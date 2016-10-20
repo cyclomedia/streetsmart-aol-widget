@@ -1,3 +1,6 @@
+// window.ATLAS_HOST = "https://atlas.cyclomedia.com";
+// window.TILES_HOST = "https://cyclotiles.blob.core.windows.net/streetsmarttiles";
+
 var dojoConfig = {
     async: true,
     locale: 'en',
@@ -11,19 +14,28 @@ var dojoConfig = {
 require(dojoConfig, [], function() {
     return define([
         'dojo/_base/declare',
+        'dojo/dom',
+        'dojo/dom-style',
         'jimu/BaseWidget',
             "http://streetsmart.cyclomedia.com/api/v16.1/Aperture.js",
             "https://streetsmart.cyclomedia.com/api/v16.1/StreetSmartApi.js"],
-        function (declare, BaseWidget, Aperture, StreetSmartApi) {
+        function (declare, dom, domStyle, BaseWidget, Aperture, StreetSmartApi) {
             //To create a widget, you need to derive from BaseWidget.
             return declare([BaseWidget], {
                 // Custom widget code goes here
 
-                baseClass: 'jimu-widget-sswidget',
+                baseClass: 'jimu-widget-streetsmartwidget',
 
                 //this property is set by the framework when widget is loaded.
                 name: 'CustomWidget',
                 panoramaViewer: null,
+                recordingClient: null,
+                lyrRecordingPoints: null,
+                lyrCameraIcon: null,
+                featureManager: null,
+                utils: null,
+                _color: "#005293",
+
 
 
                 //methods to communication with app container:
@@ -31,24 +43,31 @@ require(dojoConfig, [], function() {
                 postCreate: function() {
                   this.inherited(arguments);
                   console.log('postCreate');
-                    StreetSmartApi.init({
-                        username: 'gbo',
-                        password: 'Gg200786001',
-                        apiKey: '6vEZuXUl6PQRiPkp-XwROvENWPk56fA5-_wNKHEVSrQFifU5ebcd-PUFqfABOnAZ',
-                        srs: 'EPSG:28992',
-                        locale: 'nl',
-                        addressSettings: {
-                            locale: "nl",
-                            database: "CMDatabase"
-                        }
-                    }).then(function(){
-                        console.log('Api init success');
-                        this.panoramaViewer = StreetSmartApi.addPanoramaViewer(this.panoramaViewerDiv, {
-                            recordingsVisible: true,
-                            timeTravelVisible: true
-                        });
-                        this.panoramaViewer.openByImageId('5D123456');
-                    }.bind(this));
+
+                  var uName = this.config.uName;
+                  var uPwd = this.config.uPwd;
+                  var loc = this.config.locale;
+                  var srs = "EPSG:" + this.map.spatialReference.wkid;
+                  StreetSmartApi.init({
+                    username: uName,
+                    password: uPwd,
+                    apiKey: '6vEZuXUl6PQRiPkp-XwROvENWPk56fA5-_wNKHEVSrQFifU5ebcd-PUFqfABOnAZ',
+                    srs: srs,
+                    locale: loc,
+                    addressSettings: {
+                        locale: loc,
+                        database: "CMDatabase"
+                    }
+                  }).then(function(){
+                      console.log('Api init success');
+                      this.panoramaViewer = StreetSmartApi.addPanoramaViewer(this.panoramaViewerDiv, {
+                          recordingsVisible: true,
+                          timeTravelVisible: true
+                      });
+                      this.panoramaViewer.openByImageId('5D123456');
+                  }.bind(this));
+
+
                 },
 
                 startup: function() {
@@ -56,6 +75,14 @@ require(dojoConfig, [], function() {
                     // this.mapIdNode.innerHTML = 'map id:' + this.map.id;
                     console.log('startup');
                 }//,
+
+                // _loginSubmit : function(e){
+                //   dojo.stopEvent(e);
+                //   console.log('clicked me!');
+                //   var uName, uPwd;
+                //   uName = dom.byId("userName").value;
+                //   uPwd = dom.byId("password").value;
+                // }
 
                 // onOpen: function(){
                 //   console.log('onOpen');

@@ -1,15 +1,20 @@
 
-#sswidgetcontainer {
-    padding: 0;
-    margin: 0;
-    height: 100%;
-    width: 100%;
-}
-
 #panoramaViewerDiv {
     overflow: hidden;
     padding: 0;
     margin: 0;
     height: 100%;
     width: 100%;
+}
+
+/*#loginForm{
+	display:block;
+}*/
+
+.jimu-widget-streetsmartview {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
 }
