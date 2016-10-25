@@ -1,24 +1,27 @@
-// window.ATLAS_HOST = "https://atlas.cyclomedia.com";
-// window.TILES_HOST = "https://cyclotiles.blob.core.windows.net/streetsmarttiles";
+'use strict';
+
+// window.ATLAS_HOST = 'https://atlas.cyclomedia.com';
+// window.TILES_HOST = 'https://cyclotiles.blob.core.windows.net/streetsmarttiles';
 
 var dojoConfig = {
     async: true,
     locale: 'en',
     paths: {
-        "react": "https://cdnjs.cloudflare.com/ajax/libs/react/15.3.0/react.min",
-        "react-dom": "https://cdnjs.cloudflare.com/ajax/libs/react/15.3.0/react-dom.min",
-        "openlayers": "https://cdnjs.cloudflare.com/ajax/libs/ol3/3.17.1/ol",
+        'react': 'https://cdnjs.cloudflare.com/ajax/libs/react/15.3.0/react.min',
+        'react-dom': 'https://cdnjs.cloudflare.com/ajax/libs/react/15.3.0/react-dom.min',
+        'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/ol3/3.17.1/ol',
     }
 };
 
 require(dojoConfig, [], function() {
+
     return define([
         'dojo/_base/declare',
         'dojo/dom',
         'dojo/dom-style',
         'jimu/BaseWidget',
-            "http://streetsmart.cyclomedia.com/api/v16.1/Aperture.js",
-            "https://streetsmart.cyclomedia.com/api/v16.1/StreetSmartApi.js"],
+        'https://streetsmart.cyclomedia.com/api/v16.1/Aperture.js',
+        'https://streetsmart.cyclomedia.com/api/v16.1/StreetSmartApi.js'],
         function (declare, dom, domStyle, BaseWidget, Aperture, StreetSmartApi) {
             //To create a widget, you need to derive from BaseWidget.
             return declare([BaseWidget], {
@@ -34,7 +37,7 @@ require(dojoConfig, [], function() {
                 lyrCameraIcon: null,
                 featureManager: null,
                 utils: null,
-                _color: "#005293",
+                _color: '#005293',
 
 
 
@@ -47,7 +50,7 @@ require(dojoConfig, [], function() {
                   var uName = this.config.uName;
                   var uPwd = this.config.uPwd;
                   var loc = this.config.locale;
-                  var srs = "EPSG:" + this.map.spatialReference.wkid;
+                  var srs = 'EPSG:' + this.map.spatialReference.wkid;
                   StreetSmartApi.init({
                     username: uName,
                     password: uPwd,
@@ -56,7 +59,7 @@ require(dojoConfig, [], function() {
                     locale: loc,
                     addressSettings: {
                         locale: loc,
-                        database: "CMDatabase"
+                        database: 'CMDatabase'
                     }
                   }).then(function(){
                       console.log('Api init success');
@@ -80,8 +83,8 @@ require(dojoConfig, [], function() {
                 //   dojo.stopEvent(e);
                 //   console.log('clicked me!');
                 //   var uName, uPwd;
-                //   uName = dom.byId("userName").value;
-                //   uPwd = dom.byId("password").value;
+                //   uName = dom.byId('userName').value;
+                //   uPwd = dom.byId('password').value;
                 // }
 
                 // onOpen: function(){
