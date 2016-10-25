@@ -1,4 +1,4 @@
-'use strict';
+
 
 // window.ATLAS_HOST = 'https://atlas.cyclomedia.com';
 // window.TILES_HOST = 'https://cyclotiles.blob.core.windows.net/streetsmarttiles';
@@ -14,7 +14,6 @@ var dojoConfig = {
 };
 
 require(dojoConfig, [], function() {
-
     return define([
         'dojo/_base/declare',
         'dojo/dom',

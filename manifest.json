@@ -1,5 +1,5 @@
 {
-  "name": "CustomWidgetTemplate",
+  "name": "StreetSmart",
   "2D": true,
   "3D": false,
   "platform": "HTML",
@@ -11,13 +11,13 @@
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {
 		"inPanel":true,
-		"hasLocale": true,
+		"hasLocale": false,
 		"hasStyle":true,
 		"hasConfig":true,
 		"hasUIFile":true,
 		"hasSettingPage":true,
 		"hasSettingUIFile":true,
-		"hasSettingLocale":true,
+		"hasSettingLocale":false,
 		"hasSettingStyle":true,
 		"IsController":false
   }
