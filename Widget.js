@@ -21,10 +21,10 @@ require(dojoConfig, [], function() {
         'dojo/on',
         'dojo/dom-style',
         'dojo/_base/Color',
-        // 'esri/graphic',
+        'esri/graphic',
         'esri/layers/FeatureLayer',
         // 'esri/layers/GraphicsLayer',
-        // 'esri/geometry/Point',
+        'esri/geometry/Point',
         // 'esri/geometry/Polygon',
         // 'esri/geometry/ScreenPoint',
         'esri/SpatialReference',
@@ -38,7 +38,7 @@ require(dojoConfig, [], function() {
         'jimu/BaseWidget',
         'https://streetsmart.cyclomedia.com/api/v16.1/Aperture.js',
         'https://streetsmart.cyclomedia.com/api/v16.1/StreetSmartApi.js'],
-        function (declare, dom, lang, on, domStyle, Color, FeatureLayer, SpatialReference, SimpleRenderer, SimpleMarkerSymbol, SimpleLineSymbol, utils, BaseWidget, Aperture, StreetSmartApi) {
+        function (declare, dom, lang, on, domStyle, Color, Graphic, FeatureLayer, Point, SpatialReference, SimpleRenderer, SimpleMarkerSymbol, SimpleLineSymbol, utils, BaseWidget, Aperture, StreetSmartApi) {
             //To create a widget, you need to derive from BaseWidget.
             return declare([BaseWidget], {
                 // Custom widget code goes here
@@ -54,6 +54,7 @@ require(dojoConfig, [], function() {
                 featureManager: null,
                 utils: null,
                 _color: '#005293',
+                _apiKey: 'C3oda7I1S_49-rgV63wtWbgtOXcVe3gJWPAVWnAZK3whi7UxCjMNWzIJyv4Fmrcp',
 
 
 
@@ -71,7 +72,7 @@ require(dojoConfig, [], function() {
                         StreetSmartApi.init({
                             username: uName,
                             password: uPwd,
-                            apiKey: 'C3oda7I1S_49-rgV63wtWbgtOXcVe3gJWPAVWnAZK3whi7UxCjMNWzIJyv4Fmrcp',
+                            apiKey: this._apiKey,
                             srs: srs,
                             locale: loc,
                             addressSettings: {
@@ -97,13 +98,18 @@ require(dojoConfig, [], function() {
                     this.utils = utils;
                     this.utils.setGeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
                     var credsCM =  { "user": this.config.uName, "password": this.config.uPwd},
-                        base64userpwd = btoa(credsCM.user + ":" + credsCM.password);
+                        basicToken = btoa(credsCM.user + ":" + credsCM.password),
+                        authHeader = {
+                            "Authorization": "Basic " + basicToken
+                        };
                     this.recordingClient = new CM.aperture.WfsRecordingClient({
                         uriManager: new CM.aperture.WfsRecordingUriManager({
-                            dataUri: ATLAS_HOST + "/Recordings/wfs",
+                            apiKey: this._apiKey,
+                            dataUri: ATLAS_HOST + "/recording/wfs",
                             withCredentials: true
                         }),
-                        base64credentials: base64userpwd
+                        // TODO Will change to authHeaders in future
+                        authHeader: authHeader
                     });
 
                     CM.El.addEvent(this.recordingClient, "recordingloadsuccess", this._onRecordingLoadSuccess.bind(this));
@@ -144,7 +150,7 @@ require(dojoConfig, [], function() {
                     }
                 },
 
-                _onRecordingLoadSuccess: function(request) {
+                _onRecordingLoadSuccess: function(request, recordings) {
                     // TODO: remove custom symbol code (HD Cyclorama test stuff)
                     var makeSymbol = function(fillColor) {
                         return new SimpleMarkerSymbol(
@@ -159,7 +165,6 @@ require(dojoConfig, [], function() {
                         NoTiling: makeSymbol([200, 100, 150, 0.8])
                     };
 
-                    var recordings = this.recordingClient._recordings;
                     var graphics = [];
                     for (var i = 0; i < recordings.length; ++i) {
                         var attributes = { "recording_id": recordings[i].id };
