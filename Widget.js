@@ -26,19 +26,18 @@ require(dojoConfig, [], function() {
         'esri/layers/GraphicsLayer',
         'esri/geometry/Point',
         'esri/geometry/Polygon',
-        // 'esri/geometry/ScreenPoint',
+        'esri/geometry/ScreenPoint',
         'esri/SpatialReference',
         'esri/renderers/SimpleRenderer',
         'esri/symbols/PictureMarkerSymbol',
         'esri/symbols/SimpleMarkerSymbol',
         'esri/symbols/SimpleLineSymbol',
-        // 'esri/symbols/SimpleFillSymbol',
+        'esri/symbols/SimpleFillSymbol',
         // './FeatureManager',
-        './utils',
         'jimu/BaseWidget',
         'https://streetsmart.cyclomedia.com/api/v16.1/Aperture.js',
         'https://streetsmart.cyclomedia.com/api/v16.1/StreetSmartApi.js'],
-        function (declare, dom, lang, on, domStyle, Color, Graphic, FeatureLayer, GraphicsLayer, Point, Polygon, SpatialReference, SimpleRenderer, PictureMarkerSymbol, SimpleMarkerSymbol, SimpleLineSymbol, utils, BaseWidget, Aperture, StreetSmartApi) {
+        function (declare, dom, lang, on, domStyle, Color, Graphic, FeatureLayer, GraphicsLayer, Point, Polygon, ScreenPoint, SpatialReference, SimpleRenderer, PictureMarkerSymbol, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, BaseWidget, Aperture, StreetSmartApi) {
             //To create a widget, you need to derive from BaseWidget.
             return declare([BaseWidget], {
                 // Custom widget code goes here
@@ -52,7 +51,6 @@ require(dojoConfig, [], function() {
                 lyrRecordingPoints: null,
                 lyrCameraIcon: null,
                 featureManager: null,
-                utils: null,
                 _color: '#005293',
                 _apiKey: 'C3oda7I1S_49-rgV63wtWbgtOXcVe3gJWPAVWnAZK3whi7UxCjMNWzIJyv4Fmrcp',
 
@@ -85,12 +83,17 @@ require(dojoConfig, [], function() {
                                 recordingsVisible: true,
                                 timeTravelVisible: true
                             });
-
+                            var ptLocal;
+                            this.proj4 = CM.Proj4.getProj4();
                             var pt = this.map.extent.getCenter();
-                            var ptLL = this.utils.transformProj4js(pt, 4326);
-                            var srs = this.utils.getSrsAtCoordinates(ptLL);
-                            var ptLocal = this.utils.transformProj4js(pt, srs);
-                            this.panoramaViewer.openByCoordinate([ptLocal.x, ptLocal.y], 'EPSG:3857');
+                            var viewerSRS = this.map.spatialReference.wkid;
+                            if(srs == viewerSRS){
+                                ptLocal = pt;
+                            }else {
+                                ptLocal = this.transformProj4js(pt, viewerSRS);
+                            }
+                            this.panoramaViewer.openByCoordinate([ptLocal.x, ptLocal.y]);
+                            this._updateViewerGraphics(this.panoramaViewer, ptLocal, false);
 
                         }.bind(this));
                     }else{
@@ -102,8 +105,6 @@ require(dojoConfig, [], function() {
                 startup: function() {
                     this.inherited(arguments);
                     console.log('startup');
-                    this.utils = utils;
-                    this.utils.setGeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
                     var credsCM =  { "user": this.config.uName, "password": this.config.uPwd},
                         basicToken = btoa(credsCM.user + ":" + credsCM.password),
                         authHeader = {
@@ -145,6 +146,9 @@ require(dojoConfig, [], function() {
                     on(this.lyrRecordingPoints, "click", lang.hitch(this, this._clickRecordingPoint));
                     this.map.addLayer(this.lyrRecordingPoints);
                     this._loadRecordings(this.map.extent);
+                    this.lyrCameraIcon = new GraphicsLayer();
+                    //this.lyrCameraIcon.setVisibility(false);
+                    this.map.addLayer(this.lyrCameraIcon);
 
                     on(this.map, "extent-change", lang.hitch(this, function() {
                         this._loadRecordings(this.map.extent);
@@ -198,10 +202,27 @@ require(dojoConfig, [], function() {
                         timeTravelVisible: true
                     });
                     this.panoramaViewer.openByImageId(ptId);
+                },
+
+                transformProj4js: function(sourceGeom, targetSrs) {
+                    //No transformation needed if source SRS == target SRS
+                    if (sourceGeom.spatialReference.wkid === targetSrs) {
+                        return sourceGeom;
+                    }
+
+                    var sourceEpsg = "EPSG:" + sourceGeom.spatialReference.wkid;
+                    var destEpsg = "EPSG:" + targetSrs;
+                    if (sourceEpsg === "EPSG:102100") sourceEpsg = "EPSG:3857";
+                    if (destEpsg === "EPSG:102100") destEpsg = "EPSG:3857";
+
+                    var source = this.proj4(sourceEpsg);
+                    var dest = this.proj4(destEpsg);
+
+                    var p = this.proj4(source, dest).forward([sourceGeom.x, sourceGeom.y]);
+                    return new Point(p[0], p[1], new SpatialReference({wkid: parseInt(targetSrs)}));
                 }//,
 
-
-                // onOpen: function(){
+                    // onOpen: function(){
                 //   console.log('onOpen');
                 // },
 
