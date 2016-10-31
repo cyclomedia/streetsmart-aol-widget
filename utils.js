@@ -7,8 +7,9 @@ define([
     "esri/tasks/ProjectParameters",
     "esri/SpatialReference",
     "esri/geometry/Extent",
-    "esri/geometry/Point"
-], function(declare, lang, webMercatorUtils, GeometryService, ProjectParameters, SpatialReference, Extent, Point) {
+    "esri/geometry/Point",
+    "//cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.3/proj4.js"
+], function(declare, lang, webMercatorUtils, GeometryService, ProjectParameters, SpatialReference, Extent, Point, proj4) {
     "use strict";
 
     var geometryService = null;

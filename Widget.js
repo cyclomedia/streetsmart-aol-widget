@@ -23,13 +23,13 @@ require(dojoConfig, [], function() {
         'dojo/_base/Color',
         'esri/graphic',
         'esri/layers/FeatureLayer',
-        // 'esri/layers/GraphicsLayer',
+        'esri/layers/GraphicsLayer',
         'esri/geometry/Point',
-        // 'esri/geometry/Polygon',
+        'esri/geometry/Polygon',
         // 'esri/geometry/ScreenPoint',
         'esri/SpatialReference',
         'esri/renderers/SimpleRenderer',
-        //'esri/symbols/PictureMarkerSymbol',
+        'esri/symbols/PictureMarkerSymbol',
         'esri/symbols/SimpleMarkerSymbol',
         'esri/symbols/SimpleLineSymbol',
         // 'esri/symbols/SimpleFillSymbol',
@@ -38,7 +38,7 @@ require(dojoConfig, [], function() {
         'jimu/BaseWidget',
         'https://streetsmart.cyclomedia.com/api/v16.1/Aperture.js',
         'https://streetsmart.cyclomedia.com/api/v16.1/StreetSmartApi.js'],
-        function (declare, dom, lang, on, domStyle, Color, Graphic, FeatureLayer, Point, SpatialReference, SimpleRenderer, SimpleMarkerSymbol, SimpleLineSymbol, utils, BaseWidget, Aperture, StreetSmartApi) {
+        function (declare, dom, lang, on, domStyle, Color, Graphic, FeatureLayer, GraphicsLayer, Point, Polygon, SpatialReference, SimpleRenderer, PictureMarkerSymbol, SimpleMarkerSymbol, SimpleLineSymbol, utils, BaseWidget, Aperture, StreetSmartApi) {
             //To create a widget, you need to derive from BaseWidget.
             return declare([BaseWidget], {
                 // Custom widget code goes here
@@ -85,11 +85,18 @@ require(dojoConfig, [], function() {
                                 recordingsVisible: true,
                                 timeTravelVisible: true
                             });
-                            this.panoramaViewer.openByImageId('5D42YLZN');
+
+                            var pt = this.map.extent.getCenter();
+                            var ptLL = this.utils.transformProj4js(pt, 4326);
+                            var srs = this.utils.getSrsAtCoordinates(ptLL);
+                            var ptLocal = this.utils.transformProj4js(pt, srs);
+                            this.panoramaViewer.openByCoordinate([ptLocal.x, ptLocal.y], 'EPSG:3857');
+
                         }.bind(this));
                     }else{
                         console.log("cannot open Cyclorama zoom into map");
                     }
+
                 },
 
                 startup: function() {
@@ -181,7 +188,18 @@ require(dojoConfig, [], function() {
                         this.lyrRecordingPoints.applyEdits(null, null, this.lyrRecordingPoints.graphics);
                     }
                     this.lyrRecordingPoints.applyEdits(graphics, null, null);
+                },
+
+                _clickRecordingPoint: function(event) {
+
+                    var ptId = event.graphic.attributes.recording_id;
+                    this.panoramaViewer = StreetSmartApi.addPanoramaViewer(this.panoramaViewerDiv, {
+                        recordingsVisible: true,
+                        timeTravelVisible: true
+                    });
+                    this.panoramaViewer.openByImageId(ptId);
                 }//,
+
 
                 // onOpen: function(){
                 //   console.log('onOpen');
