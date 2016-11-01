@@ -1,5 +1,7 @@
 {
 	"uName" : "skalluri",
 	"uPwd" : "chandU9966",
-	"locale" : "en-US"
+	"locale" : "en-US",
+
+	"atlasHost": "https://atlas.cyclomedia.com"
 }
