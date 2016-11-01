@@ -62,7 +62,7 @@ require(dojoConfig, [], function() {
                 baseClass: 'jimu-widget-streetsmartwidget',
 
                 // This property is set by the framework when widget is loaded.
-                name: 'StreetSmart',        // TODO change!!
+                name: 'Street Smart',        // TODO change!!
 
                 // CM properties
                 _color: '#005293',
