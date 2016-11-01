@@ -72,6 +72,8 @@ require(dojoConfig, [], function() {
                 _lyrRecordingPoints: null,
                 _lyrCameraIcon: null,
 
+                _mapExtentChangeListener: null,
+
                 // Methods to communication with app container:
                 postCreate: function() {
                     this.inherited(arguments);
@@ -132,18 +134,33 @@ require(dojoConfig, [], function() {
                             // TODO Will change to authHeaders in future
                             authHeader: authHeader
                         });
-
-                        // Add extent listener
-                        on(this.map, "extent-change", function () {
-                            if (this.map.getZoom() > 18) {
-                                this._loadRecordings();
-                            } else {
-                                this._clearLayerGraphics(this._lyrRecordingPoints);
-                                this._clearLayerGraphics(this._lyrCameraIcon);
-                            }
-                        }.bind(this));
                     } else {
                         console.warn('No CycloMedia atlas host configured.');
+                    }
+                },
+
+                addEventListener: function(element, type, callback) {
+                    if(element && type && callback) {
+                        return on(element, type, callback);
+                    } else {
+                        console.warn('Invalid parameters');
+                        return null;
+                    }
+                },
+
+                removeEventListener: function(listener) {
+                    if(listener && typeof listener.remove === 'function') {
+                        listener.remove();
+                        return null;
+                    }
+                },
+
+                _onExtentChanged: function() {
+                    if (this.map.getZoom() > 18 && this.state !== "closed") {
+                        this._loadRecordings();
+                    } else {
+                        this._clearLayerGraphics(this._lyrRecordingPoints);
+                        this._clearLayerGraphics(this._lyrCameraIcon);
                     }
                 },
 
@@ -182,7 +199,7 @@ require(dojoConfig, [], function() {
                 },
 
                 _loadRecordings: function() {
-                    if (this.map.getZoom() > 18) {
+                    if (this.map.getZoom() > 18 && this._recordingClient) {
                         var extent = this.map.extent;
                         this._recordingClient.requestWithinBBOX(
                             extent.xmin,
@@ -251,6 +268,12 @@ require(dojoConfig, [], function() {
 
                 onOpen: function(){
                     console.info('onOpen');
+
+                    // Add extent change listener
+                    if(!this._mapExtentChangeListener) {
+                        this._mapExtentChangeListener = this.addEventListener(this.map, 'extent-change', this._onExtentChanged.bind(this));
+                    }
+
                     if (this.map.getZoom() > 18) {
                         // If no recording loaded previously then use mapcenter to open one.
                         if (StreetSmartApi.getAPIReadyState() && !this._panoramaViewer.getRecording()) {
@@ -267,6 +290,11 @@ require(dojoConfig, [], function() {
 
                 onClose: function(){
                   console.info('onClose');
+
+                    // Remove extent change listener.
+                    this._mapExtentChangeListener = this.removeEventListener(this._mapExtentChangeListener);
+
+                    // Remove Graphics from layers.
                     this._clearLayerGraphics(this._lyrRecordingPoints);
                     this._clearLayerGraphics(this._lyrCameraIcon);
                 },
