@@ -17,7 +17,7 @@
 		"hasUIFile":true,
 		"hasSettingPage":true,
 		"hasSettingUIFile":true,
-		"hasSettingLocale":false,
+		"hasSettingLocale":true,
 		"hasSettingStyle":true,
 		"IsController":false
   }

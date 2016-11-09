@@ -82,7 +82,8 @@ require(dojoConfig, [], function() {
                     // Use the Street Smart API proj4. All projection definitions are in there already.
                     utils.setProj4(CM.Proj4.getProj4());
 
-                    var srs = 'EPSG:' + this.map.spatialReference.wkid;
+                    var me = this;
+                    var srs = 'EPSG:' + me.map.spatialReference.wkid;
 
                     StreetSmartApi.init({
                         username: this.config.uName,
@@ -97,9 +98,16 @@ require(dojoConfig, [], function() {
                     }).then(function () {
                         console.info('Api init success');
 
-                        this._panoramaViewer = StreetSmartApi.addPanoramaViewer(this.panoramaViewerDiv, {
+                        this._panoramaViewer = StreetSmartApi.addPanoramaViewer(me.panoramaViewerDiv, {
                             recordingsVisible: true,
                             timeTravelVisible: true
+                        });
+
+                        me.addEventListener(me._panoramaViewer._viewer, 'viewchange', function() {
+                            me._updateViewerGraphics(this, false);
+                        });
+                        me.addEventListener(me._panoramaViewer._viewer, 'panoromachange', function() {
+                            me._updateViewerGraphics(this, false);
                         });
 
                         this.initRecordingClient();
@@ -160,7 +168,7 @@ require(dojoConfig, [], function() {
                         this._loadRecordings();
                     } else {
                         this._clearLayerGraphics(this._lyrRecordingPoints);
-                        this._clearLayerGraphics(this._lyrCameraIcon);
+                        this._lyrCameraIcon.setVisibility(false);
                     }
                 },
 
@@ -194,7 +202,6 @@ require(dojoConfig, [], function() {
 
                     // CameraIcon Layer
                     this._lyrCameraIcon = new GraphicsLayer();
-                    //this._lyrCameraIcon.setVisibility(false);
                     this.map.addLayer(this._lyrCameraIcon);
                 },
 
@@ -296,7 +303,66 @@ require(dojoConfig, [], function() {
 
                     // Remove Graphics from layers.
                     this._clearLayerGraphics(this._lyrRecordingPoints);
-                    this._clearLayerGraphics(this._lyrCameraIcon);
+                    //this._clearLayerGraphics(this._lyrCameraIcon);
+                    this._lyrCameraIcon.setVisibility(false);
+                },
+
+                _updateViewerGraphics: function(curViewer, extentchanged) {
+
+                    if (!curViewer._activeRecording) return;
+
+                    var x = curViewer._activeRecording.xyz[0];
+                    var y = curViewer._activeRecording.xyz[1];
+                    if (x && y) {
+                        var pt = new Point(x, y, new SpatialReference({ wkid: parseInt(curViewer._activeRecording.srs.substr(5)) }));
+                        //Transform local SRS to Web Mercator:
+                        var ptMap = utils.transformProj4js(pt, this.map.spatialReference.wkid);
+
+                        var yaw = curViewer.getYaw();
+                        var pitch = curViewer.getPitch();
+                        var hFov = curViewer.getHFov();
+
+                        var factor = 50;
+                        var hhFov = hFov * 0.5;
+                        var leftfovx = Math.sin(yaw - hhFov) * factor;
+                        var leftfovy = -Math.cos(yaw - hhFov) * factor;
+                        var rightfovx = Math.sin(yaw + hhFov) * factor;
+                        var rightfovy = -Math.cos(yaw + hhFov) * factor;
+
+                        var mapPt = new Point(ptMap.x, ptMap.y, this.map.spatialReference);
+                        var cPt = this.map.toScreen(mapPt);
+
+                        var a = this.map.toMap(new ScreenPoint(cPt.x, cPt.y));
+                        var b = this.map.toMap(new ScreenPoint(cPt.x + leftfovx, cPt.y + leftfovy));
+                        var c = this.map.toMap(new ScreenPoint(cPt.x + rightfovx, cPt.y + rightfovy));
+                        var d = this.map.toMap(new ScreenPoint(cPt.x, cPt.y));
+
+                        if (!curViewer.graLoc) {
+                            //TODO: path indedependent on Widget directory?
+                            var ms = new PictureMarkerSymbol("widgets/StreetSmartWidget/images/cam1.png", 28, 28);
+                            var marker = new Graphic(mapPt, ms);
+                            curViewer.graLoc = marker;
+                            this._lyrCameraIcon.add(marker);
+                        } else {
+                            curViewer.graLoc.setGeometry(mapPt);
+                        }
+                        var rot = yaw * 180 / Math.PI;
+                        curViewer.graLoc.symbol.setAngle(rot);
+
+                        if (curViewer.graFOV) {
+                            this._lyrCameraIcon.remove(curViewer.graFOV);
+                        }
+                        var ls = new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color(0, 0, 0, 1), 2);
+                        var rgb = this._color.toRgb();
+                        rgb.push(0.5);
+                        var fs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, ls, new Color.fromArray(rgb));
+                        var polygon = new Polygon(this.map.spatialReference);
+                        polygon.addRing([[a.x, a.y], [b.x, b.y], [c.x, c.y], [d.x, d.y], [a.x, a.y]]);
+                        var graphic = new Graphic(polygon, fs);
+                        curViewer.graFOV = graphic;
+                        this._lyrCameraIcon.add(graphic);
+                        this._lyrCameraIcon.setVisibility(true);
+                    }
                 },
 
                 // onMinimize: function(){

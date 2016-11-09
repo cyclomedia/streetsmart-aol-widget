@@ -7,14 +7,18 @@
     width: 100%;
 }
 
-/*#loginForm{
-	display:block;
-}*/
-
 .jimu-widget-streetsmartview {
   position: absolute;
   top: 0px;
   bottom: 0px;
   left: 0px;
   right: 0px;
+}
+
+.jimu-widget-frame.jimu-container{
+    padding:0px; !important;
+}
+
+.jimu-on-screen-widget-panel>.jimu-panel-title{
+    background-color: #98C23C; !important;
 }
