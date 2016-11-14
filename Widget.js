@@ -166,6 +166,7 @@ require(dojoConfig, [], function() {
                 _onExtentChanged: function() {
                     if (this.map.getZoom() > 18 && this.state !== "closed") {
                         this._loadRecordings();
+                        this.onOpen();
                     } else {
                         this._clearLayerGraphics(this._lyrRecordingPoints);
                         this._lyrCameraIcon.setVisibility(false);
@@ -282,6 +283,8 @@ require(dojoConfig, [], function() {
                     }
 
                     if (this.map.getZoom() > 18) {
+
+                        domStyle.set("zoomWarningDiv", "display", "none");
                         // If no recording loaded previously then use mapcenter to open one.
                         if (StreetSmartApi.getAPIReadyState() && !this._panoramaViewer.getRecording()) {
                             var pt = this.map.extent.getCenter();
@@ -292,6 +295,8 @@ require(dojoConfig, [], function() {
                             // this._updateViewerGraphics(this._panoramaViewer, ptLocal, false);
                         }
                         this._loadRecordings();
+                    }else{
+                        domStyle.set("zoomWarningDiv", "display", "block");
                     }
                 },
 
@@ -339,7 +344,7 @@ require(dojoConfig, [], function() {
 
                         if (!curViewer.graLoc) {
                             //TODO: path indedependent on Widget directory?
-                            var ms = new PictureMarkerSymbol("widgets/StreetSmartWidget/images/cam1.png", 28, 28);
+                            var ms = new PictureMarkerSymbol("widgets/StreetSmart/images/cam1.png", 28, 28);
                             var marker = new Graphic(mapPt, ms);
                             curViewer.graLoc = marker;
                             this._lyrCameraIcon.add(marker);

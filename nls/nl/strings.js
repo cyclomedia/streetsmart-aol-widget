@@ -1,6 +1,5 @@
 ﻿define(
    ({
-    label1: "Ik ben een demowidget.",
-    label2: "Dit is configureerbaar."
+       zoomWarning: "Zoomen op de kaart om de Cyclomedia Imagery openen."
   })
 );

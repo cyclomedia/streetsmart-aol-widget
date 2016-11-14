@@ -7,6 +7,16 @@
     width: 100%;
 }
 
+#zoomWarningDiv {
+    z-index: 100;
+    top: 50%;
+    position: absolute;
+    width: 50%;
+    height: 50px;
+    left: 50%;
+    margin-left: -100px;
+    margin-top: -25px;
+}
 .jimu-widget-streetsmartview {
   position: absolute;
   top: 0px;
