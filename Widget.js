@@ -62,7 +62,7 @@ require(dojoConfig, [], function() {
                 baseClass: 'jimu-widget-streetsmartwidget',
 
                 // This property is set by the framework when widget is loaded.
-                name: 'Street Smart',        // TODO change!!
+                name: 'Street Smart by CycloMedia',        // TODO change!!
 
                 // CM properties
                 _color: '#005293',
@@ -117,7 +117,11 @@ require(dojoConfig, [], function() {
                         // onOpen will be called before api is initialized, so call this again.
                         this.onOpen();
 
-                    }.bind(this));
+                    }.bind(this))
+                    .catch(function(){
+                          console.log("API init Failed");
+                          alert("Street Smart API initiation Failed");
+                        });
                 },
 
                 startup: function() {
@@ -195,7 +199,7 @@ require(dojoConfig, [], function() {
                     };
 
                     // RecordingLayer
-                    this._lyrRecordingPoints = new FeatureLayer(emptyFeatureCollection);
+                    this._lyrRecordingPoints = new FeatureLayer(emptyFeatureCollection, { id: "cmt_recordings" });
                     //this._lyrRecordingPoints.setVisibility(false);
                     this._lyrRecordingPoints.setRenderer(ren);
                     on(this._lyrRecordingPoints, "click", this._clickRecordingPoint.bind(this));
@@ -250,6 +254,7 @@ require(dojoConfig, [], function() {
                     this._clearLayerGraphics(this._lyrRecordingPoints);
                     // Add the new graphics to the layer.
                     this._addLayerGraphics(this._lyrRecordingPoints, graphics);
+                    this._lyrCameraIcon.setVisibility(true);
                 },
 
                 _clearLayerGraphics: function(layer) {
@@ -292,7 +297,6 @@ require(dojoConfig, [], function() {
                             var ptLocal = utils.transformProj4js(pt, mapSRS);
 
                             this._panoramaViewer.openByCoordinate([ptLocal.x, ptLocal.y]);
-                            // this._updateViewerGraphics(this._panoramaViewer, ptLocal, false);
                         }
                         this._loadRecordings();
                     }else{
@@ -308,7 +312,6 @@ require(dojoConfig, [], function() {
 
                     // Remove Graphics from layers.
                     this._clearLayerGraphics(this._lyrRecordingPoints);
-                    //this._clearLayerGraphics(this._lyrCameraIcon);
                     this._lyrCameraIcon.setVisibility(false);
                 },
 
@@ -343,8 +346,8 @@ require(dojoConfig, [], function() {
                         var d = this.map.toMap(new ScreenPoint(cPt.x, cPt.y));
 
                         if (!curViewer.graLoc) {
-                            //TODO: path indedependent on Widget directory?
-                            var ms = new PictureMarkerSymbol("widgets/StreetSmart/images/cam1.png", 28, 28);
+                            var folderPath = this.folderUrl + "images/cam1.png";
+                            var ms = new PictureMarkerSymbol(folderPath, 28, 28);
                             var marker = new Graphic(mapPt, ms);
                             curViewer.graLoc = marker;
                             this._lyrCameraIcon.add(marker);
@@ -358,7 +361,7 @@ require(dojoConfig, [], function() {
                             this._lyrCameraIcon.remove(curViewer.graFOV);
                         }
                         var ls = new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color(0, 0, 0, 1), 2);
-                        var rgb = this._color.toRgb();
+                        var rgb = ["152", "192", "60"];
                         rgb.push(0.5);
                         var fs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, ls, new Color.fromArray(rgb));
                         var polygon = new Polygon(this.map.spatialReference);

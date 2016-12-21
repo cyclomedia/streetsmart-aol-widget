@@ -1,5 +1,7 @@
 {
-  "name": "Street Smart",
+  "name": "StreetSmart",
+  "label": "Street Smart by CycloMedia",
+  "title": "Street Smart by CycloMedia",
   "2D": true,
   "3D": false,
   "platform": "HTML",
