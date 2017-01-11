@@ -4,4 +4,4 @@
 # Apple stuff
 .DS_Store
 
-.rar
+*.rar
