@@ -65,7 +65,8 @@ require(dojoConfig, [], function() {
                 name: 'Street Smart by CycloMedia',
 
                 // CM properties
-                _color: '#005293',
+                _recordingColor: '#005293',
+                _cmtTitleColor: '#98C23C',
                 _apiKey: 'C3oda7I1S_49-rgV63wtWbgtOXcVe3gJWPAVWnAZK3whi7UxCjMNWzIJyv4Fmrcp',
                 _panoramaViewer: null,
                 _recordingClient: null,
@@ -78,6 +79,14 @@ require(dojoConfig, [], function() {
                 postCreate: function() {
                     this.inherited(arguments);
                     console.info('postCreate');
+
+                    // Set title color for Widget.
+                    // Via css (.jimu-on-screen-widget-panel>.jimu-panel-title) all widgets are affected.
+                    this.getPanel().titleNode.style.backgroundColor = this._cmtTitleColor;
+
+                    // Remove padding (white 'border') around viewer.
+                    // Via css (.jimu-widget-frame.jimu-container) all widgets are affected.
+                    this.getPanel().containerNode.children[0].style.padding = '0px';
 
                     // Use the Street Smart API proj4. All projection definitions are in there already.
                     utils.setProj4(CM.Proj4.getProj4());
@@ -179,9 +188,9 @@ require(dojoConfig, [], function() {
 
                 createLayers: function() {
                     console.info('createLayers');
-                    var rgb = new Color.fromString(this._color).toRgb();
+                    var rgb = new Color.fromString(this._recordingColor).toRgb();
                     rgb.push(0.5);
-                    this._color = Color.fromArray(rgb);
+                    this._recordingColor = Color.fromArray(rgb);
 
                     var ms = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 9, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 255, 255]), 1), new Color.fromArray(rgb));
                     var ren = new SimpleRenderer(ms);
