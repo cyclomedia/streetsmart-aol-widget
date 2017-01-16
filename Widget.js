@@ -91,6 +91,9 @@ require(dojoConfig, [], function() {
                     // Use the Street Smart API proj4. All projection definitions are in there already.
                     utils.setProj4(CM.Proj4.getProj4());
 
+                    //set the Map zoom level to load the recordings.
+                    this.mapZoomLevel = this._checkMapZoomLevel();
+
                     var me = this;
                     var srs = 'EPSG:' + me.map.spatialReference.wkid;
 
@@ -177,7 +180,7 @@ require(dojoConfig, [], function() {
                 },
 
                 _onExtentChanged: function() {
-                    if (this.map.getZoom() > 18 && this.state !== "closed") {
+                    if (this.map.getZoom() > this.mapZoomLevel && this.state !== "closed") {
                         this._loadRecordings();
                         this.onOpen();
                     } else {
@@ -220,7 +223,7 @@ require(dojoConfig, [], function() {
                 },
 
                 _loadRecordings: function() {
-                    if (this.map.getZoom() > 18 && this._recordingClient) {
+                    if (this.map.getZoom() > this.mapZoomLevel && this._recordingClient) {
                         var extent = this.map.extent;
                         this._recordingClient.requestWithinBBOX(
                             extent.xmin,
@@ -296,7 +299,7 @@ require(dojoConfig, [], function() {
                         this._mapExtentChangeListener = this.addEventListener(this.map, 'extent-change', this._onExtentChanged.bind(this));
                     }
 
-                    if (this.map.getZoom() > 18) {
+                    if (this.map.getZoom() > this.mapZoomLevel) {
 
                         domStyle.set("zoomWarningDiv", "display", "none");
                         // If no recording loaded previously then use mapcenter to open one.
@@ -380,6 +383,17 @@ require(dojoConfig, [], function() {
                         this._lyrCameraIcon.add(graphic);
                         this._lyrCameraIcon.setVisibility(true);
                     }
+                },
+
+                _checkMapZoomLevel: function(){
+                    var mapMaxZoom = this.map.getMaxZoom();
+                    var setMapZoom;
+                    if(mapMaxZoom > 20){
+                        setMapZoom = mapMaxZoom - 5;
+                    }else {
+                        setMapZoom = mapMaxZoom - 3;
+                    }
+                    return setMapZoom;
                 },
 
                 // onMinimize: function(){
