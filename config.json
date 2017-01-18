@@ -2,6 +2,6 @@
 	"uName" : "",
 	"uPwd" : "",
 	"locale" : "en-US",
-
-	"atlasHost": "https://atlas.cyclomedia.com"
+	"atlasHost": "https://atlas.cyclomedia.com",
+	"agreement": ""
 }

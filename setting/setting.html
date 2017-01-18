@@ -24,6 +24,25 @@
                 </select>
             </div>
         </tr>
+        <tr>
+            <div class="settingsForm">
+                <input data-dojo-attach-point="agreementCheck" type="checkbox" name="userAgreement" value="accept"> ${nls.agreement1} <a href="#" onclick="document.getElementById('agreementData').style.display = 'block';"> ${nls.agreement2}</a>
+            </div>
+        </tr>
+        <tr>
+            <div id="agreementData" style="display:none;">
+                <div class="headAgree">${nls.headAgreement}</div>
+                <p class="headItalic">${nls.headItalics}</p>
+                <p class="headBold">${nls.boldHeadAgree}</p>
+                <p class="bodyAgreement">${nls.bodyAgree}</p>
+                <p class="bodyAgreement">${nls.bodyAgree1}</p>
+                <p class="bodyAgreement">${nls.bodyAgree2}</p>
+                <p class="bodyAgreement">${nls.bodyAgree3}</p>
+                <p class="bodyAgreement">${nls.bodyAgree4}</p>
+                <p class="bodyAgreement">${nls.bodyAgree5}</p>
+                <p class="bodyAgreement">${nls.bodyAgree6}</p>
+            </div>
+        </tr>
         </tbody>
     </table>
 </div>

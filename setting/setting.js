@@ -14,6 +14,8 @@ define([
 
             if(this.config){
                 this.setConfig(this.config);
+            }else{
+                this.getConfig();
             }
         },
 
@@ -22,9 +24,6 @@ define([
  
             this.config = config;
 
-            // if (this.config.recordingSource) {
-            //     this.selectRecordingSource.set("value", this.config.recordingSource);
-            // }
             if(this.config.locale){
             	this.selectCyclomediaLocation.set("value", this.config.locale);
             }
@@ -34,13 +33,16 @@ define([
             if(this.config.uPwd){
             	this.uPwdCyclomedia.value = this.config.uPwd;
             }
+            if(this.config.agreement){
+                this.agreementCheck.value = this.config.agreement;
+            }
         },
 
         getConfig: function () {
-            //this.config.recordingSource = this.selectRecordingSource.value;
             this.config.locale = this.selectCyclomediaLocation.value;
             this.config.uName = this.uNameCyclomedia.value;
             this.config.uPwd = this.uPwdCyclomedia.value;
+            this.config.agreement = this.agreementCheck.value;
             console.log("getconfig", this.config);
 
             return this.config;

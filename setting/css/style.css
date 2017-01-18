@@ -5,7 +5,6 @@
 	border-color: #98C23C;
 	border-top-style: solid; 
 	border-top-width: 30px;
-	overflow: hidden;
 }
 
 .settingsForm{
@@ -32,6 +31,23 @@
 	width: 125px;
     border-radius: 2px;
     margin-left:10px;
+}
+
+.headAgree{
+	background-color: #98C23C;
+	color: white;
+	text-align: center;
+	font-weight: bold;
+	height: 30px;
+	padding: 5px;
+}
+
+.headItalic{
+	font-style: italic;
+}
+
+.headBold{
+	font-weight: bold;
 }
 
     
