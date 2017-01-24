@@ -26,36 +26,13 @@
         </tr>
         <tr>
             <div class="settingsForm agreementLabel">
-                <input data-dojo-attach-point="agreementCheck" type="checkbox" name="userAgreement" value="accept"> ${nls.agreement1} <a href="#" onclick="document.getElementById('agreementData').style.display = 'block';"> ${nls.agreement2}</a>
+                <input data-dojo-attach-point="agreementCheck" type="checkbox" name="userAgreement" value="accept"> ${nls.agreement1} <a href="#" id="userAgreementLink" > ${nls.agreement2}</a>
             </div>
         </tr>
         <tr>
-            <div id="agreementData" style="display:none;">
+            <div id="agreementContainer" style="display:none;">
                 <div class="headAgree">${nls.headAgreement}</div>
-                <p class="headItalic">${nls.headItalics}</p>
-                <p class="headBold">${nls.boldHeadAgree}</p>
-                <p class="bodyAgreement">${nls.bodyAgree}</p>
-                <ol>
-                    <li>${nls.bodyAgree1}</li>
-                    <li>${nls.bodyAgree2}
-                    <ol>
-                        <li>${nls.bodyAgree3}</li>
-                        <li>${nls.bodyAgree4}</li>
-                        <li>${nls.bodyAgree5}</li>
-                        <li>${nls.bodyAgree6}</li>
-                        <li>${nls.bodyAgree7}</li>
-                    </ol>
-                    </li>
-                    <li>${nls.bodyAgree8}
-                    <ol type="a">
-                        <li>${nls.bodyAgree9}</li>
-                        <li>${nls.bodyAgree10}</li>
-                    </ol>
-                    </li>
-                    <li>${nls.bodyAgree11}</li>
-                    <li>${nls.bodyAgree12}</li>
-                </ol>
-                <p class="bodyAgreement">${nls.bodyAgree13}</p>
+                <div id="agreementData">
             </div>
         </tr>
         </tbody>
