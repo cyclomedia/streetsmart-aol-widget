@@ -29,7 +29,6 @@ define([
                 self.getConfig();
                 var settingLocale = dojoConfig.locale;
                 var url = self.folderUrl + 'setting/agreementCMT/agreement_' + settingLocale + '.md';
-                console.log(url);
                 require(['dojo/text!' + url], function(text) {
                     var reader = new commonmark.Parser();
                     var writer = new commonmark.HtmlRenderer();

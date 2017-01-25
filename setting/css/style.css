@@ -1,10 +1,11 @@
-.settingsSS{
+.settings-street-smart{
 	width:100%;
 	height:100%;
 	margin-top: 20px;
 	border-color: #98C23C;
 	border-top-style: solid; 
 	border-top-width: 30px;
+	overflow-y: hidden;
 }
 
 .settingsForm{
@@ -45,5 +46,11 @@
 .agreementLabel{
 	width: 58%;
 	text-align: right;
+}
+
+#agreementData{
+	height: 150px;
+	overflow-y: scroll;
+
 }
 

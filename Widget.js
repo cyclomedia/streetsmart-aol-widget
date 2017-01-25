@@ -328,8 +328,11 @@ require(dojoConfig, [], function() {
                     this._mapExtentChangeListener = this.removeEventListener(this._mapExtentChangeListener);
 
                     // Remove Graphics from layers.
-                    this._clearLayerGraphics(this._lyrRecordingPoints);
-                    this._lyrCameraIcon.setVisibility(false);
+                    if(this.map.getZoom() > this.mapZoomLevel){
+                        this._clearLayerGraphics(this._lyrRecordingPoints);
+                        this._lyrCameraIcon.setVisibility(false);
+                    }
+
                 },
 
                 _updateViewerGraphics: function(curViewer, extentchanged) {
