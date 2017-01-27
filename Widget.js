@@ -287,12 +287,7 @@ require(dojoConfig, [], function() {
                 },
 
                 _clickRecordingPoint: function(event) {
-
                     var ptId = event.graphic.attributes.recording_id;
-                    this._panoramaViewer = StreetSmartApi.addPanoramaViewer(this.panoramaViewerDiv, {
-                        recordingsVisible: true,
-                        timeTravelVisible: true
-                    });
                     this._panoramaViewer.openByImageId(ptId);
                 },
 
@@ -316,8 +311,16 @@ require(dojoConfig, [], function() {
                             this._panoramaViewer.openByCoordinate([ptLocal.x, ptLocal.y]);
                         }
                         this._loadRecordings();
-                    }else{
-                        domStyle.set("zoomWarningDiv", "display", "block");
+                    } else {
+                        var showWarning = true;
+
+                        if (this._panoramaViewer && this._panoramaViewer.getRecording() !== null) {
+                            showWarning = false;
+                        }
+
+                        if ( showWarning ) {
+                            domStyle.set("zoomWarningDiv", "display", "block");
+                        }
                     }
                 },
 
@@ -328,7 +331,7 @@ require(dojoConfig, [], function() {
                     this._mapExtentChangeListener = this.removeEventListener(this._mapExtentChangeListener);
 
                     // Remove Graphics from layers.
-                    if(this.map.getZoom() > this.mapZoomLevel){
+                    if(this.map.getZoom() < this.mapZoomLevel){
                         this._clearLayerGraphics(this._lyrRecordingPoints);
                         this._lyrCameraIcon.setVisibility(false);
                     }

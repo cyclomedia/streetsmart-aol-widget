@@ -1,40 +1,28 @@
 <div class="settings-street-smart">
-    <table class="settings-section" >
-        <tbody>
-        <tr>
-        	<div class="settingsForm">
-				<div class="settingsLabel">${nls.username}</div>
-				<input class="settingsBox" style="margin-left: 10px;" id="userName" type="text" data-dojo-attach-point="uNameCyclomedia"  placeholder="Username">
-			</div>
-        </tr>
-        <tr>
-        	<div class="settingsForm">
-				<div class="settingsLabel">${nls.password}</div>
-				<input class="settingsBox" style="margin-left: 10px;" id="password" type="password" data-dojo-attach-point="uPwdCyclomedia" placeholder="passoword">
-			</div>
-        </tr>
-         <tr>
-        	<div class="settingsForm">
-            	<div class="settingsLabel">${nls.locale}</div>
-                <select class="settingSelect" data-dojo-attach-point="selectCyclomediaLocation" data-dojo-type="dijit/form/Select">
-                    <option value="en-US" selected="selected">USA</option>
-                    <option value="en-EN">EN</option>
-                    <option value="nl">NL</option>
-                    <option value="de">DE</option>
-                </select>
-            </div>
-        </tr>
-        <tr>
-            <div class="settingsForm agreementLabel">
-                <input data-dojo-attach-point="agreementCheck" type="checkbox" name="userAgreement" value="accept"> ${nls.agreement1} <a href="#" id="userAgreementLink" > ${nls.agreement2}</a>
-            </div>
-        </tr>
-        <tr>
-            <div id="agreementContainer" style="display:none;">
-                <div class="headAgree">${nls.headAgreement}</div>
-                <div id="agreementData">
-            </div>
-        </tr>
-        </tbody>
-    </table>
+    <div class="settings-container">
+        <div class="settingsForm">
+            <div class="settingsLabel">${nls.username}</div>
+            <input class="settingsBox" style="margin-left: 10px;" id="userName" type="text" data-dojo-attach-point="uNameCyclomedia"  placeholder="Username">
+        </div>
+        <div class="settingsForm">
+            <div class="settingsLabel">${nls.password}</div>
+            <input class="settingsBox" style="margin-left: 10px;" id="password" type="password" data-dojo-attach-point="uPwdCyclomedia" placeholder="passoword">
+        </div>
+        <div class="settingsForm">
+            <div class="settingsLabel">${nls.locale}</div>
+            <select class="settingSelect" data-dojo-attach-point="selectCyclomediaLocation" data-dojo-type="dijit/form/Select">
+                <option value="en-US" selected="selected">USA</option>
+                <option value="en-EN">EN</option>
+                <option value="nl">NL</option>
+                <option value="de">DE</option>
+            </select>
+        </div>
+        <div class="settingsForm agreementLabel">
+            <input data-dojo-attach-point="agreementCheck" type="checkbox" name="userAgreement" value="accept"> ${nls.agreement1} <a href="#" id="userAgreementLink" > ${nls.agreement2}</a>
+        </div>
+    </div>
+    <div id="agreementContainer" style="display:none;">
+        <div class="headAgree">${nls.headAgreement}</div>
+        <div id="agreementData"></div>
+    </div>
 </div>
