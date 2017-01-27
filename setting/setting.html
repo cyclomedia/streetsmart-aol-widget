@@ -1,4 +1,4 @@
-<div class="settingsSS">
+<div class="settings-street-smart">
     <table class="settings-section" >
         <tbody>
         <tr>
@@ -22,6 +22,17 @@
                     <option value="nl">NL</option>
                     <option value="de">DE</option>
                 </select>
+            </div>
+        </tr>
+        <tr>
+            <div class="settingsForm agreementLabel">
+                <input data-dojo-attach-point="agreementCheck" type="checkbox" name="userAgreement" value="accept"> ${nls.agreement1} <a href="#" id="userAgreementLink" > ${nls.agreement2}</a>
+            </div>
+        </tr>
+        <tr>
+            <div id="agreementContainer" style="display:none;">
+                <div class="headAgree">${nls.headAgreement}</div>
+                <div id="agreementData">
             </div>
         </tr>
         </tbody>

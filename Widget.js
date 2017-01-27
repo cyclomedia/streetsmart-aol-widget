@@ -97,43 +97,48 @@ require(dojoConfig, [], function() {
                     var me = this;
                     var srs = 'EPSG:' + me.map.spatialReference.wkid;
 
-                    StreetSmartApi.init({
-                        username: this.config.uName,
-                        password: this.config.uPwd,
-                        apiKey: this._apiKey,
-                        srs: srs,
-                        locale: this.config.locale,
-                        addressSettings: {
+                    if(this.config.agreement !== "accept"){
+                        alert("Please accept the CycloMedia terms and agreements in the widget settings");
+                    }else {
+                        StreetSmartApi.init({
+                            username: this.config.uName,
+                            password: this.config.uPwd,
+                            apiKey: this._apiKey,
+                            srs: srs,
                             locale: this.config.locale,
-                            database: 'CMDatabase'
-                        }
-                    }).then(function () {
-                        console.info('Api init success');
+                            addressSettings: {
+                                locale: this.config.locale,
+                                database: 'CMDatabase'
+                            }
+                        }).then(function () {
+                            console.info('Api init success');
 
-                        this._panoramaViewer = StreetSmartApi.addPanoramaViewer(me.panoramaViewerDiv, {
-                            recordingsVisible: true,
-                            timeTravelVisible: true
-                        });
+                            this._panoramaViewer = StreetSmartApi.addPanoramaViewer(me.panoramaViewerDiv, {
+                                recordingsVisible: true,
+                                timeTravelVisible: true
+                            });
 
-                        me.addEventListener(me._panoramaViewer._viewer, 'viewchange', function() {
-                            me._updateViewerGraphics(this, false);
-                        });
-                        me.addEventListener(me._panoramaViewer._viewer, 'panoromachange', function() {
-                            me._updateViewerGraphics(this, false);
-                        });
 
-                        this.initRecordingClient();
+                            me.addEventListener(me._panoramaViewer._viewer, 'viewchange', function () {
+                                me._updateViewerGraphics(this, false);
+                            });
+                            me.addEventListener(me._panoramaViewer._viewer, 'panoromachange', function () {
+                                me._updateViewerGraphics(this, false);
+                            });
 
-                        this.createLayers();
+                            this.initRecordingClient();
 
-                        // onOpen will be called before api is initialized, so call this again.
-                        this.onOpen();
+                            this.createLayers();
 
-                    }.bind(this))
-                    .catch(function(){
-                          console.log("API init Failed");
-                          alert("Street Smart API initiation Failed");
-                        });
+                            // onOpen will be called before api is initialized, so call this again.
+                            this.onOpen();
+
+                        }.bind(this))
+                            .catch(function () {
+                                console.log("API init Failed");
+                                alert("Street Smart API initiation Failed");
+                            });
+                    }
                 },
 
                 startup: function() {
@@ -323,8 +328,11 @@ require(dojoConfig, [], function() {
                     this._mapExtentChangeListener = this.removeEventListener(this._mapExtentChangeListener);
 
                     // Remove Graphics from layers.
-                    this._clearLayerGraphics(this._lyrRecordingPoints);
-                    this._lyrCameraIcon.setVisibility(false);
+                    if(this.map.getZoom() > this.mapZoomLevel){
+                        this._clearLayerGraphics(this._lyrRecordingPoints);
+                        this._lyrCameraIcon.setVisibility(false);
+                    }
+
                 },
 
                 _updateViewerGraphics: function(curViewer, extentchanged) {
