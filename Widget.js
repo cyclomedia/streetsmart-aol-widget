@@ -82,7 +82,10 @@ require(dojoConfig, [], function() {
 
                     // Set title color for Widget.
                     // Via css (.jimu-on-screen-widget-panel>.jimu-panel-title) all widgets are affected.
-                    this.getPanel().titleNode.style.backgroundColor = this._cmtTitleColor;
+                    if(this.getPanel().titleNode) {
+                        this.getPanel().titleNode.style.backgroundColor = this._cmtTitleColor;
+                        this.getPanel().titleLabelNode.style.color = "white";
+                    }
 
                     // Remove padding (white 'border') around viewer.
                     // Via css (.jimu-widget-frame.jimu-container) all widgets are affected.
