@@ -47,6 +47,16 @@
 	text-align: right;
 }
 
+.measurementLabel{
+	width: 25%;
+	text-align: right;
+}
+
+.overlayLabel{
+	width: 20.3%;
+	text-align: right;
+}
+
 .settings-container {
 	height: 30%
 }

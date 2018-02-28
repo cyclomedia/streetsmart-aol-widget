@@ -29,3 +29,33 @@
   left: 0px;
   right: 0px;
 }
+
+.cmt .window-manager-container .window{
+    margin : 0px !important;
+}
+
+.cmt .window-manager-container{
+    padding : 0px !important;
+}
+
+#addGeoJsonBtn{
+    background-image: url('../images/addJson.png');
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#addGeoJsonBtn:hover{
+    background-image: url('../images/addHoverJson.png') !important;
+    background-repeat: no-repeat;
+}
+
+#uploadJsonBtn{
+    display: none;
+}
+
+.claro .dijitTooltipContainer{
+    background-color: black !important;
+    background-image: none !important;
+    color : white !important;
+    border :  none !important;
+}

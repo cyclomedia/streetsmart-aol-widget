@@ -3,5 +3,7 @@
 	"uPwd" : "",
 	"locale" : "en-US",
 	"atlasHost": "https://atlas.cyclomedia.com",
-	"agreement": ""
+	"agreement": "",
+	"measurement": "",
+	"overlay":""
 }

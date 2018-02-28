@@ -2,11 +2,11 @@
     <div class="settings-container">
         <div class="settingsForm">
             <div class="settingsLabel">${nls.username}</div>
-            <input class="settingsBox" style="margin-left: 10px;" id="userName" type="text" data-dojo-attach-point="uNameCyclomedia"  placeholder="Username">
+            <input class="settingsBox" style="margin-left: 10px;" id="userName" data-dojo-attach-point="uNameCyclomedia"  placeholder=${nls.username}>
         </div>
         <div class="settingsForm">
             <div class="settingsLabel">${nls.password}</div>
-            <input class="settingsBox" style="margin-left: 10px;" id="password" type="password" data-dojo-attach-point="uPwdCyclomedia" placeholder="password">
+            <input class="settingsBox" style="margin-left: 10px;" id="password" type="password" data-dojo-attach-point="uPwdCyclomedia" placeholder=${nls.password}>
         </div>
         <div class="settingsForm">
             <div class="settingsLabel">${nls.locale}</div>
@@ -15,15 +15,27 @@
                 <option value="en-EN">EN</option>
                 <option value="nl">NL</option>
                 <option value="de">DE</option>
+                <option value="de">FR</option>
             </select>
+        </div>
+        <div class="settingsForm">
+            <div class="settingsLabel">${nls.srs}</div>
+            <input id="srsComboBox" data-dojo-attach-point="srsCyclomedia">
+        </div>
+        <div class="settingsForm measurementLabel">
+            <input data-dojo-attach-point="measuementEnable" type="checkbox" id="enableMeasurement">  ${nls.measure}
+        </div>
+        <div class="settingsForm overlayLabel">
+            <input data-dojo-attach-point="overlayEnable" type="checkbox" id="enableOverlay">  ${nls.overlay}
         </div>
         <div class="settingsForm agreementLabel">
 
             <input data-dojo-attach-point="agreementCheck" type="checkbox" name="userAgreement" value="accept"> ${nls.agreement1} <a href="#" id="userAgreementLink" > ${nls.agreement2}</a>
         </div>
+        <div id="agreementContainer" style="display:none;">
+            <div class="headAgree">${nls.headAgreement}</div>
+            <div id="agreementData"></div>
+        </div>
     </div>
-    <div id="agreementContainer" style="display:none;">
-        <div class="headAgree">${nls.headAgreement}</div>
-        <div id="agreementData"></div>
-    </div>
+
 </div>
