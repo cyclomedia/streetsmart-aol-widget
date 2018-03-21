@@ -1,0 +1,17 @@
+{
+  "presets": [["env", {
+    "loose": true,
+    "modules": false,
+    "targets": {
+      "browsers": ["last 5 versions"]
+    }
+  }]],
+  "sourceMaps": true,
+  "sourceFileName": "./Widget.js",
+  "plugins": [
+    ["transform-strict-mode", {
+      "strict": false
+    }]
+  ],
+  "minified": true
+}

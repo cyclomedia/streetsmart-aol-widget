@@ -8,7 +8,8 @@ define({
     agreement2: "User Terms And Conditions For Street Smart.",
     headAgreement: "User Agreement",
     measure: "Measurements",
-    overlay: "Overlays"
+    overlay: "Overlays",
+    typeSrs: "Type or Select SRS",
   }),
   "de": true,
   "nl": true,

@@ -94,7 +94,7 @@ define([
                 let self = this;
                 let srsFinal = [];
 
-                dRequest('https://streetsmart.cyclomedia.com/api/v17.2/assets/srs/GlobeSpotterSpatialReferences.xml').then(function(srsData){
+                dRequest('https://streetsmart.cyclomedia.com/api/v17.2/assets/srs/GlobeSpotterSpatialReferences.xml').then(lang.hitch(this, function(srsData){
                         let srsJson = toJSON(srsData);
                         dojoArray.forEach(srsJson.children, function(spatialreference, i ) {
                             let srsObj = {};
@@ -141,11 +141,11 @@ define([
                             SearchAttr : "srs",
                             queryExpr : '*${0}*',
                             autoComplete : false,
-                            placeholder : "Type or Select SRS",
+                            placeholder : this.nls.typeSrs
                         }, "srsComboBox");
                         srsDropDown.startup();
 
-                    },
+                    }),
                     function (error) {
                         console.log(error);
                     });

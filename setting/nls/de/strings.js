@@ -8,6 +8,7 @@
        agreement2: "Allgemeine Nutzungsbedingungen für Street Smart.",
        headAgreement: "Allgemeine Nutzungsbedingungen",
        measure: "Messungen",
-       overlay: "Überlagerungen"
+       overlay: "Überlagerungen",
+       typeSrs: "Geben oder wählen Sie SRS"
   })
 );

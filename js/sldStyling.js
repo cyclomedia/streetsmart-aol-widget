@@ -102,13 +102,13 @@ define([], function () {
             const polygonFilter = (polygonLength) => `<ogc:Filter>
                 <ogc:PropertyIsGreaterThan>
                   <ogc:PropertyName>polygonLength</ogc:PropertyName>
-                  <ogc:Literal>7</ogc:Literal>
+                  <ogc:Literal>5</ogc:Literal>
                 </ogc:PropertyIsGreaterThan>
               </ogc:Filter>`;
             const smallPolygonFilter = (polygonLength) => `<ogc:Filter>
                 <ogc:PropertyIsLessThanOrEqualTo>
                   <ogc:PropertyName>polygonLength</ogc:PropertyName>
-                  <ogc:Literal>7</ogc:Literal>
+                  <ogc:Literal>5</ogc:Literal>
                 </ogc:PropertyIsLessThanOrEqualTo>
               </ogc:Filter>`;
 
