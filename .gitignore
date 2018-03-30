@@ -5,3 +5,10 @@
 .DS_Store
 
 *.rar
+
+# NPM stuff
+/node_modules/
+/yarn-error.log
+/yarn.lock
+/.babelrc
+

@@ -666,6 +666,7 @@ require(cmtDojoConfig, [], function () {
 
             _clickRecordingPoint: function (event) {
                 let ptId = event.graphic.attributes.recording_id;
+                let self = this;
                 StreetSmartApi.open(ptId,
                     {
                         viewerType: this.viewerType,
@@ -674,6 +675,9 @@ require(cmtDojoConfig, [], function () {
                     function (result) {
                         if (result && result[0]) {
                             console.log('Opened a panorama viewer through API!', result[0]);
+                            if(self.config.navigation !== true){
+                                self._navigationDisabled();
+                            }
                         }
                     }
                 ).catch(
@@ -723,6 +727,9 @@ require(cmtDojoConfig, [], function () {
                                         if (this.config.measurement !== true) {
                                             let measureBtn = StreetSmartApi.PanoramaViewerUi.buttons.MEASURE;
                                             this._panoramaViewer.toggleButtonEnabled(measureBtn);
+                                        }
+                                        if(this.config.navigation !== true){
+                                            this._navigationDisabled();
                                         }
                                     }
                                 }.bind(this)
@@ -1228,9 +1235,48 @@ require(cmtDojoConfig, [], function () {
                 // TODO NOT an official api function. will be in the next api release (v16.1+)!
                 // recalculate size for panoramaviewer when widget resizes.
                 this._panoramaViewer._viewer.invalidateSize();
-            }
+            },
 
-            //methods to communication between widgets:
+            //methods to communication between widgets
+            onReceiveData: function(name, widgetId, data, historyData){
+                console.log(name, widgetId, data, historyData);
+                if(name !== 'Search'){
+                    return;
+                }
+                let self = this;
+                if(data.selectResult) {
+                    let searchedPoint = data.selectResult.result.feature.geometry;
+                    let mapSRS = this.config.srs;
+                    let usableSRS = mapSRS.split(":");
+                    let searchedPtLocal = utils.transformProj4js(searchedPoint, usableSRS[1]);
+                    StreetSmartApi.open(searchedPtLocal.x + ',' + searchedPtLocal.y,
+                        {
+                            viewerType: this.viewerType,
+                            srs: this.config.srs,
+                        }).then(
+                        function (result) {
+                            if (result && result[0]) {
+                                console.log('Opened a panorama viewer through API!', result[0]);
+                                if(self.config.navigation !== true){
+                                    self._navigationDisabled();
+                                }
+                            }
+                        }
+                    ).catch(
+                        function (reason) {
+                            console.log('Error opening panorama viewer: ' + reason);
+                        }
+                    );
+                }
+            },
+
+            _navigationDisabled: function(){
+
+                this._panoramaViewer.toggleRecordingsVisible();
+                this._panoramaViewer.toggleNavbarVisible();
+                this._panoramaViewer.toggleTimeTravelVisible();
+
+            }
 
         });
     });

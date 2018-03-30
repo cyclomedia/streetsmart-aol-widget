@@ -9,6 +9,7 @@ define({
     headAgreement: "User Agreement",
     measure: "Measurements",
     overlay: "Overlays",
+    navigation: "Navigation",
     typeSrs: "Type or Select SRS",
   }),
   "de": true,

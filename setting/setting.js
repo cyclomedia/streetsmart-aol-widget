@@ -73,6 +73,9 @@ define([
                 if(this.config.overlay){
                     this.overlayEnable.value = this.config.overlay;
                 }
+                if(this.config.navigation){
+                    this.navigationEnable.value = this.config.navigation;
+                }
 
             },
 
@@ -84,8 +87,8 @@ define([
                 this.config.srs = dijit.byId('srsComboBox').value;
                 this.config.measurement = document.getElementById('enableMeasurement').checked;
                 this.config.overlay = document.getElementById('enableOverlay').checked;
+                this.config.navigation = document.getElementById('enableNavigation').checked;
                 console.log("getconfig", this.config);
-
                 return this.config;
             },
 
