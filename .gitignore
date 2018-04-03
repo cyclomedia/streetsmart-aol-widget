@@ -1,0 +1,15 @@
+# NPM stuff
+/node_modules/
+/npm-debug.log
+
+# WebStorm project
+/.idea/
+
+# build folder
+/dist/
+
+# Apple stuff
+.DS_Store
+
+*.rar
+

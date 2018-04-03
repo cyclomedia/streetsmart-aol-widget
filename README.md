@@ -14,8 +14,8 @@ Modify the url above so it contains your user name instead of credentials. i.e. 
 
 Also, if not already done, please configure git so it knows you (Firstname Lastname AND full email!):
 ```
-git config �global user.name �Firstname Lastname�
-git config �global user.email �your_official_email@cyclomedia.com�
+git config -global user.name "Firstname Lastname"
+git config -global user.email "your_official_email@cyclomedia.com"
 ```
 
 ## Versioning
