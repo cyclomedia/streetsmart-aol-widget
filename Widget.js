@@ -1234,10 +1234,10 @@ require(cmtDojoConfig, [], function () {
                 console.info('resize');
                 // TODO NOT an official api function. will be in the next api release (v16.1+)!
                 // recalculate size for panoramaviewer when widget resizes.
-                this._panoramaViewer._viewer.invalidateSize();
+                //this._panoramaViewer._viewer.invalidateSize();
             },
 
-            //methods to communication between widgets
+            //communication method between widgets
             onReceiveData: function(name, widgetId, data, historyData){
                 console.log(name, widgetId, data, historyData);
                 if(name !== 'Search'){
