@@ -8,7 +8,7 @@
        agreement2: "Gebruiksvoorwaarden voor Street Smart.",
        headAgreement: "Gebruiksvoorwaarden",
        measure: "Afmetingen",
-       overlay: "bedekking",
+       overlay: "Overlays",
        typeSrs: "Typ of selecteer SRS"
 
    })
