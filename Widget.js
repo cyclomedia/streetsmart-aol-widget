@@ -1275,6 +1275,7 @@ require(cmtDojoConfig, [], function () {
                 this._panoramaViewer.toggleRecordingsVisible();
                 this._panoramaViewer.toggleNavbarVisible();
                 this._panoramaViewer.toggleTimeTravelVisible();
+                this._lyrRecordingPoints.setVisibility(false);
 
             }
 

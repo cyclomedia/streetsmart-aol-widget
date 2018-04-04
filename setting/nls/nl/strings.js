@@ -9,6 +9,7 @@
        headAgreement: "Gebruiksvoorwaarden",
        measure: "Afmetingen",
        overlay: "bedekking",
+       navigation: "Navigatie",
        typeSrs: "Typ of selecteer SRS"
 
    })

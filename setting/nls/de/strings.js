@@ -9,6 +9,7 @@
        headAgreement: "Allgemeine Nutzungsbedingungen",
        measure: "Messungen",
        overlay: "Überlagerungen",
+       navigation: "Navigation",
        typeSrs: "Geben oder wählen Sie SRS"
   })
 );

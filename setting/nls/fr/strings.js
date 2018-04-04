@@ -9,6 +9,7 @@
        headAgreement: "Accord de l'utilisateur",
        measure: "Mesures",
        overlay: "Superpositions",
+       navigation: "La navigation",
        typeSrs: "Tapez ou sélectionnez SRS"
   })
 );

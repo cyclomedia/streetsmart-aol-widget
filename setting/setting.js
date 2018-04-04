@@ -96,8 +96,11 @@ define([
 
                 let self = this;
                 let srsFinal = [];
+                const spatialReferences =  "https://atlas.cyclomedia.com/spatialreferences/SpatialReferences.xml";
 
-                dRequest('https://streetsmart.cyclomedia.com/api/v17.2/assets/srs/GlobeSpotterSpatialReferences.xml').then(lang.hitch(this, function(srsData){
+
+                dRequest(spatialReferences, {headers: {"X-Requested-With": null}})
+                    .then(lang.hitch(this, function(srsData){
                         let srsJson = toJSON(srsData);
                         dojoArray.forEach(srsJson.children, function(spatialreference, i ) {
                             let srsObj = {};

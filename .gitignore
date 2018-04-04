@@ -10,5 +10,22 @@
 /node_modules/
 /yarn-error.log
 /yarn.lock
-/.babelrc
+
+
+# NPM stuff
+/node_modules/
+/npm-debug.log
+/yarn-error.log
+/yarn.lock
+
+# WebStorm project
+/.idea/
+
+# build folder
+/dist/
+
+# Apple stuff
+.DS_Store
+
+*.rar
 
