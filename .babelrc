@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "presets": [["env", {
     "loose": true,
     "modules": false,
@@ -6,6 +7,17 @@
       "browsers": ["last 5 versions"]
     }
   }]],
+=======
+  "presets": [
+    ["env", {
+      "loose": true,
+      "modules": false,
+      "targets": {
+        "browsers": ["last 5 versions"]
+      }
+    }]
+  ],
+>>>>>>> af90779d9e5876f8febc08ea416599a05cd1aa39
   "sourceMaps": true,
   "sourceFileName": "./Widget.js",
   "plugins": [
@@ -14,4 +26,8 @@
     }]
   ],
   "minified": true
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> af90779d9e5876f8febc08ea416599a05cd1aa39
