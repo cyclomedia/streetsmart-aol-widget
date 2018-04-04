@@ -1,28 +1,6 @@
-<<<<<<< HEAD
-# WebStorm project
-/.idea/
-
-# Apple stuff
-.DS_Store
-
-*.rar
-
-# NPM stuff
-/node_modules/
-/yarn-error.log
-/yarn.lock
-
-
 # NPM stuff
 /node_modules/
 /npm-debug.log
-/yarn-error.log
-/yarn.lock
-=======
-# NPM stuff
-/node_modules/
-/npm-debug.log
->>>>>>> af90779d9e5876f8febc08ea416599a05cd1aa39
 
 # WebStorm project
 /.idea/
@@ -34,4 +12,3 @@
 .DS_Store
 
 *.rar
-
