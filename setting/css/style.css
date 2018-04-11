@@ -47,6 +47,20 @@
 	text-align: right;
 }
 
+.measurementLabel{
+	width: 25%;
+	text-align: right;
+}
+
+.overlayLabel{
+	width: 20.3%;
+	text-align: right;
+}
+
+.navigationLabel{
+	width: 22%;
+	text-align: right;
+}
 .settings-container {
 	height: 30%
 }
@@ -59,5 +73,10 @@
 	height: calc(100% - 30px);
 	overflow-y: scroll;
 
+}
+
+[type="checkbox"]
+{
+	vertical-align:middle;
 }
 

@@ -1,0 +1,13 @@
+{
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1"
+  },
+  "scripts": {
+    "build:widgetjs": "babel --config ./.babelrc ./Widget.js --out-file dist/Widget.js",
+    "build:settingsjs": "babel --config ./.babelrc ./setting/setting.js --out-file dist/setting.js",
+    "build:sldstyling": "babel --config ./.babelrc ./js/sldStyling.js --out-file dist/sldStyling.js",
+    "build": "yarn run build:widgetjs && yarn run build:settingsjs && yarn run build:sldstyling",
+    "watch": "yarn run build --watch"
+  }
+}
