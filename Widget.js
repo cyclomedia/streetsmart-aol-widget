@@ -784,6 +784,76 @@ require(cmtDojoConfig, [], function () {
                 }
             },
 
+            _dropPanoramaButton:  function() {
+                const navbar = document.querySelector('.panoramaviewer .navbar');
+                const nav = navbar.querySelector('.navbar-right .nav');
+                let self = this;
+                let btn = nav.querySelector('.btn');
+                if (!nav.querySelector('#addMapDropBtn')) {
+                    let addDropBtn = dojo.create("button", {
+                        id: "addMapDropBtn",
+                        class: btn.className,
+                        draggable: true,
+                        ondragend: function (evt) {
+                            self._dropInitiated(event);
+                        }
+                    });
+                    nav.appendChild(addDropBtn);
+                }
+                let btnJsonTip = dom.byId('addMapDropBtn');
+                let toolTipMsg = "Drag and Drop on map to Open Panorama";
+                new Tooltip({
+                    connectId: btnJsonTip,
+                    label: toolTipMsg,
+                    position: ["above"]
+                });
+
+            },
+
+            _dropInitiated: function(event) {
+                event.preventDefault();
+                let self = this;
+                //this.addEventListener(this.map, 'mouse-up', event => { this._dropped(event) });
+                //Add event for drop on map
+                self.addEventListener(self.map, 'dragover', self._allowDrop(event));
+                self.addEventListener(self.map, 'drop', self._dropped(event));
+
+            },
+            _allowDrop: function(event){
+                event.preventDefault();
+                console.log(event);
+            },
+
+            _dropped: function(event){
+                event.preventDefault();
+                let self = this;
+                let sPoint = new ScreenPoint(event.screenX,event.screenY);
+                let mPoint = self.map.toMap(sPoint);
+                let mapSRS = self.config.srs;
+                let usableSRS = mapSRS.split(":");
+                let cPoint = utils.transformProj4js(mPoint, usableSRS[1]);
+                StreetSmartApi.open(cPoint.x + ',' + cPoint.y,
+                    {
+                        viewerType: self.viewerType,
+                        srs: self.config.srs,
+                    }).then(
+                    function (result) {
+                        if (result && result[0]) {
+                            console.log('Opened a panorama viewer through API!', result[0]);
+                            if(self.config.navigation !== true){
+                                self._navigationDisabled();
+                            }
+                        }
+                    }
+                ).catch(
+                    function (reason) {
+                        console.log('Error opening panorama viewer: ' + reason);
+                    }
+                );
+                self._updateViewerGraphics(this._panoramaViewer, false);
+            },
+
+
             onClose: function () {
                 console.info('onClose');
 
@@ -1074,11 +1144,13 @@ require(cmtDojoConfig, [], function () {
                         const nav = document.querySelector('.panoramaviewer .navbar .nav');
                         if (nav !== null) {
                             self._overlayButtonAdd(nav);
+                            self._dropPanoramaButton();
                             document.addEventListener('click', () => {
                                 setTimeout(() => {
                                     const expanded = document.querySelector('.panoramaviewer .viewer-navbar-expanded');
                                     if (expanded) {
                                         this._overlayButtonAdd();
+                                        this._dropPanoramaButton();
                                     }
                                 }, 250);
                             }, true);
