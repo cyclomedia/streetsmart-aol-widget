@@ -39,7 +39,7 @@ require(cmtDojoConfig, [], function () {
         'esri/tasks/query',
         'esri/request',
         'jimu/BaseWidget',
-        'https://streetsmart.cyclomedia.com/api/v18.1/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v18.4/StreetSmartApi.js',
         './js/utils',
         './js/sldStyling',
         'https://unpkg.com/shpjs@latest/dist/shp.js',
@@ -669,7 +669,7 @@ require(cmtDojoConfig, [], function () {
                 let self = this;
                 StreetSmartApi.open(ptId,
                     {
-                        viewerType: this.viewerType,
+                        viewerType: [this.viewerType],
                         srs: this.config.srs,
                     }).then(
                     function (result) {
@@ -712,7 +712,7 @@ require(cmtDojoConfig, [], function () {
 
                             StreetSmartApi.open(ptLocal.x + ',' + ptLocal.y,
                                 {
-                                    viewerType: this.viewerType,
+                                    viewerType: [this.viewerType],
                                     srs: mapSRS,
                                 }).then(
                                 function (result) {
@@ -834,7 +834,7 @@ require(cmtDojoConfig, [], function () {
                 let cPoint = utils.transformProj4js(mPoint, usableSRS[1]);
                 StreetSmartApi.open(cPoint.x + ',' + cPoint.y,
                     {
-                        viewerType: self.viewerType,
+                        viewerType: [self.viewerType],
                         srs: self.config.srs,
                     }).then(
                     function (result) {
@@ -1143,13 +1143,13 @@ require(cmtDojoConfig, [], function () {
                         });
                         const nav = document.querySelector('.panoramaviewer .navbar .nav');
                         if (nav !== null) {
-                            self._overlayButtonAdd(nav);
+                            //self._overlayButtonAdd(nav);
                             self._dropPanoramaButton();
                             document.addEventListener('click', () => {
                                 setTimeout(() => {
                                     const expanded = document.querySelector('.panoramaviewer .viewer-navbar-expanded');
                                     if (expanded) {
-                                        this._overlayButtonAdd();
+                                        //this._overlayButtonAdd();
                                         this._dropPanoramaButton();
                                     }
                                 }, 250);
@@ -1323,7 +1323,7 @@ require(cmtDojoConfig, [], function () {
                     let searchedPtLocal = utils.transformProj4js(searchedPoint, usableSRS[1]);
                     StreetSmartApi.open(searchedPtLocal.x + ',' + searchedPtLocal.y,
                         {
-                            viewerType: this.viewerType,
+                            viewerType: [this.viewerType],
                             srs: this.config.srs,
                         }).then(
                         function (result) {
