@@ -49,6 +49,17 @@
     background-repeat: no-repeat;
 }
 
+#addMapDropBtn{
+    background-image: url('../images/mapDrop.png');
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#addMapDropBtn:hover{
+    background-image: url('../images/mapDropHover.png') !important;
+    background-repeat: no-repeat;
+}
+
 #uploadJsonBtn{
     display: none;
 }

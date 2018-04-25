@@ -39,7 +39,7 @@ require(cmtDojoConfig, [], function () {
         'esri/tasks/query',
         'esri/request',
         'jimu/BaseWidget',
-        'https://streetsmart.cyclomedia.com/api/v18.1/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v18.4/StreetSmartApi.js',
         './js/utils',
         './js/sldStyling',
         'https://unpkg.com/shpjs@latest/dist/shp.js',
@@ -669,7 +669,7 @@ require(cmtDojoConfig, [], function () {
                 let self = this;
                 StreetSmartApi.open(ptId,
                     {
-                        viewerType: this.viewerType,
+                        viewerType: [this.viewerType],
                         srs: this.config.srs,
                     }).then(
                     function (result) {
@@ -712,7 +712,7 @@ require(cmtDojoConfig, [], function () {
 
                             StreetSmartApi.open(ptLocal.x + ',' + ptLocal.y,
                                 {
-                                    viewerType: this.viewerType,
+                                    viewerType: [this.viewerType],
                                     srs: mapSRS,
                                 }).then(
                                 function (result) {
@@ -783,6 +783,76 @@ require(cmtDojoConfig, [], function () {
                     self.JsonLayerButton = true;
                 }
             },
+
+            _dropPanoramaButton:  function() {
+                const navbar = document.querySelector('.panoramaviewer .navbar');
+                const nav = navbar.querySelector('.navbar-right .nav');
+                let self = this;
+                let btn = nav.querySelector('.btn');
+                if (!nav.querySelector('#addMapDropBtn')) {
+                    let addDropBtn = dojo.create("button", {
+                        id: "addMapDropBtn",
+                        class: btn.className,
+                        draggable: true,
+                        ondragend: function (evt) {
+                            self._dropInitiated(event);
+                        }
+                    });
+                    nav.appendChild(addDropBtn);
+                }
+                let btnJsonTip = dom.byId('addMapDropBtn');
+                let toolTipMsg = "Drag and Drop on map to Open Panorama";
+                new Tooltip({
+                    connectId: btnJsonTip,
+                    label: toolTipMsg,
+                    position: ["above"]
+                });
+
+            },
+
+            _dropInitiated: function(event) {
+                event.preventDefault();
+                let self = this;
+                //this.addEventListener(this.map, 'mouse-up', event => { this._dropped(event) });
+                //Add event for drop on map
+                self.addEventListener(self.map, 'dragover', self._allowDrop(event));
+                self.addEventListener(self.map, 'drop', self._dropped(event));
+
+            },
+            _allowDrop: function(event){
+                event.preventDefault();
+                console.log(event);
+            },
+
+            _dropped: function(event){
+                event.preventDefault();
+                let self = this;
+                let sPoint = new ScreenPoint(event.screenX,event.screenY);
+                let mPoint = self.map.toMap(sPoint);
+                let mapSRS = self.config.srs;
+                let usableSRS = mapSRS.split(":");
+                let cPoint = utils.transformProj4js(mPoint, usableSRS[1]);
+                StreetSmartApi.open(cPoint.x + ',' + cPoint.y,
+                    {
+                        viewerType: [self.viewerType],
+                        srs: self.config.srs,
+                    }).then(
+                    function (result) {
+                        if (result && result[0]) {
+                            console.log('Opened a panorama viewer through API!', result[0]);
+                            if(self.config.navigation !== true){
+                                self._navigationDisabled();
+                            }
+                        }
+                    }
+                ).catch(
+                    function (reason) {
+                        console.log('Error opening panorama viewer: ' + reason);
+                    }
+                );
+                self._updateViewerGraphics(this._panoramaViewer, false);
+            },
+
 
             onClose: function () {
                 console.info('onClose');
@@ -1073,12 +1143,14 @@ require(cmtDojoConfig, [], function () {
                         });
                         const nav = document.querySelector('.panoramaviewer .navbar .nav');
                         if (nav !== null) {
-                            self._overlayButtonAdd(nav);
+                            //self._overlayButtonAdd(nav);
+                            self._dropPanoramaButton();
                             document.addEventListener('click', () => {
                                 setTimeout(() => {
                                     const expanded = document.querySelector('.panoramaviewer .viewer-navbar-expanded');
                                     if (expanded) {
-                                        this._overlayButtonAdd();
+                                        //this._overlayButtonAdd();
+                                        this._dropPanoramaButton();
                                     }
                                 }, 250);
                             }, true);
@@ -1251,7 +1323,7 @@ require(cmtDojoConfig, [], function () {
                     let searchedPtLocal = utils.transformProj4js(searchedPoint, usableSRS[1]);
                     StreetSmartApi.open(searchedPtLocal.x + ',' + searchedPtLocal.y,
                         {
-                            viewerType: this.viewerType,
+                            viewerType: [this.viewerType],
                             srs: this.config.srs,
                         }).then(
                         function (result) {
