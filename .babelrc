@@ -9,7 +9,6 @@
     }]
   ],
   "sourceMaps": true,
-  "sourceFileName": "./Widget.js",
   "plugins": [
     ["transform-strict-mode", {
       "strict": false

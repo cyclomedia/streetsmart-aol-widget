@@ -5,18 +5,22 @@ See: https://www.cyclomedia.com/ for more information.
 
 ## Getting Started
 
-To create a fresh clone from the (new) git repository, use the following command (or just use the url from a git GUI application like TortoiseGit):
- ```
- git clone ssh://credentials@vm-3d-srv01:/srv/viewing/git/streetsmartwidget4aol.git
- ```
+- Install node.
+- Download the [Web AppBuilder for ArcGIS](https://developers.arcgis.com/web-appbuilder/) and run the executable.
+- Insert your ArcGIS credentials and the right portalUrl and appID when asked.
+- Create a new app in the AppBuilder
+- Copy `.env.example` to `.env` and update `WIDGET_DIR` so it points to the widget folder in the AppBuilder install path on your system.
+- Run `npm install`
+- Run `npm run build` which builds this widget to both the `dist` folder and `${WIDGET_DIR}`
+- Add the StreetSmart widget to your development app. 
 
-Modify the url above so it contains your user name instead of credentials. i.e. "gbo".
+## Developing
 
-Also, if not already done, please configure git so it knows you (Firstname Lastname AND full email!):
-```
-git config -global user.name "Firstname Lastname"
-git config -global user.email "your_official_email@cyclomedia.com"
-```
+Run `npm start` which automatically transpiles and copies everything to `dist` and your widget directory.
+Live reload doesn't work as the AppBuilder in seperate process.
+
+NB: When adding the StreetSmart widget to your development app, the WebAppBuilder copies `client\stemapp\widgets\StreetSmart` to `server\apps\LOCAL_APP_ID\widgets\StreetSmart`. 
+To prevent caching issues, make a symlink from the server path to the client path.
 
 ## Versioning
 

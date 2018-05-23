@@ -40,8 +40,8 @@ require(cmtDojoConfig, [], function () {
         'esri/request',
         'jimu/BaseWidget',
         'https://streetsmart.cyclomedia.com/api/v18.4/StreetSmartApi.js',
-        './js/utils',
-        './js/sldStyling',
+        './utils',
+        './sldStyling',
         'https://unpkg.com/shpjs@latest/dist/shp.js',
         'https://cdnjs.cloudflare.com/ajax/libs/ol3/4.0.1/ol.js'
     ], function (declare,
@@ -690,7 +690,7 @@ require(cmtDojoConfig, [], function () {
             },
 
             onOpen: function () {
-
+                console.log('OPEN IT boi adfasfsd');
                 if (this.streetSmartInitiated === true) {
                     console.info('onOpen');
                     let self = this;

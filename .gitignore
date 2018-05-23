@@ -13,5 +13,7 @@
 
 *.rar
 
+.env
+
 /yarn.lock
 /yarn-error.log
