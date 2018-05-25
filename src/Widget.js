@@ -86,18 +86,23 @@ require(REQUIRE_CONFIG, [], function () {
             name: 'Street Smart by CycloMedia',
 
             _initialized: false,
+            _zoomThreshold: null,
             _viewerType: StreetSmartApi.ViewerType.PANORAMA,
 
             // CM properties
             _recordingColor: '#005293',
             _cmtTitleColor: '#98C23C',
             _apiKey: 'C3oda7I1S_49-rgV63wtWbgtOXcVe3gJWPAVWnAZK3whi7UxCjMNWzIJyv4Fmrcp',
-            
+
             // Initial construction, might not be added to DOM yet.
             postCreate() {
                 console.log('postCreate.');
                 this.inherited(arguments);
+
                 utils.setProj4(CM.Proj4.getProj4());
+
+                this._applyWidgetStyle();
+                this._determineZoomThreshold();
             },
 
             startup() {
@@ -124,7 +129,22 @@ require(REQUIRE_CONFIG, [], function () {
                 return StreetSmartApi.init(CONFIG).then(() => {
                     console.log('api init success');
                     this._initialized = true;
-                });
+                }).then(() => {
+                    this._centerViewerToMap();
+                })
+            },
+
+            _applyWidgetStyle() {
+                const panel = this.getPanel();
+
+                // Set title color for Widget.
+                if (panel.titleNode) {
+                    panel.titleNode.style.backgroundColor = this._cmtTitleColor;
+                    panel.titleLabelNode.style.color = 'white';
+                }
+
+                // Remove padding (white 'border') around viewer.
+                panel.containerNode.children[0].style.padding = '0px';
             },
 
             _centerViewerToMap() {
@@ -139,17 +159,31 @@ require(REQUIRE_CONFIG, [], function () {
                 );
             },
 
-            onOpen() {
-                console.log('onOpen');
-                this._initApi().then(() => {
-                    this._centerViewerToMap();
+            _determineZoomThreshold: function () {
+                const maxMapZoom = this.map.getMaxZoom();
+                let zoomThreshold = maxMapZoom - 3;
 
-                });
+                if (maxMapZoom > 20) {
+                    zoomThreshold = maxMapZoom - 5;
+                }
+                this._zoomThreshold = zoomThreshold;
+                return zoomThreshold;
+            },
+
+            onOpen() {
+                const zoomLevel = this.map.getZoom();
+                console.log('onOpen');
+
+                // Only open when the zoomThreshold is reached.
+                if (zoomLevel > this._zoomThreshold) {
+                    this._initApi();
+                }
             },
 
             onClose() {
                 console.log('onClose', this.panoramaViewerDiv);
                 StreetSmartApi.destroy({ targetElement: this.panoramaViewerDiv });
+                this._initialized = false;
             },
 
             // communication method between widgets

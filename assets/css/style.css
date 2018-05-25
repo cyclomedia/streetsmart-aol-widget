@@ -12,10 +12,9 @@
     width: 100%;
 }
 
-#zoomWarningDiv {
-    z-index: 100;
-    top: 50%;
+#_zoom-warning {
     position: absolute;
+    top: 50%;
     width: 100%;
     text-align: center;
     height: 50px;
