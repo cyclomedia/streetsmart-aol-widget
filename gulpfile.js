@@ -6,11 +6,11 @@ console.log('WIDGET DIRECTORY: ', process.env.WIDGET_DIR);
 
 gulp.task('babel', function() {
     return gulp.src([
-        'src/**/*.*',
+        'src/**/*.js',
     ])
+        .pipe(babel())
         .pipe(gulp.dest('dist'))
         .pipe(gulp.dest(process.env.WIDGET_DIR));
-        // .pipe(babel({ modules: 'amd' }))
 });
 
 gulp.task('copy', function() {
