@@ -12,71 +12,19 @@ const REQUIRE_CONFIG = {
 require(REQUIRE_CONFIG, [], function () {
     return define([
         'dojo/_base/declare',
-        'dojo/dom',
-        'dojo/_base/lang',
         'dojo/on',
-        'dojo/_base/array',
-        'dojo/dom-style',
-        'dojo/_base/Color',
-        'dojo/dom-attr',
-        'dijit/Tooltip',
-        'esri/graphic',
-        'esri/layers/FeatureLayer',
-        'esri/layers/GraphicsLayer',
-        'esri/geometry/Point',
-        'esri/geometry/Polygon',
-        'esri/geometry/ScreenPoint',
-        'esri/SpatialReference',
-        'esri/renderers/SimpleRenderer',
-        'esri/symbols/PictureMarkerSymbol',
-        'esri/symbols/SimpleMarkerSymbol',
-        'esri/symbols/SimpleLineSymbol',
-        'esri/symbols/SimpleFillSymbol',
-        'esri/symbols/TextSymbol',
-        'esri/geometry/Polyline',
-        'esri/layers/LabelLayer',
-        'esri/tasks/QueryTask',
-        'esri/tasks/query',
-        'esri/request',
         'jimu/BaseWidget',
         'https://streetsmart.cyclomedia.com/api/v18.4/StreetSmartApi.js',
         './utils',
-        './sldStyling',
-        'https://unpkg.com/shpjs@latest/dist/shp.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/ol3/4.0.1/ol.js'
-    ], function (declare,
-                 dom,
-                 lang,
-                 on,
-                 dojoArray,
-                 domStyle,
-                 Color,
-                 domAttr,
-                 Tooltip,
-                 Graphic,
-                 FeatureLayer,
-                 GraphicsLayer,
-                 Point,
-                 Polygon,
-                 ScreenPoint,
-                 SpatialReference,
-                 SimpleRenderer,
-                 PictureMarkerSymbol,
-                 SimpleMarkerSymbol,
-                 SimpleLineSymbol,
-                 SimpleFillSymbol,
-                 TextSymbol,
-                 Polyline,
-                 LabelLayer,
-                 QueryTask,
-                 Query,
-                 esriRequest,
-                 BaseWidget,
-                 StreetSmartApi,
-                 utils,
-                 sldStyling,
-                 Shp,
-                 ol) {
+        './RecordingClient',
+    ], function (
+         declare,
+         on,
+         BaseWidget,
+         StreetSmartApi,
+         utils,
+         RecordingClient
+    ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
             // Custom widget code goes here
@@ -101,6 +49,11 @@ require(REQUIRE_CONFIG, [], function () {
 
                 utils.setProj4(CM.Proj4.getProj4());
 
+                this._recordingClient = new RecordingClient({
+                    config: this.config,
+                    apiKey: this._apiKey,
+                    map: this.map,
+                });
                 this._applyWidgetStyle();
                 this._determineZoomThreshold();
             },
@@ -111,7 +64,7 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             async _initApi() {
-                console.log('_initApi', this.config);
+                console.log('_initApi');
                 const CONFIG = {
                     targetElement: this.panoramaViewerDiv, // I have no idea where this comes from
                     username: this.config.uName,
@@ -127,11 +80,33 @@ require(REQUIRE_CONFIG, [], function () {
                 };
 
                 return StreetSmartApi.init(CONFIG).then(() => {
-                    console.log('api init success');
+                    console.log('API init done, map extent', this.map.extent);
                     this._initialized = true;
-                }).then(() => {
+
+                    this._bindEventHandlers();
                     this._centerViewerToMap();
-                })
+                });
+            },
+
+            _bindEventHandlers() {
+                this._extentChangeListener = on(this.map, 'extent-change', this._handleExtentChange.bind(this));
+            },
+
+            _removeEventHandlers() {
+                this._extentChangeListener.remove();
+            },
+
+            _handleExtentChange() {
+                if (this.map.getZoom() > this._zoomThreshold) {
+                    this._loadRecordings();
+                    return;
+                }
+            },
+
+            _loadRecordings() {
+                this._recordingClient.load().then((response) => {
+                    console.log('_loadRecordings done', response);
+                });
             },
 
             _applyWidgetStyle() {
@@ -175,15 +150,16 @@ require(REQUIRE_CONFIG, [], function () {
                 console.log('onOpen');
 
                 // Only open when the zoomThreshold is reached.
-                if (zoomLevel > this._zoomThreshold) {
+                // if (zoomLevel > this._zoomThreshold) {
                     this._initApi();
-                }
+                // }
             },
 
             onClose() {
                 console.log('onClose', this.panoramaViewerDiv);
                 StreetSmartApi.destroy({ targetElement: this.panoramaViewerDiv });
                 this._initialized = false;
+                this._removeEventHandlers();
             },
 
             // communication method between widgets
