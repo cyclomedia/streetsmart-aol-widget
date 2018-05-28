@@ -45,7 +45,6 @@ require(REQUIRE_CONFIG, [], function () {
 
             // Initial construction, might not be added to DOM yet.
             postCreate() {
-                console.log('postCreate.');
                 this.inherited(arguments);
 
                 this.wkid = parseInt(this.config.srs.split(':')[1]);
@@ -60,18 +59,22 @@ require(REQUIRE_CONFIG, [], function () {
                 this._layerManager = new LayerManager({
                     wkid: this.wkid,
                     map: this.map,
+                    onRecordingLayerClick: this._handleRecordingClick.bind(this),
                 });
                 this._applyWidgetStyle();
                 this._determineZoomThreshold();
             },
 
             startup() {
-                console.log('startup');
                 this.inherited(arguments);
             },
 
+            _handleRecordingClick(event) {
+                const recordingId = event.graphic.attributes.recordingId;
+                this.query(recordingId);
+            },
+
             async _initApi() {
-                console.log('_initApi');
                 const CONFIG = {
                     targetElement: this.panoramaViewerDiv, // I have no idea where this comes from
                     username: this.config.uName,
@@ -87,7 +90,6 @@ require(REQUIRE_CONFIG, [], function () {
                 };
 
                 return StreetSmartApi.init(CONFIG).then(() => {
-                    console.log('API init done, map extent', this.map.extent);
                     this._initialized = true;
 
                     this._bindEventHandlers();
@@ -135,8 +137,12 @@ require(REQUIRE_CONFIG, [], function () {
                 const mapCenter = this.map.extent.getCenter();
                 const mapSRS = this.config.srs.split(':')[1];
                 const localCenter = utils.transformProj4js(mapCenter, mapSRS);
-                StreetSmartApi.open(
-                    `${localCenter.x},${localCenter.y}`, {
+                this.query(`${localCenter.x},${localCenter.y}`);
+            },
+
+            query(query) {
+                const mapSRS = this.config.srs.split(':')[1];
+                return StreetSmartApi.open(query, {
                         viewerType: [this.viewerType],
                         srs: mapSRS
                     }
@@ -156,7 +162,6 @@ require(REQUIRE_CONFIG, [], function () {
 
             onOpen() {
                 const zoomLevel = this.map.getZoom();
-                console.log('onOpen');
 
                 // Only open when the zoomThreshold is reached.
                 // if (zoomLevel > this._zoomThreshold) {
@@ -165,7 +170,6 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             onClose() {
-                console.log('onClose', this.panoramaViewerDiv);
                 StreetSmartApi.destroy({ targetElement: this.panoramaViewerDiv });
                 this._initialized = false;
                 this._removeEventHandlers();
