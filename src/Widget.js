@@ -113,6 +113,8 @@ require(REQUIRE_CONFIG, [], function () {
                     this._recordingClient.load().then((response) => {
                         this._layerManager.updateRecordings(response);
                     });
+                } else {
+                    this._layerManager.updateRecordings([]);
                 }
             },
 

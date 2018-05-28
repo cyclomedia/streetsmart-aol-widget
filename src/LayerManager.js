@@ -7,8 +7,6 @@ define([
     'esri/renderers/SimpleRenderer',
     'esri/layers/GraphicsLayer',
     'esri/SpatialReference',
-    'esri/symbols/SimpleFillSymbol',
-    'esri/geometry/Circle',
 ], function (
     Color,
     Point,
@@ -18,12 +16,10 @@ define([
     SimpleRenderer,
     GraphicsLayer,
     SpatialReference,
-    SimpleFillSymbol,
-    Circle,
 ) {
     return class LayerManager {
         constructor({ map, wkid }) {
-            this._recordingColor = new Color.fromString('#005293');
+            this._recordingColor = new Color.fromString('#80B0FF');
 
             this.map = map;
             this.wkid = wkid;
@@ -34,51 +30,34 @@ define([
         }
 
         updateRecordings(recordingData) {
-            console.log('updateRecordings');
             this.recordingLayer.clear();
-            const recordingColor = [...this._recordingColor.toRgb(), 0.5];
-            const fillColor = new Color.fromArray(recordingColor);
+
             recordingData.map((data) => {
                 const coord = new Point(data.xyz[0], data.xyz[1], this.srs);
 
-                const stroke = new SimpleLineSymbol(
-                    SimpleLineSymbol.STYLE_SOLID,
-                    new Color([255, 255, 255]),
-                    1
-                );
-
-                const symbol = new SimpleMarkerSymbol(
-                    SimpleMarkerSymbol.STYLE_CIRCLE,
-                    9,
-                    stroke,
-                    fillColor,
-                );
-
-                const graphic = new Graphic(coord, symbol);
+                const graphic = new Graphic(coord, null);
                 this.recordingLayer.add(graphic);
             });
         }
 
         _createRecordingLayer() {
-            // const recordingColor = [...this._recordingColor.toRgb(), 0.5];
-            // const stroke = new SimpleLineSymbol(
-            //     SimpleLineSymbol.STYLE_SOLID,
-            //     new Color([255, 255, 255]),
-            //     1
-            // );
-            //
-            // const circle = new SimpleMarkerSymbol(
-            //     SimpleMarkerSymbol.STYLE_CIRCLE,
-            //     9,
-            //     stroke,
-            //     new Color.fromArray(recordingColor)
-            // );
-            //
-            // const renderer = new SimpleRenderer(circle);
-            return new GraphicsLayer({
-                id: 'recordingLayer',
-                // renderer,
-            })
+            const outline = new SimpleLineSymbol(
+                SimpleLineSymbol.STYLE_SOLID,
+                new Color([255, 255, 255]),
+                1
+            );
+
+            const symbol = new SimpleMarkerSymbol({
+                style: 'circle',
+                color: this._recordingColor,
+                size: 11,
+                outline,
+            });
+
+            const renderer = new SimpleRenderer(symbol);
+            const layer = new GraphicsLayer({ id: 'recordingLayer' });
+            layer.setRenderer(renderer);
+            return layer;
         }
     }
 });
