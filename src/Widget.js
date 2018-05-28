@@ -17,13 +17,15 @@ require(REQUIRE_CONFIG, [], function () {
         'https://streetsmart.cyclomedia.com/api/v18.4/StreetSmartApi.js',
         './utils',
         './RecordingClient',
+        './LayerManager',
     ], function (
          declare,
          on,
          BaseWidget,
          StreetSmartApi,
          utils,
-         RecordingClient
+         RecordingClient,
+         LayerManager
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
@@ -38,7 +40,6 @@ require(REQUIRE_CONFIG, [], function () {
             _viewerType: StreetSmartApi.ViewerType.PANORAMA,
 
             // CM properties
-            _recordingColor: '#005293',
             _cmtTitleColor: '#98C23C',
             _apiKey: 'C3oda7I1S_49-rgV63wtWbgtOXcVe3gJWPAVWnAZK3whi7UxCjMNWzIJyv4Fmrcp',
 
@@ -47,11 +48,17 @@ require(REQUIRE_CONFIG, [], function () {
                 console.log('postCreate.');
                 this.inherited(arguments);
 
+                this.wkid = parseInt(this.config.srs.split(':')[1]);
+
                 utils.setProj4(CM.Proj4.getProj4());
 
                 this._recordingClient = new RecordingClient({
                     config: this.config,
                     apiKey: this._apiKey,
+                    map: this.map,
+                });
+                this._layerManager = new LayerManager({
+                    wkid: this.wkid,
                     map: this.map,
                 });
                 this._applyWidgetStyle();
@@ -84,6 +91,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this._initialized = true;
 
                     this._bindEventHandlers();
+                    this._loadRecordings();
                     this._centerViewerToMap();
                 });
             },
@@ -97,16 +105,15 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _handleExtentChange() {
-                if (this.map.getZoom() > this._zoomThreshold) {
-                    this._loadRecordings();
-                    return;
-                }
+                this._loadRecordings();
             },
 
             _loadRecordings() {
-                this._recordingClient.load().then((response) => {
-                    console.log('_loadRecordings done', response);
-                });
+                if (this.map.getZoom() > this._zoomThreshold) {
+                    this._recordingClient.load().then((response) => {
+                        this._layerManager.updateRecordings(response);
+                    });
+                }
             },
 
             _applyWidgetStyle() {
