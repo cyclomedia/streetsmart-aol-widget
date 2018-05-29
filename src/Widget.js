@@ -92,7 +92,6 @@ require(REQUIRE_CONFIG, [], function () {
                 return StreetSmartApi.init(CONFIG).then(() => {
                     this._initialized = true;
 
-                    this._bindEventHandlers();
                     this._loadRecordings();
                     this._centerViewerToMap();
                 });
@@ -100,6 +99,16 @@ require(REQUIRE_CONFIG, [], function () {
 
             _bindEventHandlers() {
                 this._extentChangeListener = on(this.map, 'extent-change', this._handleExtentChange.bind(this));
+                this._viewChangeListener = on(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.VIEW_CHANGE,
+                    this._handleConeChange.bind(this)
+                );
+                this._imageChangeListener = on(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE,
+                    this._handleConeChange.bind(this)
+                );
+            },
+
+            _handleConeChange(e) {
+                this._layerManager.updateViewingCone(this._panoramaViewer);
             },
 
             _removeEventHandlers() {
@@ -146,7 +155,12 @@ require(REQUIRE_CONFIG, [], function () {
                         viewerType: [this.viewerType],
                         srs: mapSRS
                     }
-                );
+                ).then((res) => {
+                    if (!this._panoramaViewer) {
+                        this._panoramaViewer = res[0];
+                        this._bindEventHandlers();
+                    }
+                });
             },
 
             _determineZoomThreshold: function () {
