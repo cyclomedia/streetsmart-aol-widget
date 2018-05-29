@@ -10,8 +10,8 @@ define([
         'dijit/_WidgetsInTemplateMixin',
         'jimu/BaseWidgetSetting',
         './commonmark',
-        './xml2json'
-    ], function(declare, lang,dojoArray, dRequest, dom, on, Memory, FilteringSelect, _WidgetsInTemplateMixin, BaseWidgetSetting, commonmark, xml2js) {
+        './xml2json',
+    ], function(declare, lang,dojoArray, dRequest, dom, on, Memory, FilteringSelect, _WidgetsInTemplateMixin, BaseWidgetSetting, commonmark, xml2json) {
 
         return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
             baseClass: 'jimu-widget-streetsmartwidget-setting',
@@ -63,18 +63,30 @@ define([
                 }
                 if(this.config.agreement){
                     this.agreementCheck.value = this.config.agreement;
+                    if(this.config.agreement === "accept"){
+                        this.agreementCheck.checked = true;
+                    }
                 }
                 if(this.config.srs){
                     this.srsCyclomedia.value = this.config.srs;
                 }
                 if(this.config.measurement){
                     this.measuementEnable.value = this.config.measurement;
+                    if(this.config.measurement === true){
+                        this.measuementEnable.checked = true;
+                    }
                 }
                 if(this.config.overlay){
                     this.overlayEnable.value = this.config.overlay;
+                    if(this.config.overlay === true) {
+                        this.overlayEnable.checked = true;
+                    }
                 }
                 if(this.config.navigation){
                     this.navigationEnable.value = this.config.navigation;
+                    if(this.config.navigation === true) {
+                        this.navigationEnable.checked = true;
+                    }
                 }
 
             },
@@ -101,7 +113,7 @@ define([
 
                 dRequest(spatialReferences, {headers: {"X-Requested-With": null}})
                     .then(lang.hitch(this, function(srsData){
-                        let srsJson = toJSON(srsData);
+                        let srsJson = xml2json.toJSON(srsData);
                         dojoArray.forEach(srsJson.children, function(spatialreference, i ) {
                             let srsObj = {};
                             srsObj['Name'] = spatialreference.children[0].content;
@@ -135,14 +147,19 @@ define([
                             srsDisplay.push(srsDisplayName);
                         });
                         srsDisplay.sort(function(a,b){
-                            return parseInt(a.id.substr(5)) - parseInt(b.id.substr(5));
+                            if(a.id && b.id) {
+                                return parseInt(`${a.id}`.substr(5)) - parseInt(`${b.id}`.substr(5));
+                            } else if (a.id) {
+                                return 1;
+                            }
+                            return -1;
                         });
                         let srsStore = new Memory({data : srsDisplay});
 
                         let srsDropDown = new FilteringSelect({
                             id : "srsComboBox",
                             name : "SRS",
-                            value : "",
+                            value : this.config.srs || '',
                             store : srsStore,
                             SearchAttr : "srs",
                             queryExpr : '*${0}*',

@@ -1,44 +1,48 @@
 <div class="settings-street-smart">
     <div class="settings-container">
         <div class="settingsForm">
-            <div class="settingsLabel">${nls.username}</div>
+            <div class="settingsLabel jimu-r-row">${nls.username}</div>
             <input class="settingsBox" style="margin-left: 10px;" id="userName" data-dojo-attach-point="uNameCyclomedia"  placeholder=${nls.username}>
         </div>
         <div class="settingsForm">
-            <div class="settingsLabel">${nls.password}</div>
+            <div class="settingsLabel jimu-r-row">${nls.password}</div>
             <input class="settingsBox" style="margin-left: 10px;" id="password" type="password" data-dojo-attach-point="uPwdCyclomedia" placeholder=${nls.password}>
         </div>
         <div class="settingsForm">
-            <div class="settingsLabel">${nls.locale}</div>
+            <div class="settingsLabel jimu-r-row">${nls.locale}</div>
             <select class="settingSelect" data-dojo-attach-point="selectCyclomediaLocation" data-dojo-type="dijit/form/Select">
                 <option value="en-US" selected="selected">USA</option>
                 <option value="en-EN">EN</option>
                 <option value="nl">NL</option>
                 <option value="de">DE</option>
-                <option value="de">FR</option>
+                <option value="fr">FR</option>
             </select>
         </div>
         <div class="settingsForm">
-            <div class="settingsLabel">${nls.srs}</div>
+            <div class="settingsLabel jimu-r-row">${nls.srs}</div>
             <input id="srsComboBox" data-dojo-attach-point="srsCyclomedia">
         </div>
-        <div class="settingsForm measurementLabel">
-            <input data-dojo-attach-point="measuementEnable" type="checkbox" id="enableMeasurement">  ${nls.measure}
+        <div class="settingsForm boxCheckStlye">
+            <div class="checkLabel"><input data-dojo-attach-point="measuementEnable" type="checkbox" id="enableMeasurement"></div>
+            <div class=" measurementLabel jimu-r-row">${nls.measure}</div>
         </div>
-        <div class="settingsForm overlayLabel">
-            <input data-dojo-attach-point="overlayEnable" type="checkbox" id="enableOverlay">  ${nls.overlay}
+        <div class="settingsForm boxCheckStlye">
+            <div class="checkLabel"><input data-dojo-attach-point="overlayEnable" type="checkbox" id="enableOverlay"></div>
+            <div class=" overlayLabel jimu-r-row">${nls.overlay}</div>
         </div>
-        <div class="settingsForm navigationLabel">
-            <input data-dojo-attach-point="navigationEnable" type="checkbox" id="enableNavigation">  ${nls.navigation}
+        <div class="settingsForm boxCheckStlye">
+            <div class="checkLabel"><input data-dojo-attach-point="navigationEnable" type="checkbox" id="enableNavigation"></div>
+            <div class=" navigationLabel jimu-r-row">${nls.navigation}</div>
         </div>
-        <div class="settingsForm agreementLabel">
-
-            <input data-dojo-attach-point="agreementCheck" type="checkbox" name="userAgreement" value="accept"> ${nls.agreement1} <a href="#" id="userAgreementLink" > ${nls.agreement2}</a>
+        <div class="settingsForm boxCheckStlye">
+            <div class="checkLabel"><input data-dojo-attach-point="agreementCheck" type="checkbox" name="userAgreement" value="accept"> ${nls.agreement1} <a href="#" id="userAgreementLink" > ${nls.agreement2}</a></div>
+            <div class="agreementLabel jimu-r-row"></div>
         </div>
-        <div id="agreementContainer" style="display:none;">
+        <div id="agreementContainer jimu-r-row" style="display:none;">
             <div class="headAgree">${nls.headAgreement}</div>
             <div id="agreementData"></div>
         </div>
+        <div class="versionLabel">${nls.version}</div>
     </div>
 
 </div>

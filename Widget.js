@@ -42,8 +42,7 @@ require(cmtDojoConfig, [], function () {
         'https://streetsmart.cyclomedia.com/api/v18.4/StreetSmartApi.js',
         './js/utils',
         './js/sldStyling',
-        'https://unpkg.com/shpjs@latest/dist/shp.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/ol3/4.0.1/ol.js'
+        'https://unpkg.com/shpjs@latest/dist/shp.js'
     ], function (declare,
                  dom,
                  lang,
@@ -75,8 +74,7 @@ require(cmtDojoConfig, [], function () {
                  StreetSmartApi,
                  utils,
                  sldStyling,
-                 Shp,
-                 ol) {
+                 Shp) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
             // Custom widget code goes here
@@ -103,7 +101,6 @@ require(cmtDojoConfig, [], function () {
             // Methods to communication with app container:
             postCreate: function () {
                 this.inherited(arguments);
-                console.info('postCreate');
 
                 this.measureChange = true;
                 this.JsonLayerButton = false;
@@ -138,7 +135,7 @@ require(cmtDojoConfig, [], function () {
                 let viewDiv = this.panoramaViewerDiv;
 
                 if (this.config.agreement !== "accept") {
-                    alert("Please accept the CycloMedia terms and agreements in the widget settings");
+                    alert(this.nls.agreementWarning);
                 } else {
 
                     let stsmInit = {
@@ -156,8 +153,6 @@ require(cmtDojoConfig, [], function () {
                     };
 
                     StreetSmartApi.init(stsmInit).then(function () {
-                        console.info('Api init success');
-
                         this.initRecordingClient();
 
                         this.createLayers();
@@ -170,7 +165,6 @@ require(cmtDojoConfig, [], function () {
                         StreetSmartApi.on(msEvents.MEASUREMENT_CHANGED, measurementEvent => this._handleMeasurements(measurementEvent));
                     }.bind(this))
                         .catch(function () {
-                            console.log("API init Failed");
                             alert("Street Smart API initiation Failed");
                         });
                 }
@@ -178,11 +172,9 @@ require(cmtDojoConfig, [], function () {
 
             startup: function () {
                 this.inherited(arguments);
-                console.info('startup');
             },
 
             initRecordingClient: function () {
-                console.info('initRecordingClient');
 
                 let basicToken = btoa(this.config.uName + ":" + this.config.uPwd);
                 let authHeader = {
@@ -207,7 +199,7 @@ require(cmtDojoConfig, [], function () {
                 if (element && type && callback) {
                     return on(element, type, callback);
                 } else {
-                    console.warn('Invalid parameters');
+                    //console.warn('Invalid parameters');
                     return null;
                 }
             },
@@ -232,7 +224,6 @@ require(cmtDojoConfig, [], function () {
             },
 
             createLayers: function () {
-                console.info('createLayers');
                 let rgb = new Color.fromString(this._recordingColor).toRgb();
                 rgb.push(0.5);
                 this._recordingColor = Color.fromArray(rgb);
@@ -441,7 +432,6 @@ require(cmtDojoConfig, [], function () {
                             imageUrl = imageDat;
                             imageUrl = " ' " + imageUrl + " ' ";
                         }
-                        console.log(imgDatValue);
                         imageSize = layerSymbology.size;
                         symbolShape = "image";
                     }
@@ -489,7 +479,6 @@ require(cmtDojoConfig, [], function () {
                     }
 
                     let overlay = StreetSmartApi.addOverlay(overlayOptions);
-                    console.log(overlay);
                     self.arrayOverlayIds[sldName] = overlay.id;
                 }
                 else if (mapLayer.geometryType === esriPolyLineStr) {
@@ -526,8 +515,6 @@ require(cmtDojoConfig, [], function () {
                     if (layerSymbology.type === lineSymbol || esriLineSymbol) {
                         lineWidth = layerSymbology.width;
                         lineStyling = sldStyling.sldStylingPoints(fillColor, strokeColor, strokeWidth, symbolLine, sldName, sldTitle, imageType, imageUrl, imageSize, lineWidth, polygonLength);
-                        console.log(symbolLine);
-                        console.log(lineStyling);
                         overlayOptions = {
                             name: layerName,
                             geojson: featureGeoJSON,
@@ -540,7 +527,6 @@ require(cmtDojoConfig, [], function () {
                     }
 
                     let overlay = StreetSmartApi.addOverlay(overlayOptions);
-                    console.log(overlay);
                     self.lineOverlayIds[sldName] = overlay.id;
                 }
                 else if (mapLayer.geometryType === esriGeometryPolygonStr) {
@@ -586,8 +572,6 @@ require(cmtDojoConfig, [], function () {
                             strokeWidth = layerSymbology.outline.width;
                         }
                         polyStyling = sldStyling.sldStylingPoints(fillColor, strokeColor, strokeWidth, symbolPoly, sldName, sldTitle, imageType, imageUrl, imageSize, lineWidth, polygonLength);
-                        console.log(symbolPoly);
-                        console.log(polyStyling);
                         overlayOptions = {
                             name: layerName,
                             geojson: featureGeoJSON,
@@ -599,7 +583,6 @@ require(cmtDojoConfig, [], function () {
                         StreetSmartApi.removeOverlay(this.polyOverlayIds[sldName]);
                     }
                     let overlay = StreetSmartApi.addOverlay(overlayOptions);
-                    console.log(overlay);
                     self.polyOverlayIds[sldName] = overlay.id;
                 }
 
@@ -674,7 +657,7 @@ require(cmtDojoConfig, [], function () {
                     }).then(
                     function (result) {
                         if (result && result[0]) {
-                            console.log('Opened a panorama viewer through API!', result[0]);
+                            domStyle.set("zoomWarningDiv", "display", "none");
                             if(self.config.navigation !== true){
                                 self._navigationDisabled();
                             }
@@ -692,9 +675,6 @@ require(cmtDojoConfig, [], function () {
             onOpen: function () {
 
                 if (this.streetSmartInitiated === true) {
-                    console.info('onOpen');
-                    let self = this;
-
                     // Add extent change listener
                     if (!this._mapExtentChangeListener) {
                         this._mapExtentChangeListener = this.addEventListener(this.map, 'extent-change', this._onExtentChanged.bind(this));
@@ -716,7 +696,6 @@ require(cmtDojoConfig, [], function () {
                                     srs: mapSRS,
                                 }).then(
                                 function (result) {
-                                    console.log('Created component through API:', result);
                                     if (result) {
                                         for (let i = 0; i < result.length; i++) {
                                             if (result[i].getType() === StreetSmartApi.ViewerType.PANORAMA) window.panoramaViewer = result[i];
@@ -801,7 +780,7 @@ require(cmtDojoConfig, [], function () {
                     nav.appendChild(addDropBtn);
                 }
                 let btnJsonTip = dom.byId('addMapDropBtn');
-                let toolTipMsg = "Drag and Drop on map to Open Panorama";
+                let toolTipMsg = self.nls.tipDragDrop;
                 new Tooltip({
                     connectId: btnJsonTip,
                     label: toolTipMsg,
@@ -821,7 +800,6 @@ require(cmtDojoConfig, [], function () {
             },
             _allowDrop: function(event){
                 event.preventDefault();
-                console.log(event);
             },
 
             _dropped: function(event){
@@ -839,7 +817,6 @@ require(cmtDojoConfig, [], function () {
                     }).then(
                     function (result) {
                         if (result && result[0]) {
-                            console.log('Opened a panorama viewer through API!', result[0]);
                             if(self.config.navigation !== true){
                                 self._navigationDisabled();
                             }
@@ -855,8 +832,6 @@ require(cmtDojoConfig, [], function () {
 
 
             onClose: function () {
-                console.info('onClose');
-
                 let divView = this.panoramaViewerDiv;
 
                 // Remove extent change listener.
@@ -895,13 +870,10 @@ require(cmtDojoConfig, [], function () {
                     btnUpload.click();
                     dojo.connect(btnUpload, "change", function () {
                         let fileData = btnUpload.files[0];
-                        console.log(fileData);
                         if (fileData.type === "application/zip") {
                             let reader = new FileReader();
                             reader.onload = function (e) {
-                                console.log(reader.result);
                                 Shp(reader.result).then(function (geoJson) {
-                                    console.log(geoJson);
                                     let overlayPoints = [];
                                     let overlayGraphics = [];
                                     let responsePoints;
@@ -1017,7 +989,6 @@ require(cmtDojoConfig, [], function () {
 
             _handleMeasurements: function (measurementEvent) {
                 let self = this;
-                console.log(this);
                 if (measurementEvent && measurementEvent.detail) {
                     const {activeMeasurement, panoramaViewer} = measurementEvent.detail;
                     if (activeMeasurement) {
@@ -1065,7 +1036,6 @@ require(cmtDojoConfig, [], function () {
                                 }
                             });
                             if (coordinatesLength > 1) {
-                                console.log("measurepoints" + measureLinePoints);
                                 let polyJson = {
                                     "paths": [measureLinePoints],
                                     "spatialReference": {wkid: 102100},
@@ -1084,7 +1054,6 @@ require(cmtDojoConfig, [], function () {
                             }
                         }
                         if (activeMeasurement.features[0].geometry.type === "Polygon") {
-                            //console.log(activeMeasurement.features[0].geometry.coordinates);
                             let surfacePoints = [];
                             let surfaceMeasurePoints = activeMeasurement.features[0].geometry.coordinates[0];
                             let surfaceMeasureLength = surfaceMeasurePoints.length;
@@ -1111,7 +1080,6 @@ require(cmtDojoConfig, [], function () {
                                     }
                                 }
                                 if (surfaceMeasureLength > 2) {
-                                    console.log("measurepoints" + surfacePoints);
                                     let polyJson = {
                                         "rings": [surfacePoints],
                                         "spatialReference": {wkid: 102100}
@@ -1126,7 +1094,7 @@ require(cmtDojoConfig, [], function () {
                                     let measureValue = new TextSymbol(value);
                                     measureValue.setVerticalAlignment("middle");
                                     measureValue.setHorizontalAlignment("right");
-                                    self.map.graphics.add(new Graphic(lineLabelPoint, measureValue));
+                                    self.chandU66map.graphics.add(new Graphic(lineLabelPoint, measureValue));
                                 }
                             }
                         }
@@ -1282,7 +1250,6 @@ require(cmtDojoConfig, [], function () {
             },
 
             onMinimize: function () {
-                console.log('onMinimize');
             },
 
             // onMaximize: function(){
@@ -1311,7 +1278,6 @@ require(cmtDojoConfig, [], function () {
 
             //communication method between widgets
             onReceiveData: function(name, widgetId, data, historyData){
-                console.log(name, widgetId, data, historyData);
                 if(name !== 'Search'){
                     return;
                 }

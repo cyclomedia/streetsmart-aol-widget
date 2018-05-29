@@ -4,7 +4,7 @@
 	border-color: #98C23C;
 	border-top-style: solid;
 	border-top-width: 30px;
-	overflow-y: hidden;
+	overflow-y: auto;
 }
 
 .settingsForm{
@@ -50,16 +50,19 @@
 .measurementLabel{
 	width: 25%;
 	text-align: right;
+	display: inline;
 }
 
 .overlayLabel{
 	width: 20.3%;
 	text-align: right;
+	display: inline;
 }
 
 .navigationLabel{
 	width: 22%;
 	text-align: right;
+	display: inline;
 }
 .settings-container {
 	height: 30%
@@ -80,3 +83,16 @@
 	vertical-align:middle;
 }
 
+.versionLabel{
+	text-align: -webkit-right;
+	margin: 6%;
+	color:lightgray;
+}
+
+.checkLabel{
+	display: inline;
+}
+
+.boxCheckStlye{
+	margin-left: 12%;
+}

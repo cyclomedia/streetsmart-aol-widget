@@ -1,141 +1,96 @@
-/**
- * @date: 2017-8-1 11:53:30
- * @author: laihuanmin
- * @desc This xml2json can be used in es6 module.I wrote this plugin because there's only CMD module version can
- * be use,and I do not like write React with JQuery.
- *       It's not just parse XML string to json object, but also can parse XML to JSON.
- *       Hope you can enjoy! :P
- * @dependent: xml2json plugin had finished in es2015 environment,and without any JavaScript kit or frame
- *
- */
 
-/**
- * @private
- */
-function _getAllAttr(node) {
-    var attributes = node.attributes;
-    if (node.hasAttributes() === false) {
-        return {};
-    }
-    var result = {};
-    for (let attr of attributes) {
-        result[attr.name] = attr.value;
-    }
-    return result;
-}
+(function () {
 
-/**
- * @private
- */
-function _getContent(node) {
-    return node.innerHTML;
-}
-
-/**
- * @private
- */
-function _getTagName(node) {
-    return node.tagName;
-}
-
-/**
- * @private
- */
-function _getChildren(parent) {
-    var childNodes = parent.childNodes;
-    var children = [];
-    for (let child of childNodes) {
-        if (child.nodeType !== 1) {
-            continue;
-        } else {
-            children.push(child);
+    function _getAllAttr(node) {
+        const result = {};
+        if(node && node.attributes) {
+            if (node.hasAttributes() === true) {
+                const attributes = node.attributes;
+                const attribKeys = Object.keys(attributes);
+                for (let index = 0; index < attribKeys.length; index += 1) {
+                    const attr = attributes[attribKeys[index]];
+                    if(attr && attr.name && attr.value) {
+                        result[attr.name] = attr.value;
+                    }
+                }
+            }
         }
+        return result;
     }
-    return children;
-}
 
-/**
- * @private
- */
-function _getChildInfo(children) {
-    var resultArr = [];
-    for (var child of children) {
-        var eachChildInfo = {
-            tagName: _getTagName(child),
-            content: _getContent(child),
-            attr: _getAllAttr(child),
-            isParent: false,
-            hasAttr: child.hasAttributes()
-        };
-        var subChildren = _getChildren(child);
-        if (subChildren.length !== 0) {
-            eachChildInfo.isParent = true;
-            eachChildInfo.children = _getChildInfo(subChildren);
+    /**
+     * @private
+     */
+    function _getContent(node) {
+        return node.innerHTML || node.textContent;
+    }
+
+    /**
+     * @private
+     */
+    function _getTagName(node) {
+        return node.tagName;
+    }
+
+    /**
+     * @private
+     */
+    function _getChildren(parent) {
+        const children = [];
+        if(parent && parent.childNodes) {
+            const childNodes = parent.childNodes;
+            let childNodeKeys = Object.keys(childNodes);
+            for (let childIndex = 0; childIndex < childNodeKeys.length; childIndex += 1) {
+                const child = childNodes[childNodeKeys[childIndex]];
+                if(child && child.nodeType === 1) {
+                    children.push(child);
+                }
+            }
         }
-        resultArr.push(eachChildInfo);
+        return children;
     }
-    return resultArr;
-}
 
-/**
- * @private
- */
-function _renderXMLTree(parent) {
-    var parentEle = document.createElement(parent.tagName);
-    //append attributes
-    if (parent.hasAttr === true) {
-        var attributes = parent.attr;
-        for (var attrName in attributes) {
-            var attrVal = attributes[attrName];
-            parentEle.setAttribute(attrName, attrVal);
+    /**
+     * @private
+     */
+    function _getChildInfo(children) {
+        const resultArr = [];
+        if(children) {
+            const childKeys = Object.keys(children);
+            for(let childKeyIndex = 0; childKeyIndex < childKeys.length; childKeyIndex += 1) {
+                const child = children[childKeys[childKeyIndex]];
+                if(child) {
+                    const eachChildInfo = {
+                        tagName: _getTagName(child),
+                        content: _getContent(child),
+                        attr: _getAllAttr(child),
+                        isParent: false,
+                        hasAttr: child.hasAttributes()
+                    };
+                    const subChildren = _getChildren(child);
+                    if (subChildren && subChildren.length !== 0) {
+                        eachChildInfo.isParent = true;
+                        eachChildInfo.children = _getChildInfo(subChildren);
+                    }
+                    resultArr.push(eachChildInfo);
+                }
+            }
         }
+        return resultArr;
     }
-    //append children
-    if (parent.isParent === true) {
-        var children = parent.children;
-        for (var child of children) {
-            parentEle.appendChild(_renderXMLTree(child));
-        }
-    } else {
-        parentEle.appendChild(document.createTextNode(parent.content));
+
+
+    function toJSON(xmlString) {
+        const doc = getXmlObject(xmlString);
+        return _getChildInfo(doc.childNodes)[0];
     }
-    return parentEle;
-}
 
-/**
- * 传入XML字符串转为JSON
- * pass xml string and will return a JSON object
- *
- * @param {string} xmlString
- * @return {object} json
- */
-function toJSON(xmlString) {
-    var doc = getXmlObject(xmlString);
-    return _getChildInfo(doc.childNodes)[0];
-}
-
-/**
- * 传入JSON转为XML对象
- * pass JSON object and will return XML Object
- * @param {object} json
- * @return {object} xmlObject
- */
-function toXML(json) {
-    return _renderXMLTree(json);
-}
-
-/**
- * 你需要传递一个XML字符串到形参上,然后会获取到原生操作XML的对象
- * you should pass a XML string content to the first parameter,and it's will return a Object which can maintain XML info
- *
- * @param {string} xmlString
- * @return {object} xmlObject
- */
-function getXmlObject(xmlString) {
-    var parser = new DOMParser();
-    var xmlDoc = parser.parseFromString(xmlString, "text/xml");
-    return xmlDoc;
-}
-
-
-console.log(toJSON("<root><alpha>a</alpha></root>"))
+    function getXmlObject(xmlString) {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+        return xmlDoc;
+    }
+        define({
+            toJSON
+        });
+})();
