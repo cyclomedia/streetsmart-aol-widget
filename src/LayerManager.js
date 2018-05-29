@@ -96,53 +96,45 @@ define([
             }
 
             this.viewingConeLayer.clear();
+            const viewerColor = new Color.fromArray(panoramaViewer.getViewerColor());
             const coord = new Point(x, y, this.srs);
             // Transform local SRS to Web Mercator:
             const coordLocal = utils.transformProj4js(coord, this.map.spatialReference.wkid);
 
             const yaw = viewer.getYaw();
-            const pitch = viewer.getPitch();
             const hFov = viewer.getHFov();
 
-            let factor = 50;
-            let hhFov = hFov * 0.5;
-            let leftfovx = Math.sin(yaw - hhFov) * factor;
-            let leftfovy = -Math.cos(yaw - hhFov) * factor;
-            let rightfovx = Math.sin(yaw + hhFov) * factor;
-            let rightfovy = -Math.cos(yaw + hhFov) * factor;
+            const factor = 70;
+            const hhFov = hFov * 0.5;
+            const leftFovX = Math.sin(yaw - hhFov) * factor;
+            const leftFovY = -Math.cos(yaw - hhFov) * factor;
+            const rightFovX = Math.sin(yaw + hhFov) * factor;
+            const rightFovY = -Math.cos(yaw + hhFov) * factor;
 
-            let mapPt = new Point(coordLocal.x, coordLocal.y, this.map.spatialReference);
-            let cPt = this.map.toScreen(mapPt);
-            // this._prePoint = mapPt;
+            const mapPt = new Point(coordLocal.x, coordLocal.y, this.map.spatialReference);
+            const cPt = this.map.toScreen(mapPt);
 
-            let a = this.map.toMap(new ScreenPoint(cPt.x, cPt.y));
-            let b = this.map.toMap(new ScreenPoint(cPt.x + leftfovx, cPt.y + leftfovy));
-            let c = this.map.toMap(new ScreenPoint(cPt.x + rightfovx, cPt.y + rightfovy));
-            let d = this.map.toMap(new ScreenPoint(cPt.x, cPt.y));
+            const a = this.map.toMap(new ScreenPoint(cPt.x, cPt.y));
+            const b = this.map.toMap(new ScreenPoint(cPt.x + leftFovX, cPt.y + leftFovY));
+            const c = this.map.toMap(new ScreenPoint(cPt.x + rightFovX, cPt.y + rightFovY));
+            const d = this.map.toMap(new ScreenPoint(cPt.x, cPt.y));
 
-            // if (!curViewer.graLoc) {
-            //     let folderPath = this.folderUrl + "images/cam1.png";
-            //     let ms = new PictureMarkerSymbol(folderPath, 28, 28);
-            //     let marker = new Graphic(mapPt, ms);
-            //     curViewer.graLoc = marker;
-            //     this._lyrCameraIcon.add(marker);
-            // } else {
-            //     curViewer.graLoc.setGeometry(mapPt);
-            // }
-            // let rot = yaw * 180 / Math.PI;
-            // curViewer.graLoc.symbol.setAngle(rot);
+            const activeRecordingSymbol = new SimpleMarkerSymbol({
+                style: 'circle',
+                color: viewerColor,
+                size: 11,
+            });
 
-            // if (curViewer.graFOV) {
-            //     this._lyrCameraIcon.remove(curViewer.graFOV);
-            // }
-            let ls = new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color(0, 0, 0, 1), 2);
-            let rgba = panoramaViewer.getViewerColor();
-            rgba[3] = 0.5; // set alpha
-            let fs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, ls, new Color.fromArray(rgba));
-            let polygon = new Polygon(this.map.spatialReference);
+            const centerDot = new Graphic(mapPt, activeRecordingSymbol);
+            this.viewingConeLayer.add(centerDot);
+
+            const outline = new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL, new Color(0, 0, 0, 1), 2);
+
+            const symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, outline, viewerColor);
+            const polygon = new Polygon(this.map.spatialReference);
             polygon.addRing([[a.x, a.y], [b.x, b.y], [c.x, c.y], [d.x, d.y], [a.x, a.y]]);
-            let graphic = new Graphic(polygon, fs);
-            // curViewer.graFOV = graphic; // asfdasdfasfhsfjh
+            const graphic = new Graphic(polygon, symbol);
+
             this.viewingConeLayer.add(graphic);
             this.viewingConeLayer.setVisibility(true);
         }

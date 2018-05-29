@@ -99,6 +99,7 @@ require(REQUIRE_CONFIG, [], function () {
 
             _bindEventHandlers() {
                 this._extentChangeListener = on(this.map, 'extent-change', this._handleExtentChange.bind(this));
+                this._extentChangeListener = on(this.map, 'zoom-end', this._handleConeChange.bind(this));
                 this._viewChangeListener = on(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.VIEW_CHANGE,
                     this._handleConeChange.bind(this)
                 );
