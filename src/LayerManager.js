@@ -37,8 +37,18 @@ define([
             this.viewingConeLayer = this._createViewingConeLayer();
             this.srs = new SpatialReference({ wkid });
 
-            map.addLayer(this.recordingLayer);
-            map.addLayer(this.viewingConeLayer);
+        }
+
+        addLayers() {
+            this.map.addLayer(this.recordingLayer);
+            this.map.addLayer(this.viewingConeLayer);
+        }
+
+        removeLayers() {
+            this.recordingLayer.clear();
+            this.viewingConeLayer.clear();
+            this.map.removeLayer(this.recordingLayer);
+            this.map.removeLayer(this.viewingConeLayer);
         }
 
         updateRecordings(recordingData) {
