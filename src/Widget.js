@@ -37,7 +37,7 @@ require(REQUIRE_CONFIG, [], function () {
 
             _zoomThreshold: null,
             _viewerType: StreetSmartApi.ViewerType.PANORAMA,
-            _listeners: {},
+            _listeners: [],
 
             // CM properties
             _cmtTitleColor: '#98C23C',
@@ -104,15 +104,27 @@ require(REQUIRE_CONFIG, [], function () {
             // Adds event listeners which are automatically
             // cleared onClose
             addEventListener(target, eventName, callback) {
-                const listener = on(target, eventName, callback);
-                this._listeners[listener.id] = listener;
+                let listener = on(target, eventName, callback);
+
+                // Using dojo on doesn't always return a listener.
+                // For the panoramaViewer events it returns the panoramaViewer itself.
+                if (!listener.remove) {
+                    listener = {
+                        remove: () => {
+                            target.off(eventName, callback);
+                        }
+                    }
+                }
+
+                this._listeners.push(listener);
                 return listener;
             },
 
             removeEventListener(listener) {
                 listener.remove();
 
-                delete this._listeners[listener.id];
+                const index = this._listeners.indexOf(listener);
+                this._listeners.splice(index, 1);
             },
 
             _openApiWhenZoomedIn() {
@@ -129,11 +141,13 @@ require(REQUIRE_CONFIG, [], function () {
                 this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this._handleConeChange.bind(this));
             },
 
-            _removeEventHandlers() {
-                Object.values(this._listeners, (listener) => {
+            // We do not use removeEventListener for this,
+            // as removing stuff in an array is a bad idea.
+            _removeEventListeners() {
+                this._listeners.forEach((listener) => {
                     listener.remove();
                 });
-                this._listeners = {};
+                this._listeners = [];
             },
 
             _handleConeChange() {
@@ -175,7 +189,6 @@ require(REQUIRE_CONFIG, [], function () {
                 // Manually fire these events as they are fired too early by the API,
                 // we can't listen to them yet.
                 this.query(`${localCenter.x},${localCenter.y}`);
-                this._handleConeChange();
             },
 
             query(query) {
@@ -190,6 +203,7 @@ require(REQUIRE_CONFIG, [], function () {
                         this._panoramaViewer = res[0];
                         this._layerManager.addLayers();
                         this._bindViewerEventHandlers();
+                        this._handleConeChange();
                     }
                 });
             },
@@ -218,7 +232,7 @@ require(REQUIRE_CONFIG, [], function () {
 
             onClose() {
                 StreetSmartApi.destroy({ targetElement: this.panoramaViewerDiv });
-                this._removeEventHandlers();
+                this._removeEventListeners();
                 this._layerManager.removeLayers();
                 this._panoramaViewer = null;
             },
