@@ -7,7 +7,7 @@ console.log('WIDGET DIRECTORY: ', process.env.WIDGET_DIR);
 
 gulp.task('babel', function() {
     return gulp.src([
-        'src/**/*.js',
+        'src/**/*.js', '!**/*___jb_old___'
     ])
         .pipe(babel())
         .pipe(gulp.dest('dist'))
@@ -17,11 +17,11 @@ gulp.task('babel', function() {
 
 gulp.task('copy', function() {
     // Also copy all non javascript files to the dist folder
-    gulp.src(['src/**/*.*', '!src/**/*.js'], { base: 'src' })
+    gulp.src(['src/**/*.*', '!src/**/*.js', '!**/*___jb_old___'], { base: 'src' })
         .pipe(gulp.dest('dist'))
         .pipe(gulp.dest(process.env.WIDGET_DIR));
 
-    gulp.src('assets/**/*.*', { base: 'assets' })
+    gulp.src(['assets/**/*.*', '!**/*___jb_old___'], { base: 'assets' })
         .pipe(gulp.dest('dist'))
         .pipe(gulp.dest(process.env.WIDGET_DIR))
         .pipe(livereload());
