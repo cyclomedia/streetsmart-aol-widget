@@ -1,5 +1,6 @@
 var gulp = require('gulp');
 var babel = require('gulp-babel');
+var livereload = require('gulp-livereload');
 require('dotenv').config();
 
 console.log('WIDGET DIRECTORY: ', process.env.WIDGET_DIR);
@@ -10,7 +11,8 @@ gulp.task('babel', function() {
     ])
         .pipe(babel())
         .pipe(gulp.dest('dist'))
-        .pipe(gulp.dest(process.env.WIDGET_DIR));
+        .pipe(gulp.dest(process.env.WIDGET_DIR))
+        .pipe(livereload());
 });
 
 gulp.task('copy', function() {
@@ -21,11 +23,13 @@ gulp.task('copy', function() {
 
     gulp.src('assets/**/*.*', { base: 'assets' })
         .pipe(gulp.dest('dist'))
-        .pipe(gulp.dest(process.env.WIDGET_DIR));
+        .pipe(gulp.dest(process.env.WIDGET_DIR))
+        .pipe(livereload());
 });
 
 gulp.task('default', ['babel', 'copy']);
 
 gulp.task('watch', function() {
+    livereload.listen();
     gulp.watch(['src/**/*.*', 'assets/**/*.*'], ['default']);
 });
