@@ -28,11 +28,14 @@ define([
     utils,
 ) {
     return class LayerManager {
-        constructor({ map, wkid, onRecordingLayerClick }) {
+        constructor({ map, wkid, onRecordingLayerClick, addEventListener, removeEventListener, setPanoramaViewerOrientation }) {
             this._recordingColor = new Color.fromString('#80B0FF');
 
             this.map = map;
             this.wkid = wkid;
+            this.addEventListener = addEventListener;
+            this.removeEventListener = removeEventListener;
+            this.setPanoramaViewerOrientation = setPanoramaViewerOrientation;
             this.recordingLayer = this._createRecordingLayer({ onClick: onRecordingLayerClick });
             this.viewingConeLayer = this._createViewingConeLayer();
             this.srs = new SpatialReference({ wkid });
@@ -42,6 +45,8 @@ define([
         addLayers() {
             this.map.addLayer(this.recordingLayer);
             this.map.addLayer(this.viewingConeLayer);
+
+            this.addEventListener(this.viewingConeLayer, 'mouse-down', this.startConeInteraction.bind(this));
         }
 
         removeLayers() {
@@ -62,7 +67,42 @@ define([
                 });
                 this.recordingLayer.add(graphic);
             });
-        }
+        };
+
+        startConeInteraction(e) {
+            this.map.disablePan();
+
+            this._coneDragListener = this.addEventListener(this.map, 'mouse-drag', this._handleConeMoved.bind(this));
+            this._coneDragEndListener = this.addEventListener(this.map, 'mouse-drag-end', this.stopConeInteraction.bind(this));
+        };
+
+        stopConeInteraction() {
+            this.map.enablePan();
+            this.removeEventListener(this._coneDragListener);
+            this.removeEventListener(this._coneDragEndListener);
+        };
+
+        _handleConeMoved(e) {
+            const yaw = this._calcYaw(this._currentPanoramaViewerPosition, e.mapPoint);
+            const orientation = {
+                yaw,
+            };
+            this.setPanoramaViewerOrientation(orientation);
+        };
+
+        _calcYaw(pt1, pt2) {
+            let yDiff = pt2.y - pt1.y;
+            let xDiff = pt2.x - pt1.x;
+            let angle = Math.atan2(yDiff, xDiff) * 180 / Math.PI;
+            let a = angle;
+            if (angle > 0 && angle <= 90)
+                a = 90 - angle;
+            if (angle > 90 && angle <= 180)
+                a = 360 - angle + 90;
+            if (angle < 0)
+                a = 90 - angle;
+            return a;
+        };
 
         _createRecordingLayer({ onClick }) {
             const outline = new SimpleLineSymbol(
@@ -123,6 +163,7 @@ define([
 
             const mapPt = new Point(coordLocal.x, coordLocal.y, this.map.spatialReference);
             const cPt = this.map.toScreen(mapPt);
+            this._currentPanoramaViewerPosition = mapPt;
 
             const a = this.map.toMap(new ScreenPoint(cPt.x, cPt.y));
             const b = this.map.toMap(new ScreenPoint(cPt.x + leftFovX, cPt.y + leftFovY));

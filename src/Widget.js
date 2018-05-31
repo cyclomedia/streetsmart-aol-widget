@@ -60,6 +60,9 @@ require(REQUIRE_CONFIG, [], function () {
                     wkid: this.wkid,
                     map: this.map,
                     onRecordingLayerClick: this._handleRecordingClick.bind(this),
+                    setPanoramaViewerOrientation: this.setPanoramaViewerOrientation.bind(this),
+                    addEventListener: this.addEventListener.bind(this),
+                    removeEventListener: this.removeEventListener.bind(this),
                 });
                 this._applyWidgetStyle();
                 this._determineZoomThreshold();
@@ -99,7 +102,6 @@ require(REQUIRE_CONFIG, [], function () {
 
             _bindMapEventHandlers() {
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
-                this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
             },
 
             // Adds event listeners which are automatically
@@ -142,6 +144,7 @@ require(REQUIRE_CONFIG, [], function () {
             _bindViewerEventHandlers() {
                 this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.VIEW_CHANGE, this._handleConeChange.bind(this));
                 this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this._handleConeChange.bind(this));
+                this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
             },
 
             // We do not use removeEventListener for this,
@@ -209,6 +212,11 @@ require(REQUIRE_CONFIG, [], function () {
                         this._handleConeChange();
                     }
                 });
+            },
+
+            setPanoramaViewerOrientation(orientation) {
+                const currentOrientation = this._panoramaViewer.getOrientation();
+                this._panoramaViewer.setOrientation(Object.assign({}, currentOrientation, orientation));
             },
 
             _determineZoomThreshold: function () {
