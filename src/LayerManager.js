@@ -91,17 +91,11 @@ define([
         };
 
         _calcYaw(pt1, pt2) {
-            let yDiff = pt2.y - pt1.y;
-            let xDiff = pt2.x - pt1.x;
-            let angle = Math.atan2(yDiff, xDiff) * 180 / Math.PI;
-            let a = angle;
-            if (angle > 0 && angle <= 90)
-                a = 90 - angle;
-            if (angle > 90 && angle <= 180)
-                a = 360 - angle + 90;
-            if (angle < 0)
-                a = 90 - angle;
-            return a;
+            const yDiff = pt2.y - pt1.y;
+            const xDiff = pt2.x - pt1.x;
+            const radians = Math.atan2(yDiff, xDiff);
+            const angle = radians * 180 / Math.PI;
+            return 90 - angle;
         };
 
         _createRecordingLayer({ onClick }) {
