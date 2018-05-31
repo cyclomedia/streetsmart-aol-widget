@@ -90,6 +90,7 @@ require(REQUIRE_CONFIG, [], function () {
                 };
 
                 return StreetSmartApi.init(CONFIG).then(() => {
+                    this.loadingIndicator.classList.add('hidden');
                     this._bindMapEventHandlers();
                     this._loadRecordings();
                     this._centerViewerToMap();
@@ -128,8 +129,10 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _openApiWhenZoomedIn() {
+                this.zoomWarning.classList.remove('hidden');
                 const listener = this.addEventListener(this.map, 'zoom-end', (zoomEvent) => {
                     if (zoomEvent.level > this._zoomThreshold) {
+                        this.zoomWarning.classList.add('hidden');
                         this._initApi();
                         this.removeEventListener(listener);
                     }
@@ -232,6 +235,7 @@ require(REQUIRE_CONFIG, [], function () {
 
             onClose() {
                 StreetSmartApi.destroy({ targetElement: this.panoramaViewerDiv });
+                this.loadingIndicator.classList.remove('hidden');
                 this._removeEventListeners();
                 this._layerManager.removeLayers();
                 this._panoramaViewer = null;

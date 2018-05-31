@@ -12,13 +12,18 @@
     width: 100%;
 }
 
-#_zoom-warning {
+#zoom-warning {
+    background: white;
     position: absolute;
     top: 50%;
     width: 100%;
     text-align: center;
     height: 50px;
     margin-top: -25px;
+}
+
+.hidden {
+    display: none;
 }
 
 .jimu-widget-streetsmartview {

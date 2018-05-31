@@ -1,4 +1,7 @@
 <div style="width: 100%; height:100%">
-    <span id="_zoom-warning">${nls.zoomWarning}</span>
+    <div data-dojo-attach-point="loadingIndicator" class="jimu-loading-indicator">
+        <div class="jimu-loading"></div>
+    </div>
+    <span id="zoom-warning" data-dojo-attach-point="zoomWarning" class="hidden">${nls.zoomWarning}</span>
     <div id='panoramaViewerDiv' data-dojo-attach-point="panoramaViewerDiv"></div>
 </div>
