@@ -12,22 +12,30 @@
     width: 100%;
 }
 
-#zoomWarningDiv {
-    z-index: 100;
-    top: 50%;
+#zoom-warning {
+    background: white;
     position: absolute;
-    width: 50%;
+    top: 50%;
+    width: 100%;
+    text-align: center;
     height: 50px;
-    left: 50%;
-    margin-left: -100px;
     margin-top: -25px;
 }
+
+.hidden {
+    display: none;
+}
+
 .jimu-widget-streetsmartview {
   position: absolute;
   top: 0px;
   bottom: 0px;
   left: 0px;
   right: 0px;
+}
+
+.cmt {
+    background: none !important;
 }
 
 .cmt .window-manager-container .window{
