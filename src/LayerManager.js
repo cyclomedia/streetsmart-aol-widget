@@ -9,7 +9,6 @@ define([
     'esri/symbols/SimpleLineSymbol',
     'esri/symbols/SimpleFillSymbol',
     'esri/renderers/SimpleRenderer',
-    'esri/layers/FeatureLayer',
     'esri/layers/GraphicsLayer',
     'esri/SpatialReference',
     './utils',
@@ -24,7 +23,6 @@ define([
     SimpleLineSymbol,
     SimpleFillSymbol,
     SimpleRenderer,
-    FeatureLayer,
     GraphicsLayer,
     SpatialReference,
     utils,
@@ -40,7 +38,6 @@ define([
             this.setPanoramaViewerOrientation = setPanoramaViewerOrientation;
             this.recordingLayer = this._createRecordingLayer({ onClick: onRecordingLayerClick });
             this.viewingConeLayer = this._createViewingConeLayer();
-            this.measureLayer = this._measureLayer();
             this.srs = new SpatialReference({ wkid });
 
         }
@@ -48,17 +45,15 @@ define([
         addLayers() {
             this.map.addLayer(this.recordingLayer);
             this.map.addLayer(this.viewingConeLayer);
+
             this.addEventListener(this.viewingConeLayer, 'mouse-down', this.startConeInteraction.bind(this));
-            this.map.addLayer(this.measureLayer);
         }
 
         removeLayers() {
             this.recordingLayer.clear();
             this.viewingConeLayer.clear();
-            this.measureLayer.clear();
             this.map.removeLayer(this.recordingLayer);
             this.map.removeLayer(this.viewingConeLayer);
-            this.map.removeLayer(this.measureLayer);
         }
 
         updateRecordings(recordingData) {
@@ -127,28 +122,6 @@ define([
 
         _createViewingConeLayer() {
             const layer = new GraphicsLayer({ id: 'cmd_viewingConeLayer' });
-            return layer;
-        }
-
-        _measureLayer(){
-            const measureCollection = {
-                "layerDefinition": {
-                    "geometryType": "esriGeometryPoint",
-                    "fields": [{
-                        "name": "id",
-                        "alias": "ID",
-                        "type": "esriFieldTypeOID"
-                    }]
-                },
-                "featureSet": null
-            };
-
-            const measureSymbol = new SimpleMarkerSymbol();
-            measureSymbol.setStyle(SimpleMarkerSymbol.STYLE_CROSS);
-            measureSymbol.setAngle(47);
-            let measureRen = new SimpleRenderer(measureSymbol);
-            const layer = new FeatureLayer(measureCollection, {id: "cmt_measure"});
-            layer.setRenderer(measureRen);
             return layer;
         }
 
