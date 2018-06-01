@@ -2,8 +2,8 @@ const REQUIRE_CONFIG = {
     async: true,
     locale: 'en',
     paths: {
-        'react': 'https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react.min',
-        'react-dom': 'https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react-dom.min',
+        'react': 'https://unpkg.com/react@16.2.0/umd/react.production.min',
+        'react-dom': 'https://unpkg.com/react-dom@16.2.0/umd/react-dom.production.min',
         'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/ol3/4.0.1/ol',
         'lodash': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min'
     }
@@ -14,7 +14,7 @@ require(REQUIRE_CONFIG, [], function () {
         'dojo/_base/declare',
         'dojo/on',
         'jimu/BaseWidget',
-        'https://streetsmart.cyclomedia.com/api/v18.4/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v18.6/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -94,14 +94,36 @@ require(REQUIRE_CONFIG, [], function () {
 
                 return StreetSmartApi.init(CONFIG).then(() => {
                     this.loadingIndicator.classList.add('hidden');
-                    this._bindMapEventHandlers();
+                    this._bindInitialMapHandlers();
                     this._loadRecordings();
                     this._centerViewerToMap();
                 });
             },
 
-            _bindMapEventHandlers() {
+            _bindInitialMapHandlers() {
+                const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED
+                this.addEventListener(StreetSmartApi, measurementChanged, this._handleMeasurementChanged.bind(this));
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
+            },
+
+            _handleMeasurementChanged(e) {
+                const newViewer = e.detail.panoramaViewer;
+
+                // Handle initial viewer creation
+                if (!this._panoramaViewer && newViewer) {
+                    this._panoramaViewer = newViewer;
+                    this._layerManager.addLayers();
+                    this._bindViewerDependantEventHandlers();
+                    this._handleConeChange();
+                    return;
+                }
+
+                if (newViewer !== this._panoramaViewer) {
+                    this.removeEventListener(this._viewChangeListener);
+                    this.removeEventListener(this._imageChangeListener);
+                    this._panoramaViewer = newViewer;
+                    this._bindViewerDependantEventHandlers({ viewerOnly: true});
+                }
             },
 
             // Adds event listeners which are automatically
@@ -141,10 +163,13 @@ require(REQUIRE_CONFIG, [], function () {
                 });
             },
 
-            _bindViewerEventHandlers() {
-                this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.VIEW_CHANGE, this._handleConeChange.bind(this));
-                this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this._handleConeChange.bind(this));
-                this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
+            _bindViewerDependantEventHandlers(options) {
+                const opts = Object.assign({}, options, { viewerOnly: false });
+                this._viewChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.VIEW_CHANGE, this._handleConeChange.bind(this));
+                this._imageChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this._handleConeChange.bind(this));
+                if (!opts.viewerOnly) {
+                    this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
+                }
             },
 
             // We do not use removeEventListener for this,
@@ -198,20 +223,11 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             query(query) {
-                const mapSRS = this.config.srs.split(':')[1];
                 return StreetSmartApi.open(query, {
                         viewerType: [this.viewerType],
-                        srs: mapSRS
+                        srs: this.config.srs,
                     }
-                ).then((res) => {
-                    if (!this._panoramaViewer) {
-                        // Handle initial open
-                        this._panoramaViewer = res[0];
-                        this._layerManager.addLayers();
-                        this._bindViewerEventHandlers();
-                        this._handleConeChange();
-                    }
-                });
+                );
             },
 
             setPanoramaViewerOrientation(orientation) {
