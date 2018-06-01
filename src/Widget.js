@@ -18,6 +18,7 @@ require(REQUIRE_CONFIG, [], function () {
         './utils',
         './RecordingClient',
         './LayerManager',
+        './MeasurementsHandler'
     ], function (
          declare,
          on,
@@ -25,7 +26,8 @@ require(REQUIRE_CONFIG, [], function () {
          StreetSmartApi,
          utils,
          RecordingClient,
-         LayerManager
+         LayerManager,
+         MeasurementsHandler
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
@@ -38,6 +40,7 @@ require(REQUIRE_CONFIG, [], function () {
             _zoomThreshold: null,
             _viewerType: StreetSmartApi.ViewerType.PANORAMA,
             _listeners: [],
+            _measureChange: true,
 
             // CM properties
             _cmtTitleColor: '#98C23C',
@@ -63,6 +66,15 @@ require(REQUIRE_CONFIG, [], function () {
                     setPanoramaViewerOrientation: this.setPanoramaViewerOrientation.bind(this),
                     addEventListener: this.addEventListener.bind(this),
                     removeEventListener: this.removeEventListener.bind(this),
+                });
+                this._measurementhandler = new MeasurementsHandler({
+                    wkid: this.wkid,
+                    map: this.map,
+                    measureChange : this._measureChange,
+                    addEventListener: this.addEventListener.bind(this),
+                    layerManager: this._layerManager,
+                    StreetSmartApi: StreetSmartApi
+
                 });
                 this._applyWidgetStyle();
                 this._determineZoomThreshold();
@@ -97,6 +109,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this._bindInitialMapHandlers();
                     this._loadRecordings();
                     this._centerViewerToMap();
+                    this._measurementsChanges();
                 });
             },
 
@@ -197,6 +210,12 @@ require(REQUIRE_CONFIG, [], function () {
                 } else {
                     this._layerManager.updateRecordings([]);
                 }
+            },
+
+            _measurementsChanges(){
+                //adding measurement events to the viewer
+                const measurementEvents = StreetSmartApi.Events.measurement;
+                StreetSmartApi.on(measurementEvents.MEASUREMENT_CHANGED, measurementEvent => this._measurementhandler.viewerMeasurements(measurementEvent));
             },
 
             _applyWidgetStyle() {
