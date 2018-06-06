@@ -13,19 +13,25 @@ require(REQUIRE_CONFIG, [], function () {
     return define([
         'dojo/_base/declare',
         'dojo/on',
+        'dojo/dom',
+        'dijit/Tooltip',
         'jimu/BaseWidget',
+        'esri/geometry/ScreenPoint',
         'https://streetsmart.cyclomedia.com/api/v18.6/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
     ], function (
-         declare,
-         on,
-         BaseWidget,
-         StreetSmartApi,
-         utils,
-         RecordingClient,
-         LayerManager
+        declare,
+        on,
+        dom,
+        Tooltip,
+        BaseWidget,
+        ScreenPoint,
+        StreetSmartApi,
+        utils,
+        RecordingClient,
+        LayerManager
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
@@ -101,7 +107,7 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _bindInitialMapHandlers() {
-                const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED
+                const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED;
                 this.addEventListener(StreetSmartApi, measurementChanged, this._handleMeasurementChanged.bind(this));
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
             },
@@ -115,6 +121,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this._layerManager.addLayers();
                     this._bindViewerDependantEventHandlers();
                     this._handleConeChange();
+                    this._dragDropMarker(event);
                     return;
                 }
 
@@ -123,6 +130,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this.removeEventListener(this._imageChangeListener);
                     this._panoramaViewer = newViewer;
                     this._bindViewerDependantEventHandlers({ viewerOnly: true});
+                    this._dragDropMarker(event);
                 }
             },
 
@@ -263,6 +271,50 @@ require(REQUIRE_CONFIG, [], function () {
                 this._removeEventListeners();
                 this._layerManager.removeLayers();
                 this._panoramaViewer = null;
+            },
+
+            _dragDropMarker(){
+                const navbar = document.querySelector('.panoramaviewer .navbar');
+                const nav = navbar.querySelector('.navbar-right .nav');
+                let self = this;
+                let btn = nav.querySelector('.btn');
+                if (!nav.querySelector('#addMapDropBtn')) {
+                    let addDropBtn = dojo.create("button", {
+                        id: "addMapDropBtn",
+                        class: btn.className,
+                        draggable: true,
+                        ondragend: function (evt) {
+                            self._markerDropInitiated(event);
+                        }
+                    });
+                    nav.appendChild(addDropBtn);
+                }
+                let btnJsonTip = dom.byId('addMapDropBtn');
+                let toolTipMsg = self.nls.tipDragDrop;
+                new Tooltip({
+                    connectId: btnJsonTip,
+                    label: toolTipMsg,
+                    position: ["above"]
+                });
+            },
+
+            _markerDropInitiated: function(event) {
+                event.preventDefault();
+                //Add event for drop on map
+                this.addEventListener(this.map, 'drop', this._markerDropped(event));
+
+            },
+
+            _markerDropped: function(event){
+                event.preventDefault();
+                let self = this;
+                let sPoint = new ScreenPoint(event.screenX,event.screenY);
+                let mPoint = self.map.toMap(sPoint);
+                let mapSRS = self.config.srs;
+                let usableSRS = mapSRS.split(":");
+                let cPoint = utils.transformProj4js(mPoint, usableSRS[1]);
+
+                this.query(`${cPoint.x},${cPoint.y}`);
             },
 
             // communication method between widgets
