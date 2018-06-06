@@ -92,7 +92,7 @@ define([], function () {
                 </Stroke>
             </PolygonSymbolizer>`,
 
-        sldStylingPoints: function (fill, stroke, strokeWidth, shape, name, title, imageType, imageUrl, imageSize, lineWidth, polygonLength) {
+        applySldStyling: function (fill, stroke, strokeWidth, shape, name, title, imageType, imageUrl, imageSize, lineWidth, polygonLength) {
             const filter = (symbol) => `<ogc:Filter>
                 <ogc:PropertyIsEqualTo>
                   <ogc:PropertyName>symbol</ogc:PropertyName>
@@ -124,6 +124,7 @@ define([], function () {
               <sld:NamedLayer>
                 <Name>${name}</Name>
                 <sld:UserStyle>
+                <VendorOption name="attributeInfo">ObjectID</VendorOption>
                   <Title>${title}</Title>
                   <FeatureTypeStyle>
                     <Rule>

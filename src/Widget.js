@@ -18,6 +18,7 @@ require(REQUIRE_CONFIG, [], function () {
         './utils',
         './RecordingClient',
         './LayerManager',
+        './OverlayManager'
     ], function (
          declare,
          on,
@@ -25,7 +26,8 @@ require(REQUIRE_CONFIG, [], function () {
          StreetSmartApi,
          utils,
          RecordingClient,
-         LayerManager
+         LayerManager,
+         OverlayManager
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
@@ -38,6 +40,9 @@ require(REQUIRE_CONFIG, [], function () {
             _zoomThreshold: null,
             _viewerType: StreetSmartApi.ViewerType.PANORAMA,
             _listeners: [],
+
+            // Overlay Object
+            arrayOverlayIds: {},
 
             // CM properties
             _cmtTitleColor: '#98C23C',
@@ -62,8 +67,20 @@ require(REQUIRE_CONFIG, [], function () {
                     onRecordingLayerClick: this._handleRecordingClick.bind(this),
                     setPanoramaViewerOrientation: this.setPanoramaViewerOrientation.bind(this),
                     addEventListener: this.addEventListener.bind(this),
+                    config: this.config,
                     removeEventListener: this.removeEventListener.bind(this),
                 });
+
+                this._overlayManager = new OverlayManager({
+                    wkid: this.wkid,
+                    map: this.map,
+                    config: this.config,
+                    StreetSmartApi: StreetSmartApi,
+                    arrayOverlayIds: this.arrayOverlayIds,
+                    lineOverlayIds: this.lineOverlayIds,
+                    polyOverlayIds: this.polyOverlayIds,
+                });
+
                 this._applyWidgetStyle();
                 this._determineZoomThreshold();
             },
@@ -97,6 +114,9 @@ require(REQUIRE_CONFIG, [], function () {
                     this._bindInitialMapHandlers();
                     this._loadRecordings();
                     this._centerViewerToMap();
+                    if (this.config.overlay === true) {
+                        this._overlayManager._overlayFeatures();
+                    }
                 });
             },
 
@@ -187,6 +207,9 @@ require(REQUIRE_CONFIG, [], function () {
 
             _handleExtentChange() {
                 this._loadRecordings();
+                if (this.config.overlay === true) {
+                    this._overlayManager._overlayFeatures();
+                }
             },
 
             _loadRecordings() {
