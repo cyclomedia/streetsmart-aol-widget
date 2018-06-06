@@ -40,7 +40,6 @@ require(REQUIRE_CONFIG, [], function () {
             _zoomThreshold: null,
             _viewerType: StreetSmartApi.ViewerType.PANORAMA,
             _listeners: [],
-            _measureChange: true,
 
             // CM properties
             _cmtTitleColor: '#98C23C',
@@ -70,7 +69,6 @@ require(REQUIRE_CONFIG, [], function () {
                 this._measurementhandler = new MeasurementsHandler({
                     wkid: this.wkid,
                     map: this.map,
-                    measureChange : this._measureChange,
                     addEventListener: this.addEventListener.bind(this),
                     layerManager: this._layerManager,
                     StreetSmartApi: StreetSmartApi
@@ -114,7 +112,7 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _bindInitialMapHandlers() {
-                const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED
+                const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED;
                 this.addEventListener(StreetSmartApi, measurementChanged, this._handleMeasurementChanged.bind(this));
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
             },
@@ -137,6 +135,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this._panoramaViewer = newViewer;
                     this._bindViewerDependantEventHandlers({ viewerOnly: true});
                 }
+
             },
 
             // Adds event listeners which are automatically
@@ -183,6 +182,10 @@ require(REQUIRE_CONFIG, [], function () {
                 if (!opts.viewerOnly) {
                     this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
                 }
+                if (this.config.measurement !== true) {
+                    const measureBtn = StreetSmartApi.PanoramaViewerUi.buttons.MEASURE;
+                    this._panoramaViewer.toggleButtonEnabled(measureBtn);
+                }
             },
 
             // We do not use removeEventListener for this,
@@ -215,7 +218,7 @@ require(REQUIRE_CONFIG, [], function () {
             _measurementsChanges(){
                 //adding measurement events to the viewer
                 const measurementEvents = StreetSmartApi.Events.measurement;
-                StreetSmartApi.on(measurementEvents.MEASUREMENT_CHANGED, measurementEvent => this._measurementhandler.viewerMeasurements(measurementEvent));
+                StreetSmartApi.on(measurementEvents.MEASUREMENT_CHANGED, measurementEvent => this._measurementhandler.drawMeasurements(measurementEvent));
             },
 
             _applyWidgetStyle() {

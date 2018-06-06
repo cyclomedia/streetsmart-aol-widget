@@ -43,40 +43,49 @@ define([
             this.StreetSmartApi = StreetSmartApi;
         }
 
-        viewerMeasurements(measurementEvent){
+        drawMeasurements(measurementEvent){
             if(measurementEvent && measurementEvent.detail){
                 const {activeMeasurement, panoramaViewer} = measurementEvent.detail;
                 if(activeMeasurement){
-                    if(panoramaViewer && this.measureChange === true) {
-                        this.addEventListener(panoramaViewer, this.StreetSmartApi.Events.panoramaViewer.VIEW_CHANGE, () => {
-                            this.layerManager.updateViewingCone(panoramaViewer);
-                        });
-                        this.addEventListener(panoramaViewer, this.StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, () => {
-                            this.layerManager.updateViewingCone(panoramaViewer);
-                        });
-                        this.measureChange = false;
+                    if (activeMeasurement.features[0].geometry.type === "Point") {
+                        const measurementCoordinates = activeMeasurement.features[0].geometry.coordinates;
+                        this.drawPoint(measurementCoordinates);
+                    }if(activeMeasurement.features[0].geometry.type === "LineString") {
+                        const measurementCoordinates = activeMeasurement.features[0].geometry.coordinates;
+                        const coordinatesLength = measurementCoordinates.length;
+                        this.drawLineString(measurementCoordinates, coordinatesLength, activeMeasurement);
+                    }if(activeMeasurement.features[0].geometry.type === "Polygon") {
+                        this.drawPolygon(activeMeasurement);
                     }
-
-                        if (activeMeasurement.features[0].geometry.type === "Point" || activeMeasurement.features[0].geometry.type === "LineString") {
-                                const measurementCoordinates = activeMeasurement.features[0].geometry.coordinates;
-                                const coordinatesLength = measurementCoordinates.length;
-                                this._pointMeasurements(measurementCoordinates, coordinatesLength, activeMeasurement);
-                        }if(activeMeasurement.features[0].geometry.type === "Polygon") {
-                            this._surfaceMeasurements(activeMeasurement);
-                        }
                     }else if (!activeMeasurement) {
-                        //this.layerManager.measureLayer.clear();
                         this.map.graphics.clear();
-                        this.measureChange = true;
-                        if(panoramaViewer) {
-                            this.addEventListener(panoramaViewer, this.StreetSmartApi.Events.panoramaViewer.VIEW_CHANGE, this.layerManager.updateViewingCone(panoramaViewer));
-                            this.addEventListener(panoramaViewer, this.StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this.layerManager.updateViewingCone(panoramaViewer));
-                        }
                 }
             }
         }
 
-        _pointMeasurements(measurementCoordinates, coordinatesLength, activeMeasurement){
+        drawPoint(measurementCoordinates){
+            if(measurementCoordinates !== null) {
+                const pointX = measurementCoordinates[0];
+                const pointY = measurementCoordinates[1];
+                const pt = new Point(pointX, pointY, new SpatialReference({wkid: this.wkid}));
+                const ptMap = utils.transformProj4js(pt, this.map.spatialReference.wkid);
+                const measureGraphics = [];
+                const geom = new Point(ptMap.x, ptMap.y, new SpatialReference({wkid: 102100}));
+                const symbol = null;
+                const measureNumber = new TextSymbol();
+                measureNumber.setText(1);
+                measureNumber.setVerticalAlignment("top");
+                measureNumber.setHorizontalAlignment("right");
+                const measureGraphic = Graphic(geom, symbol, null);
+                measureGraphics.push(measureGraphic);
+                this.map.graphics.clear();
+                this.layerManager.measureLayer.add(measureGraphics);
+                this.map.graphics.add(new Graphic(geom, measureNumber));
+            }
+
+        }
+
+        drawLineString(measurementCoordinates, coordinatesLength, activeMeasurement){
             let measureLinePoints = [];
             let self = this;
             dojoArray.forEach(measurementCoordinates, function (measureCoordinates, i) {
@@ -118,10 +127,9 @@ define([
                 measureValue.setHorizontalAlignment("right");
                 self.map.graphics.add(new Graphic(lineLabelPoint, measureValue));
             }
-
         }
 
-        _surfaceMeasurements(activeMeasurement){
+        drawPolygon(activeMeasurement){
             let surfacePoints = [];
             let self = this;
             const surfaceMeasurePoints = activeMeasurement.features[0].geometry.coordinates[0];

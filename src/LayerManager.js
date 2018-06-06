@@ -40,7 +40,7 @@ define([
             this.setPanoramaViewerOrientation = setPanoramaViewerOrientation;
             this.recordingLayer = this._createRecordingLayer({ onClick: onRecordingLayerClick });
             this.viewingConeLayer = this._createViewingConeLayer();
-            this.measureLayer = this._measureLayer();
+            this.measureLayer = this._createMeasureLayer();
             this.srs = new SpatialReference({ wkid });
 
         }
@@ -130,7 +130,7 @@ define([
             return layer;
         }
 
-        _measureLayer(){
+        _createMeasureLayer(){
             const measureCollection = {
                 "layerDefinition": {
                     "geometryType": "esriGeometryPoint",
