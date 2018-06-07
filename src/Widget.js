@@ -267,7 +267,16 @@ require(REQUIRE_CONFIG, [], function () {
 
             // communication method between widgets
             onReceiveData(name, widgetId, data, historyData) {
-                console.log('onReceiveData', name, widgetId, data, historyData);
+                if(name !== 'Search'){
+                    return;
+                }
+                if(data.selectResult) {
+                    let searchedPoint = data.selectResult.result.feature.geometry;
+                    let mapSRS = this.config.srs;
+                    let usableSRS = mapSRS.split(":");
+                    let searchedPtLocal = utils.transformProj4js(searchedPoint, usableSRS[1]);
+                    this.query((`${searchedPtLocal.x},${searchedPtLocal.y}`));
+                }
             },
         });
     });
