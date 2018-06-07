@@ -10,6 +10,7 @@
        measure: "Messungen",
        overlay: "Überlagerungen",
        navigation: "Navigation",
-       typeSrs: "Geben oder wählen Sie SRS"
+       typeSrs: "Geben oder wählen Sie SRS",
+       version: "Street Smart Widget für Web AppBuilder @ Version 18.1"
   })
 );

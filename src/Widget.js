@@ -157,7 +157,11 @@ require(REQUIRE_CONFIG, [], function () {
                 const listener = this.addEventListener(this.map, 'zoom-end', (zoomEvent) => {
                     if (zoomEvent.level > this._zoomThreshold) {
                         this.zoomWarning.classList.add('hidden');
-                        this._initApi();
+                        if (this.config.agreement !== true) {
+                            alert(this.nls.agreementWarning);
+                        }else {
+                            this._initApi();
+                        }
                         this.removeEventListener(listener);
                     }
                 });
@@ -169,6 +173,9 @@ require(REQUIRE_CONFIG, [], function () {
                 this._imageChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this._handleConeChange.bind(this));
                 if (!opts.viewerOnly) {
                     this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
+                }
+                if(this.config.navigation !== true){
+                    this._navigationDisabled();
                 }
             },
 
@@ -246,12 +253,24 @@ require(REQUIRE_CONFIG, [], function () {
                 return zoomThreshold;
             },
 
+            _navigationDisabled: function(){
+                this._panoramaViewer.toggleNavbarVisible();
+                this._panoramaViewer.toggleTimeTravelVisible();
+                //this function is not working as expected getting an error from the StreetSmart API
+                //this._panoramaViewer.toggleRecordingsVisible();
+                this._layerManager.recordingLayer.setVisibility(false);
+            },
+
             onOpen() {
                 const zoomLevel = this.map.getZoom();
 
                 // Only open when the zoomThreshold is reached.
                 if (zoomLevel > this._zoomThreshold) {
-                    this._initApi();
+                    if (this.config.agreement !== true) {
+                        alert(this.nls.agreementWarning);
+                    }else {
+                        this._initApi();
+                    }
                 } else {
                     this._openApiWhenZoomedIn();
                 }

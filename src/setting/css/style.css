@@ -4,7 +4,7 @@
 	border-color: #98C23C;
 	border-top-style: solid;
 	border-top-width: 30px;
-	overflow-y: hidden;
+	overflow-y: auto;
 }
 
 .settingsForm{
@@ -80,3 +80,8 @@
 	vertical-align:middle;
 }
 
+.versionLabel{
+	text-align: -webkit-right;
+	margin: 6%;
+	color:lightgray;
+}

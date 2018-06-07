@@ -10,6 +10,7 @@
        measure: "Afmetingen",
        overlay: "Overlays",
        navigation: "Navigatie",
-       typeSrs: "Typ of selecteer SRS"
+       typeSrs: "Typ of selecteer SRS",
+       version: "Street Smart Widget voor Web AppBuilder @ versie 18.1"
    })
 );
