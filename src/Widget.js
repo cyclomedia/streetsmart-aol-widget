@@ -139,7 +139,6 @@ require(REQUIRE_CONFIG, [], function () {
                 // Handle initial viewer creation
                 if (!this._panoramaViewer && newViewer) {
                     this._panoramaViewer = newViewer;
-                    debugger;
                     this._layerManager.addLayers();
                     this._bindViewerDependantEventHandlers();
                     this._handleConeChange();
