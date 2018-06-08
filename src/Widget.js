@@ -34,7 +34,7 @@ require(REQUIRE_CONFIG, [], function () {
             // Custom widget code goes here
             baseClass: 'jimu-widget-streetsmartwidget',
 
-            // This property is set by the framework when widget is loaded.
+            // This property is `set by the framework when widget is loaded.
             name: 'Street Smart by CycloMedia',
 
             _zoomThreshold: null,
@@ -115,7 +115,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this._loadRecordings();
                     this._centerViewerToMap();
                     if (this.config.overlay === true) {
-                        this._overlayManager._overlayFeatures();
+                        // this._overlayManager.addOverlaysToViewer();
                     }
                 });
             },
@@ -128,17 +128,28 @@ require(REQUIRE_CONFIG, [], function () {
 
             _handleMeasurementChanged(e) {
                 const newViewer = e.detail.panoramaViewer;
+                this._handleViewerChanged(newViewer);
+            },
 
+            /**
+             * Handles the viewer change and event handler rebinding,
+             * starting measurement mode changes the viewer.
+             */
+            _handleViewerChanged(newViewer) {
                 // Handle initial viewer creation
                 if (!this._panoramaViewer && newViewer) {
                     this._panoramaViewer = newViewer;
+                    debugger;
                     this._layerManager.addLayers();
                     this._bindViewerDependantEventHandlers();
                     this._handleConeChange();
                     return;
                 }
 
-                if (newViewer !== this._panoramaViewer) {
+                // Update the event handlers and everything else once the viewer changed
+                // Always make sure newViewer is set as newViewer can be undefined
+                // while this._panoramaViewer can be null
+                if (newViewer && newViewer !== this._panoramaViewer) {
                     this.removeEventListener(this._viewChangeListener);
                     this.removeEventListener(this._imageChangeListener);
                     this._panoramaViewer = newViewer;
@@ -208,7 +219,7 @@ require(REQUIRE_CONFIG, [], function () {
             _handleExtentChange() {
                 this._loadRecordings();
                 if (this.config.overlay === true) {
-                    this._overlayManager._overlayFeatures();
+                    // this._overlayManager.addOverlaysToViewer();
                 }
             },
 
@@ -247,7 +258,7 @@ require(REQUIRE_CONFIG, [], function () {
 
             query(query) {
                 return StreetSmartApi.open(query, {
-                        viewerType: [this.viewerType],
+                        viewerType: [this._viewerType],
                         srs: this.config.srs,
                     }
                 );

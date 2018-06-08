@@ -13,6 +13,7 @@ define([
     'esri/renderers/SimpleRenderer',
     'esri/layers/GraphicsLayer',
     'esri/SpatialReference',
+    './arcgisToGeojson',
     './utils',
     './sldStyling',
 ], function (
@@ -30,6 +31,7 @@ define([
     SimpleRenderer,
     GraphicsLayer,
     SpatialReference,
+    geoJsonUtils,
     utils,
     sldStyling,
 ) {
@@ -39,20 +41,154 @@ define([
             this.map = map;
             this.wkid = wkid;
             this.config = config;
-            this.StreetSmartApi = StreetSmartApi;
-            this.arrayOverlayIds = arrayOverlayIds;
+            this.api = StreetSmartApi;
+            this.defaultSymbol = {
+                color: { r: 223, g: 115, b: 255, a: 1},
+                size: 11,
+                type: 'simplemarkersymbol',
+                style: 'square',
+                xoffset: 0,
+                yoffset: 0,
+                outline: {
+                    color: { r: 26, g: 26, b: 26, a: 1 },
+                    width: 2,
+                    type: 'simplelinesymbol',
+                    style: 'solid'
+                },
+            };
+        }
+
+        addOverlaysToViewer() {
+            const mapLayers = _.values(this.map._layers);
+            const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
+            _.each(featureLayers, (mapLayer) => {
+                const geojson = this.createGeoJsonForFeature(mapLayer);
+                // const sldXMLtext = this.createSldForFeature(mapLayer);
+                const sldXMLtext = `
+                    <sld:StyledLayerDescriptor version="1.0.0"
+                xsi:schemaLocation="http://www.opengis.net/sldStyledLayerDescriptor.xsd"
+                xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    >
+                    <sld:NamedLayer>
+                <Name>BetaAssets - Utility Structures</Name>
+                <sld:UserStyle>
+                <Title>BetaAssets_8551</Title>
+                <FeatureTypeStyle>
+                <Rule>
+                <PointSymbolizer>
+                <Graphic>
+                <Mark>
+                <WellKnownName>circle</WellKnownName>
+                <Fill>
+                <CssParameter name="fill">#ff0000</CssParameter>
+                    </Fill>
+                    <Stroke>
+                    <CssParameter name="stroke">#000000</CssParameter>
+                    <CssParameter name="stroke-width">1.3333333333333333</CssParameter>
+                    </Stroke>
+                    </Mark>
+                    <Size>12</Size>
+                    </Graphic>
+                    </PointSymbolizer>
+                    </Rule>
+
+                    </FeatureTypeStyle>
+                    </sld:UserStyle>
+                    </sld:NamedLayer>
+                    </sld:StyledLayerDescriptor>
+                        `;
+                if (!mapLayer.name.includes('Utility')) {
+                    return;
+                }
+
+                // console.log('config', this.config);
+                console.log('addOverlay', mapLayer.name, {
+                    geojson: JSON.stringify(geojson),
+                    sldXMLtext,
+                });
+                // console.log('this.api', this.api);
+                // console.log('viewerSRS', this.config.srs);
+                this.api.addOverlay({
+                    // sourceSrs: 'EPSG:3857',
+                    name: mapLayer.name,
+                    sldXMLtext,
+                    geojson
+                });
+            });
+        }
+
+        createGeoJsonForFeature(mapLayer) {
+            const arcgisFeatureSet = mapLayer.toJson().featureSet;
+            const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet);
+
+            // Add the symbol prop to the geoJson so it is styled by the SLD
+            // const newFeatures = geojson.features.map((feature) => this.getSymbolForFeature(feature, mapLayer));
+            let wkid = _.get(arcgisFeatureSet, 'features[0].geometry.spatialReference.wkid', null);
+            if (wkid) {
+                wkid = wkid === 102100 ? 3857 : wkid;
+                const crs = {
+                    type: 'EPSG',
+                    properties: {
+                        code: wkid,
+                    }
+                };
+                geojson.crs = crs;
+            }
+            return geojson;
+        }
+
+        getSymbolForFeature(feature, mapLayer) {
+            debugger;
+        }
+
+        createSldForFeature(mapLayer) {
+            let symbol;
+            if (mapLayer.renderer && mapLayer.renderer.getSymbol && _.isFunction(mapLayer.renderer.getSymbol)) {
+                symbol = mapLayer.renderer.getSymbol();
+                // console.log('renderer symbol', symbol);
+            } else if (mapLayer.renderer) {
+                console.log('defaultSymbol', symbol);
+                debugger;
+                symbol = mapLayer.renderer.defaultSymbol;
+            }
+
+            if (!symbol) {
+                console.log('own symbol', symbol);
+                debugger;
+                symbol = this.defaultSymbol;
+            }
+
+            let stroke = null;
+            let strokeWidth = null;
+            if (symbol.outline) {
+                stroke = symbol.outline.color.toHex();
+                strokeWidth = symbol.outline.width;
+            }
+
+            // todo: image parsing
+
+
+            // fill, stroke, strokeWidth, shape, name, title, imageType, imageUrl, imageSize, lineWidth, polygonLength
+            return sldStyling.applySldStyling({
+                name: mapLayer.name,
+                title: mapLayer.id,
+                fill: symbol.color.toHex(),
+                shape: symbol.style,
+                imageType: null,
+                imageUrl: null,
+                imageSize: null,
+                lineWidth: symbol.width,
+                polygonLength: null,
+                strokeWidth,
+                stroke,
+            });
         }
 
         _overlayFeatures() {
-            let self = this;
-            let mapLayers = self.map._layers;
+            let mapLayers = this.map._layers;
             let layerName;
-            let overlaySrs;
-            if (self.config.srs === "EPSG:28992") {
-                overlaySrs = new SpatialReference({wkid: parseInt(self.config.srs.substr(5))})
-            } else {
-                overlaySrs = new SpatialReference({wkid: 102100});
-            }
             const featureLayStr = 'Feature Layer';
             const esriGeometryPointStr = 'esriGeometryPoint';
             const esriGeometryMultipointStr = 'esriGeometryMultipoint';
@@ -83,7 +219,7 @@ define([
                         featurePoints,
                         featureLines,
                         featurePolys,
-                        overlaySrs,
+                        overlaySrs: new SpatialReference({ wkid: mapLayer.spatialReference.wkid}),
                         esriGeometryPointStr,
                         esriGeometryMultipointStr,
                         esriPolyLineStr,
@@ -152,7 +288,6 @@ define([
             layerSymbology
         }
         ) {
-            const self = this;
             const sldName = mapLayer.name;
             const sldTitle = mapLayer.id;
             let fillColor;
@@ -209,7 +344,6 @@ define([
 
         _displayPointFeatures(overlayParameters){
             let symbolShape, pointStyling;
-            let self = this;
             if (overlayParameters.layerSymbology.type === overlayParameters.markSymbol) {
                 if (overlayParameters.layerSymbology.outline) {
                     const toConvert = overlayParameters.layerSymbology.outline.color;
@@ -235,8 +369,8 @@ define([
                 symbolShape = "image";
             }
             //Here i read each point from the feature layer
-            dojoArray.forEach(overlayParameters.mapLayer.graphics, function (pointFeature, i) {
-                const srsViewer = parseInt(self.config.srs.substr(5));
+            overlayParameters.mapLayer.graphics.forEach((pointFeature) => {
+                const srsViewer = parseInt(this.config.srs.substr(5));
                 const ptViewer = utils.transformProj4js(pointFeature.geometry, srsViewer);
                 const ptCoordinate = [ptViewer.x, ptViewer.y];
                 const properties = {
@@ -277,27 +411,27 @@ define([
         }
 
         _displayLineFeatures(overlayParameters){
-            let self = this;
+            console.log('displayLineFeatures', overlayParameters);
             const symbolLine = "line";
             const properties = {
                 symbol: symbolLine
             };
-            dojoArray.forEach(overlayParameters.mapLayer.graphics, function (pointFeature, i) {
+            overlayParameters.mapLayer.graphics.forEach((pointFeature) => {
                 let lineCoords = [];
-                dojoArray.forEach(pointFeature.geometry.paths[0], function (featurePoint, i) {
+                pointFeature.geometry.paths[0].forEach((featurePoint) => {
                     const mapPt = new Point(featurePoint[0], featurePoint[1], overlayParameters.overlaySrs);
-                    const srsViewer = parseInt(self.config.srs.substr(5));
+                    const srsViewer = parseInt(this.config.srs.substr(5));
                     const ptViewer = utils.transformProj4js(mapPt, srsViewer);
                     const lineCoordinate = [ptViewer.x, ptViewer.y];
                     lineCoords.push(lineCoordinate);
                 });
 
                 let featureLineViewer = {
-                    "type": "Feature",
+                    type: "Feature",
                     properties,
-                    "geometry": {
-                        "type": "LineString",
-                        "coordinates": lineCoords
+                    geometry: {
+                        type: "LineString",
+                        coordinates: lineCoords
                     }
                 };
                 overlayParameters.featureLines.push(featureLineViewer);
@@ -323,15 +457,14 @@ define([
         }
 
         _displayPolygonFeatures(overlayParameters){
-            let self = this;
             const symbolPoly = "polygon";
-            dojoArray.forEach(overlayParameters.mapLayer.graphics, function (pointFeature, i) {
+            overlayParameters.mapLayer.graphics.forEach((pointFeature) => {
                 let polyCoords = [];
                 const polyFeatureArray = pointFeature.geometry.rings[0];
                 overlayParameters.polygonLength = polyFeatureArray.length;
-                dojoArray.forEach(polyFeatureArray, function (featurePoint, i) {
+                polyFeatureArray.forEach((featurePoint) => {
                     const mapPt = new Point(featurePoint[0], featurePoint[1], overlayParameters.overlaySrs);
-                    const srsViewer = parseInt(self.config.srs.substr(5));
+                    const srsViewer = parseInt(this.config.srs.substr(5));
                     const ptViewer = utils.transformProj4js(mapPt, srsViewer);
                     const ptCoordinate = [ptViewer.x, ptViewer.y];
                     polyCoords.push(ptCoordinate);
