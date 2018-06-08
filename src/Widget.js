@@ -115,7 +115,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this._loadRecordings();
                     this._centerViewerToMap();
                     if (this.config.overlay === true) {
-                        // this._overlayManager.addOverlaysToViewer();
+                        this._overlayManager.addOverlaysToViewer();
                     }
                 });
             },
