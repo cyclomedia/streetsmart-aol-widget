@@ -1,9 +1,11 @@
 define([
     'esri/renderers/SimpleRenderer',
-    'esri/renderers/ClassBreaksRenderer'
+    'esri/renderers/ClassBreaksRenderer',
+    'esri/renderers/UniqueValueRenderer'
 ], function (
     SimpleRenderer,
-    ClassBreaksRenderer
+    ClassBreaksRenderer,
+    UniqueValueRenderer
 ) {
     'use strict';
 
@@ -19,14 +21,43 @@ define([
         generateFilterSymbolMapping({ mapLayer }) {
         // ... not really a mapping but meh.
             const renderer = mapLayer.renderer;
-            if (renderer instanceof  SimpleRenderer) {
+            if (renderer instanceof SimpleRenderer) {
                 return [{
                     filter: null, // Every symbol is the same, so no filtering needed
                     symbol: renderer.getSymbol(),
                     geometryType: mapLayer.geometryType,
                 }];
             }
-            console.warn('Unsupported renderer found', mapLayer.name, mapLayer.renderer);
+            if (renderer instanceof UniqueValueRenderer) {
+                const attribute = renderer.attributeField;
+
+                const specialCases = renderer.infos.map((uniqueValue) => ({
+                    filter: {
+                        value: uniqueValue.value,
+                        attribute,
+                    },
+                    symbol: uniqueValue.symbol,
+                    geometryType: mapLayer.geometryType,
+                }));
+
+                // Add the "else" symbol (default case) to the list
+                if (renderer.defaultSymbol) {
+                    const defaultCase = {
+                        // filter: {
+                        //     value: 'TRUE',
+                        //     attribute: 'SLD_DEFAULT_CASE',
+                        // },
+                        filter: null,
+                        symbol: renderer.defaultSymbol,
+                        geometryType: mapLayer.geometryType,
+                    };
+
+                    return [defaultCase, ...specialCases];
+                }
+
+                return specialCases;
+            }
+            console.warn('Unsupported renderer found', mapLayer.name);
             return [{
                 filter: null,
                 symbol: renderer.defaultSymbol,
@@ -42,7 +73,11 @@ define([
         },
         // Transform `infos` to filter
         createSldFilter(filter) {
-            return '';
+            if (!filter) {
+                return '';
+            }
+            const content = `<PropertyName>${filter.attribute}</PropertyName><Literal>${filter.value}</Literal>`
+            return `<Filter><PropertyIsEqualTo>${content}</PropertyIsEqualTo></Filter>`;
         },
         _createStrokeAndFill(symbol) {
             let stroke = '';
@@ -96,10 +131,10 @@ define([
             if (symbol.type === 'picturemarkersymbol') {
                 content = `
                     <ExternalGraphic>
-                       <OnlineResource xlink:type="simple" xlink:href="${symbol.imageData}" />
+                       <OnlineResource xlink:type="simple" xlink:href="${symbol.url}" />
                        <Format>${symbol.contentType}</Format>
                     </ExternalGraphic>
-                    <Size>32</Size>
+                    <Size>100</Size>
                 `;
             } else {
                 const { stroke, fill } = this._createStrokeAndFill(symbol);
@@ -132,7 +167,7 @@ define([
                     <sld:UserStyle>
                         <Title>BetaAssets_8551</Title>
                         <FeatureTypeStyle>
-                         ${rules.join('')}
+                             ${rules.join('')}
                         </FeatureTypeStyle>
                     </sld:UserStyle>
                 </sld:NamedLayer>
