@@ -12,8 +12,7 @@ define([
     'esri/layers/FeatureLayer',
     'esri/layers/GraphicsLayer',
     'esri/SpatialReference',
-    './utils',
-    './OverlayManager',
+    './utils'
 ], function (
     Color,
     on,
@@ -28,8 +27,7 @@ define([
     FeatureLayer,
     GraphicsLayer,
     SpatialReference,
-    utils,
-    OverlayManager
+    utils
 ) {
     return class LayerManager {
         constructor({ map, wkid, onRecordingLayerClick, addEventListener, removeEventListener, setPanoramaViewerOrientation }) {
@@ -134,23 +132,23 @@ define([
 
         _createMeasureLayer(){
             const measureCollection = {
-                "layerDefinition": {
-                    "geometryType": "esriGeometryPoint",
-                    "fields": [{
-                        "name": "id",
-                        "alias": "ID",
-                        "type": "esriFieldTypeOID"
+                layerDefinition: {
+                    geometryType: 'esriGeometryPoint',
+                    fields: [{
+                        name: 'id',
+                        alias: 'ID',
+                        type: 'esriFieldTypeOID'
                     }]
                 },
-                "featureSet": null
+                featureSet: null
             };
 
             const measureSymbol = new SimpleMarkerSymbol();
             measureSymbol.setStyle(SimpleMarkerSymbol.STYLE_CROSS);
             measureSymbol.setAngle(47);
-            let measureRen = new SimpleRenderer(measureSymbol);
-            const layer = new FeatureLayer(measureCollection, {id: "cmt_measure"});
-            layer.setRenderer(measureRen);
+            const renderer = new SimpleRenderer(measureSymbol);
+            const layer = new FeatureLayer(measureCollection, {id: 'cmt_measure'});
+            layer.setRenderer(renderer);
             return layer;
         }
 

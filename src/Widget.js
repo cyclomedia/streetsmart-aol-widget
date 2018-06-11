@@ -18,7 +18,7 @@ require(REQUIRE_CONFIG, [], function () {
         './utils',
         './RecordingClient',
         './LayerManager',
-        './MeasurementsHandler',
+        './MeasurementHandler',
         './OverlayManager'
     ], function (
          declare,
@@ -28,7 +28,7 @@ require(REQUIRE_CONFIG, [], function () {
          utils,
          RecordingClient,
          LayerManager,
-         MeasurementsHandler,
+         MeasurementHandler,
          OverlayManager
     ) {
         //To create a widget, you need to derive from BaseWidget.
@@ -73,11 +73,10 @@ require(REQUIRE_CONFIG, [], function () {
                     removeEventListener: this.removeEventListener.bind(this),
                 });
 
-                this._measurementHandler = new MeasurementsHandler({
+                this._measurementHandler = new MeasurementHandler({
                     wkid: this.wkid,
                     map: this.map,
-                    addEventListener: this.addEventListener.bind(this),
-                    layerManager: this._layerManager,
+                    layer: this._layerManager.measureLayer,
                     StreetSmartApi: StreetSmartApi
                 });
 
@@ -124,7 +123,6 @@ require(REQUIRE_CONFIG, [], function () {
                     this._bindInitialMapHandlers();
                     this._loadRecordings();
                     this._centerViewerToMap();
-                    this._measurementsChanges();
                     if (this.config.overlay === true) {
                         this._overlayManager.addOverlaysToViewer();
                     }
@@ -166,7 +164,6 @@ require(REQUIRE_CONFIG, [], function () {
                     this._panoramaViewer = newViewer;
                     this._bindViewerDependantEventHandlers({ viewerOnly: true});
                 }
-
             },
 
             // Adds event listeners which are automatically
