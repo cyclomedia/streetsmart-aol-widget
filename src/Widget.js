@@ -18,6 +18,7 @@ require(REQUIRE_CONFIG, [], function () {
         './utils',
         './RecordingClient',
         './LayerManager',
+        './OverlayManager'
     ], function (
          declare,
          on,
@@ -25,19 +26,23 @@ require(REQUIRE_CONFIG, [], function () {
          StreetSmartApi,
          utils,
          RecordingClient,
-         LayerManager
+         LayerManager,
+         OverlayManager
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
             // Custom widget code goes here
             baseClass: 'jimu-widget-streetsmartwidget',
 
-            // This property is set by the framework when widget is loaded.
+            // This property is `set by the framework when widget is loaded.
             name: 'Street Smart by CycloMedia',
 
             _zoomThreshold: null,
             _viewerType: StreetSmartApi.ViewerType.PANORAMA,
             _listeners: [],
+
+            // Overlay Object
+            arrayOverlayIds: {},
 
             // CM properties
             _cmtTitleColor: '#98C23C',
@@ -62,8 +67,20 @@ require(REQUIRE_CONFIG, [], function () {
                     onRecordingLayerClick: this._handleRecordingClick.bind(this),
                     setPanoramaViewerOrientation: this.setPanoramaViewerOrientation.bind(this),
                     addEventListener: this.addEventListener.bind(this),
+                    config: this.config,
                     removeEventListener: this.removeEventListener.bind(this),
                 });
+
+                this._overlayManager = new OverlayManager({
+                    wkid: this.wkid,
+                    map: this.map,
+                    config: this.config,
+                    StreetSmartApi: StreetSmartApi,
+                    arrayOverlayIds: this.arrayOverlayIds,
+                    lineOverlayIds: this.lineOverlayIds,
+                    polyOverlayIds: this.polyOverlayIds,
+                });
+
                 this._applyWidgetStyle();
                 this._determineZoomThreshold();
             },
@@ -97,6 +114,9 @@ require(REQUIRE_CONFIG, [], function () {
                     this._bindInitialMapHandlers();
                     this._loadRecordings();
                     this._centerViewerToMap();
+                    if (this.config.overlay === true) {
+                        this._overlayManager.addOverlaysToViewer();
+                    }
                 });
             },
 
@@ -108,7 +128,14 @@ require(REQUIRE_CONFIG, [], function () {
 
             _handleMeasurementChanged(e) {
                 const newViewer = e.detail.panoramaViewer;
+                this._handleViewerChanged(newViewer);
+            },
 
+            /**
+             * Handles the viewer change and event handler rebinding,
+             * starting measurement mode changes the viewer.
+             */
+            _handleViewerChanged(newViewer) {
                 // Handle initial viewer creation
                 if (!this._panoramaViewer && newViewer) {
                     this._panoramaViewer = newViewer;
@@ -118,7 +145,10 @@ require(REQUIRE_CONFIG, [], function () {
                     return;
                 }
 
-                if (newViewer !== this._panoramaViewer) {
+                // Update the event handlers and everything else once the viewer changed
+                // Always make sure newViewer is set as newViewer can be undefined
+                // while this._panoramaViewer can be null
+                if (newViewer && newViewer !== this._panoramaViewer) {
                     this.removeEventListener(this._viewChangeListener);
                     this.removeEventListener(this._imageChangeListener);
                     this._panoramaViewer = newViewer;
@@ -187,6 +217,9 @@ require(REQUIRE_CONFIG, [], function () {
 
             _handleExtentChange() {
                 this._loadRecordings();
+                if (this.config.overlay === true) {
+                    // this._overlayManager.addOverlaysToViewer();
+                }
             },
 
             _loadRecordings() {
@@ -224,7 +257,7 @@ require(REQUIRE_CONFIG, [], function () {
 
             query(query) {
                 return StreetSmartApi.open(query, {
-                        viewerType: [this.viewerType],
+                        viewerType: [this._viewerType],
                         srs: this.config.srs,
                     }
                 );

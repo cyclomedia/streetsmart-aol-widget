@@ -12,6 +12,7 @@ define([
     'esri/layers/GraphicsLayer',
     'esri/SpatialReference',
     './utils',
+    './OverlayManager',
 ], function (
     Color,
     on,
@@ -26,6 +27,7 @@ define([
     GraphicsLayer,
     SpatialReference,
     utils,
+    OverlayManager
 ) {
     return class LayerManager {
         constructor({ map, wkid, onRecordingLayerClick, addEventListener, removeEventListener, setPanoramaViewerOrientation }) {
