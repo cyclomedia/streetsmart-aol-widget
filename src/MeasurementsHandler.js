@@ -34,16 +34,15 @@ define([
     utils,
 ) {
     return class MeasurementsHandler {
-        constructor({map, wkid, measureChange, addEventListener, layerManager, StreetSmartApi}) {
+        constructor({map, wkid, measureChange, layerManager, StreetSmartApi}) {
             this.map = map;
             this.wkid = wkid;
             this.measureChange = measureChange;
-            this.addEventListener = addEventListener;
             this.layerManager = layerManager;
             this.StreetSmartApi = StreetSmartApi;
         }
 
-        drawMeasurements(measurementEvent){
+        draw(measurementEvent){
             if(measurementEvent && measurementEvent.detail){
                 const {activeMeasurement, panoramaViewer} = measurementEvent.detail;
                 if(activeMeasurement){
