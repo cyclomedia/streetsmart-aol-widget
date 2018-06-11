@@ -22,6 +22,12 @@ Live reload doesn't work as the AppBuilder in seperate process.
 NB: When adding the StreetSmart widget to your development app, the WebAppBuilder copies `client\stemapp\widgets\StreetSmart` to `server\apps\LOCAL_APP_ID\widgets\StreetSmart`. 
 To prevent caching issues, make a symlink from the server path to the client path.
 
+### Livereload
+
+We rely on the module bundler of the ArcGis WebApp Builder for Widget Development, and we cannot simply hook into this process to add livereload.
+To support livereload in this symbiotic setup, we rely on `gulp-livereload` in combination with a browser addon.
+Add [this plugin](https://chrome.google.com/webstore/detail/livereload/jnihajbhpnppcggbcgedagnkighmdlei) to Chrome and click on the icon in the ArcGis tab to enable livereload.
+
 ## Versioning
 
 We use YEAR.MAJOR.PATCH versioning.
@@ -41,6 +47,7 @@ Aperture API:
 ## Authors
 
 * **Sarath Chandra Kalluri** - *Initial work* - [Sarath Chandra Kalluri](mailto:skalluri@cyclomedia.com).
+* **Jasper Stam** - https://github.com/stam 
 
 ## License
 
