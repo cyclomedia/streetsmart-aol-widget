@@ -87,7 +87,7 @@ define([
             const bold = new Font(10, Font.WEIGHT_BOLD);
             const pointLabel = new TextSymbol(text, bold);
             pointLabel.setColor('white');
-            pointLabel.setHaloSize(2);
+            pointLabel.setHaloSize(1);
             pointLabel.setHaloColor(Color.fromString('black'));
             return pointLabel;
         }
@@ -119,7 +119,7 @@ define([
             this.layer.add(new Graphic(pointMap, this._createPointLabel(`${index}`)));
         }
 
-        _drawLines(transformedCoords, derivedData) {
+        _drawLines(transformedCoords) {
             const mapWkid = this.map.spatialReference.wkid;
             const validCoords = transformedCoords.filter(coord => coord !== null);
 
@@ -135,8 +135,30 @@ define([
             const lineGeom = new Polyline(polyJson);
             const lineSymbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([236, 122, 8, 0.8]), 4);
             this.layer.add(new Graphic(lineGeom, lineSymbol));
+        }
 
-            // Draw length labels
+        _drawPolygon(transformedCoords) {
+            const mapWkid = this.map.spatialReference.wkid;
+            const validCoords = transformedCoords.filter(coord => coord !== null);
+
+            if (validCoords.length <= 1) {
+                return;
+            }
+
+            const polyJson = {
+                rings: [validCoords],
+                spatialReference: { wkid: mapWkid },
+            };
+
+            const polygonGeom = new Polygon(polyJson);
+            const outline = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([236, 122, 8, 0.8]), 4);
+            const symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, outline, new Color([236, 122, 8, 0.4]));
+            this.layer.add(new Graphic(polygonGeom, symbol));
+        }
+
+        _drawLineLabels(transformedCoords, derivedData) {
+            const mapWkid = this.map.spatialReference.wkid;
+
             _.each(transformedCoords, (coord, i) => {
                 const lineLength = derivedData.segmentLengths.value[i];
                 const nextCoord = transformedCoords[i + 1];
@@ -175,74 +197,35 @@ define([
 
             const transformedCoords = this._transformPoints(coords);
 
-            // Draw the line between the valid points, together with the lineLength derivedData
-            this._drawLines(transformedCoords, derivedData);
+            this._drawLines(transformedCoords);
+            this._drawLineLabels(transformedCoords, derivedData);
 
             // Draw the individual points in the lineMeasurement;
             _.each(transformedCoords, (coord, i) => this._drawPoint(coord, i + 1));
         }
 
-        drawPolygonMeasurement(activeMeasurement){
+        drawPolygonMeasurement(activeMeasurement) {
             const coords = activeMeasurement.features[0].geometry.coordinates[0];
             const derivedData = activeMeasurement.features[0].properties.derivedData;
 
-            if (coords === null) {
+            if (coords === null || coords.length < 2) {
                 return;
             }
 
-            // const transformedCoords = this._transformPoints(coords);
-            //
-            // // Draw the line between the valid points, together with the lineLength derivedData
-            // this._drawLines(transformedCoords, derivedData);
-            //
-            // // Draw the individual points in the lineMeasurement;
-            // _.each(transformedCoords, (coord, i) => this._drawPoint(coord, i + 1));
-            return;
+            const transformedCoords = this._transformPoints(coords);
+            // The first and last coords are the same
+            const uniqueCoords = _.clone(transformedCoords);
+            uniqueCoords.pop();
 
-            let surfacePoints = [];
-            let self = this;
-            const surfaceMeasurePoints = activeMeasurement.features[0].geometry.coordinates[0];
-            const surfaceMeasureLength = surfaceMeasurePoints.length;
-            if (surfaceMeasureLength > 0) {
-                for (let i = 1; i < surfaceMeasureLength; i++) {
-                    const surfaceX = surfaceMeasurePoints[i][0];
-                    const surfaceY = surfaceMeasurePoints[i][1];
-                    const surfacePt = new Point(surfaceX, surfaceY, new SpatialReference({wkid: self.wkid}));
-                    const surfacePtMap = utils.transformProj4js(surfacePt, self.map.spatialReference.wkid);
-                    let surfaceGraphics = [];
-                    const surfaceGeom = new Point(surfacePtMap.x, surfacePtMap.y, new SpatialReference({wkid: 102100}));
-                    const surfaceSymbol = null;
-                    const surfaceMeasureNumber = new TextSymbol();
-                    surfaceMeasureNumber.setText(i);
-                    surfaceMeasureNumber.setVerticalAlignment("top");
-                    surfaceMeasureNumber.setHorizontalAlignment("right");
-                    const surfaceMeasureGraphic = Graphic(surfaceGeom, surfaceSymbol, null);
-                    surfaceGraphics.push(surfaceMeasureGraphic);
-                    self.layerManager.measureLayer.add(surfaceGraphics);
-                    self.map.graphics.add(new Graphic(surfaceGeom, surfaceMeasureNumber));
-                    if (surfaceMeasureLength > 1) {
-                        let polyPoints = [surfacePtMap.x, surfacePtMap.y];
-                        surfacePoints.push(polyPoints);
-                    }
-                }
-                if (surfaceMeasureLength > 2) {
-                    const polyJson = {
-                        "rings": [surfacePoints],
-                        "spatialReference": {wkid: 102100}
-                    };
-                    const surfaceMeasureLines = new Polygon(polyJson);
-                    const polySymbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([26, 26, 26, 1]), 2);
-                    self.map.graphics.add(new Graphic(surfaceMeasureLines, polySymbol));
-                    const x1 = (surfacePoints[surfaceMeasureLength - 3][0] + surfacePoints[surfaceMeasureLength - 2][0]) / 2;
-                    const y1 = (surfacePoints[surfaceMeasureLength - 3][1] + surfacePoints[surfaceMeasureLength - 2][1]) / 2;
-                    const lineLabelPoint = new Point(x1, y1, new SpatialReference({wkid: 102100}));
-                    const value = parseFloat(activeMeasurement.features[0].properties.derivedData.segmentLengths.value[surfaceMeasureLength - 3]).toFixed(2) + activeMeasurement.features[0].properties.derivedData.unit;
-                    const measureValue = new TextSymbol(value);
-                    measureValue.setVerticalAlignment("middle");
-                    measureValue.setHorizontalAlignment("right");
-                    self.map.graphics.add(new Graphic(lineLabelPoint, measureValue));
-                }
+            // Draw the line between the valid points, together with the lineLength derivedData
+            // This only works when we have >= 2 distinct points
+            if (uniqueCoords.length >= 2) {
+                this._drawPolygon(transformedCoords);
+                this._drawLineLabels(transformedCoords, derivedData);
             }
+
+            // Draw the individual points
+            _.each(uniqueCoords, (coord, i) => this._drawPoint(coord, i + 1));
         }
     }
 });
