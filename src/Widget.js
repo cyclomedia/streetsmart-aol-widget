@@ -13,7 +13,10 @@ require(REQUIRE_CONFIG, [], function () {
     return define([
         'dojo/_base/declare',
         'dojo/on',
+        'dojo/dom',
+        'dijit/Tooltip',
         'jimu/BaseWidget',
+        'esri/geometry/ScreenPoint',
         'https://streetsmart.cyclomedia.com/api/v18.6/StreetSmartApi.js',
         './utils',
         './RecordingClient',
@@ -21,15 +24,18 @@ require(REQUIRE_CONFIG, [], function () {
         './MeasurementHandler',
         './OverlayManager'
     ], function (
-         declare,
-         on,
-         BaseWidget,
-         StreetSmartApi,
-         utils,
-         RecordingClient,
-         LayerManager,
-         MeasurementHandler,
-         OverlayManager
+        declare,
+        on,
+        dom,
+        Tooltip,
+        BaseWidget,
+        ScreenPoint,
+        StreetSmartApi,
+        utils,
+        RecordingClient,
+        LayerManager,
+        MeasurementHandler,
+        OverlayManager
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
@@ -152,6 +158,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this._layerManager.addLayers();
                     this._bindViewerDependantEventHandlers();
                     this._handleConeChange();
+                    this._drawDraggableMarker();
                     return;
                 }
 
@@ -311,6 +318,45 @@ require(REQUIRE_CONFIG, [], function () {
                 this._removeEventListeners();
                 this._layerManager.removeLayers();
                 this._panoramaViewer = null;
+            },
+
+            _drawDraggableMarker() {
+                const nav = this.panoramaViewerDiv.querySelector('.navbar .navbar-right .nav');
+                const exampleButton = nav.querySelector('.btn');
+
+                // Draw the actual button in the same style as the other buttons.
+                const markerButton = dojo.create('button', {
+                    id: 'addMapDropBtn',
+                    class: exampleButton.className,
+                    draggable: true,
+                    ondragend: this._handleMarkerDrop.bind(this),
+                });
+
+                nav.appendChild(markerButton);
+                const toolTipMsg = this.nls.tipDragDrop;
+
+                new Tooltip({
+                    connectId: markerButton,
+                    label: toolTipMsg,
+                    position: ['above']
+                });
+            },
+
+            _handleMarkerDrop(e) {
+                e.preventDefault();
+
+                // Figure out on what pixels (relative to the map) the marker was dropped.
+                const containerOffset = this.map.container.getBoundingClientRect();
+                const mapRelativePixels = {
+                    x: e.clientX - containerOffset.x,
+                    y: e.clientY - containerOffset.y,
+                };
+
+                const sPoint = new ScreenPoint(mapRelativePixels.x, mapRelativePixels.y);
+                const mPoint = this.map.toMap(sPoint);
+                const vPoint = utils.transformProj4js(mPoint, this.wkid);
+
+                this.query(`${vPoint.x},${vPoint.y}`);
             },
 
             // communication method between widgets
