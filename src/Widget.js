@@ -18,6 +18,7 @@ require(REQUIRE_CONFIG, [], function () {
         './utils',
         './RecordingClient',
         './LayerManager',
+        './MeasurementHandler',
         './OverlayManager'
     ], function (
          declare,
@@ -27,6 +28,7 @@ require(REQUIRE_CONFIG, [], function () {
          utils,
          RecordingClient,
          LayerManager,
+         MeasurementHandler,
          OverlayManager
     ) {
         //To create a widget, you need to derive from BaseWidget.
@@ -69,6 +71,13 @@ require(REQUIRE_CONFIG, [], function () {
                     addEventListener: this.addEventListener.bind(this),
                     config: this.config,
                     removeEventListener: this.removeEventListener.bind(this),
+                });
+
+                this._measurementHandler = new MeasurementHandler({
+                    wkid: this.wkid,
+                    map: this.map,
+                    layer: this._layerManager.measureLayer,
+                    StreetSmartApi: StreetSmartApi
                 });
 
                 this._overlayManager = new OverlayManager({
@@ -121,7 +130,7 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _bindInitialMapHandlers() {
-                const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED
+                const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED;
                 this.addEventListener(StreetSmartApi, measurementChanged, this._handleMeasurementChanged.bind(this));
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
             },
@@ -129,6 +138,7 @@ require(REQUIRE_CONFIG, [], function () {
             _handleMeasurementChanged(e) {
                 const newViewer = e.detail.panoramaViewer;
                 this._handleViewerChanged(newViewer);
+                this._measurementHandler.draw(e)
             },
 
             /**
@@ -200,6 +210,10 @@ require(REQUIRE_CONFIG, [], function () {
                 if (!opts.viewerOnly) {
                     this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
                 }
+                if (this.config.measurement !== true) {
+                    const measureBtn = StreetSmartApi.PanoramaViewerUi.buttons.MEASURE;
+                    this._panoramaViewer.toggleButtonEnabled(measureBtn);
+                }
             },
 
             // We do not use removeEventListener for this,
@@ -218,6 +232,7 @@ require(REQUIRE_CONFIG, [], function () {
             _handleExtentChange() {
                 this._loadRecordings();
                 if (this.config.overlay === true) {
+                    // TODO remove and redraw overlays
                     // this._overlayManager.addOverlaysToViewer();
                 }
             },
