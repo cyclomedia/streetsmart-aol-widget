@@ -158,7 +158,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this._layerManager.addLayers();
                     this._bindViewerDependantEventHandlers();
                     this._handleConeChange();
-                    this._dragDropMarker(event);
+                    this._drawDraggableMarker();
                     return;
                 }
 
@@ -170,7 +170,6 @@ require(REQUIRE_CONFIG, [], function () {
                     this.removeEventListener(this._imageChangeListener);
                     this._panoramaViewer = newViewer;
                     this._bindViewerDependantEventHandlers({ viewerOnly: true});
-                    this._dragDropMarker(event);
                 }
             },
 
@@ -321,48 +320,43 @@ require(REQUIRE_CONFIG, [], function () {
                 this._panoramaViewer = null;
             },
 
-            _dragDropMarker(){
-                const navbar = document.querySelector('.panoramaviewer .navbar');
-                const nav = navbar.querySelector('.navbar-right .nav');
-                let self = this;
-                let btn = nav.querySelector('.btn');
-                if (!nav.querySelector('#addMapDropBtn')) {
-                    let addDropBtn = dojo.create("button", {
-                        id: "addMapDropBtn",
-                        class: btn.className,
-                        draggable: true,
-                        ondragend: function (evt) {
-                            self._markerDropInitiated(event);
-                        }
-                    });
-                    nav.appendChild(addDropBtn);
-                }
-                let btnJsonTip = dom.byId('addMapDropBtn');
-                let toolTipMsg = self.nls.tipDragDrop;
+            _drawDraggableMarker() {
+                const nav = this.panoramaViewerDiv.querySelector('.navbar .navbar-right .nav');
+                const exampleButton = nav.querySelector('.btn');
+
+                // Draw the actual button in the same style as the other buttons.
+                const markerButton = dojo.create('button', {
+                    id: 'addMapDropBtn',
+                    class: exampleButton.className,
+                    draggable: true,
+                    ondragend: this._handleMarkerDrop.bind(this),
+                });
+
+                nav.appendChild(markerButton);
+                const toolTipMsg = this.nls.tipDragDrop;
+
                 new Tooltip({
-                    connectId: btnJsonTip,
+                    connectId: markerButton,
                     label: toolTipMsg,
-                    position: ["above"]
+                    position: ['above']
                 });
             },
 
-            _markerDropInitiated: function(event) {
-                event.preventDefault();
-                //Add event for drop on map
-                this.addEventListener(this.map, 'drop', this._markerDropped(event));
+            _handleMarkerDrop(e) {
+                e.preventDefault();
 
-            },
+                // Figure out on what pixels (relative to the map) the marker was dropped.
+                const containerOffset = this.map.container.getBoundingClientRect();
+                const mapRelativePixels = {
+                    x: e.clientX - containerOffset.x,
+                    y: e.clientY - containerOffset.y,
+                };
 
-            _markerDropped: function(event){
-                event.preventDefault();
-                let self = this;
-                let sPoint = new ScreenPoint(event.screenX,event.screenY);
-                let mPoint = self.map.toMap(sPoint);
-                let mapSRS = self.config.srs;
-                let usableSRS = mapSRS.split(":");
-                let cPoint = utils.transformProj4js(mPoint, usableSRS[1]);
+                const sPoint = new ScreenPoint(mapRelativePixels.x, mapRelativePixels.y);
+                const mPoint = this.map.toMap(sPoint);
+                const vPoint = utils.transformProj4js(mPoint, this.wkid);
 
-                this.query(`${cPoint.x},${cPoint.y}`);
+                this.query(`${vPoint.x},${vPoint.y}`);
             },
 
             // communication method between widgets
