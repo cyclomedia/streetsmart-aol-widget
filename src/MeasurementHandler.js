@@ -159,6 +159,10 @@ define([
         _drawLineLabels(transformedCoords, derivedData) {
             const mapWkid = this.map.spatialReference.wkid;
 
+            if (transformedCoords.length <= 1) {
+                return;
+            }
+
             _.each(transformedCoords, (coord, i) => {
                 const lineLength = derivedData.segmentLengths.value[i];
                 const nextCoord = transformedCoords[i + 1];
