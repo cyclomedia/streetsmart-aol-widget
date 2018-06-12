@@ -49,9 +49,6 @@ require(REQUIRE_CONFIG, [], function () {
             _viewerType: StreetSmartApi.ViewerType.PANORAMA,
             _listeners: [],
 
-            // Overlay Object
-            arrayOverlayIds: {},
-
             // CM properties
             _cmtTitleColor: '#98C23C',
             _apiKey: 'C3oda7I1S_49-rgV63wtWbgtOXcVe3gJWPAVWnAZK3whi7UxCjMNWzIJyv4Fmrcp',
@@ -91,9 +88,6 @@ require(REQUIRE_CONFIG, [], function () {
                     map: this.map,
                     config: this.config,
                     StreetSmartApi: StreetSmartApi,
-                    arrayOverlayIds: this.arrayOverlayIds,
-                    lineOverlayIds: this.lineOverlayIds,
-                    polyOverlayIds: this.polyOverlayIds,
                 });
 
                 this._applyWidgetStyle();
@@ -129,9 +123,6 @@ require(REQUIRE_CONFIG, [], function () {
                     this._bindInitialMapHandlers();
                     this._loadRecordings();
                     this._centerViewerToMap();
-                    if (this.config.overlay === true) {
-                        this._overlayManager.addOverlaysToViewer();
-                    }
                 });
             },
 
@@ -238,10 +229,6 @@ require(REQUIRE_CONFIG, [], function () {
 
             _handleExtentChange() {
                 this._loadRecordings();
-                if (this.config.overlay === true) {
-                    // TODO remove and redraw overlays
-                    // this._overlayManager.addOverlaysToViewer();
-                }
             },
 
             _loadRecordings() {
@@ -282,7 +269,11 @@ require(REQUIRE_CONFIG, [], function () {
                         viewerType: [this._viewerType],
                         srs: this.config.srs,
                     }
-                );
+                ).then(() => {
+                    if (this.config.overlay === true) {
+                        this._overlayManager.addOverlaysToViewer();
+                    }
+                });
             },
 
             setPanoramaViewerOrientation(orientation) {
@@ -315,6 +306,7 @@ require(REQUIRE_CONFIG, [], function () {
             onClose() {
                 StreetSmartApi.destroy({ targetElement: this.panoramaViewerDiv });
                 this.loadingIndicator.classList.remove('hidden');
+                this._overlayManager.reset();
                 this._removeEventListeners();
                 this._layerManager.removeLayers();
                 this._panoramaViewer = null;

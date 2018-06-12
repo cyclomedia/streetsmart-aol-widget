@@ -36,8 +36,7 @@ define([
     SldFactory,
 ) {
     return class LayerManager {
-        constructor({ map, wkid, config, StreetSmartApi, arrayOverlayIds }) {
-
+        constructor({ map, wkid, config, StreetSmartApi }) {
             this.map = map;
             this.wkid = wkid;
             this.config = config;
@@ -56,22 +55,40 @@ define([
                     style: 'solid'
                 },
             };
+            this.overlays = [];
         }
 
         addOverlaysToViewer() {
+            this.removeOverlays();
+
             const mapLayers = _.values(this.map._layers);
             const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
             _.each(featureLayers, (mapLayer) => {
                 const geojson = this.createGeoJsonForFeature(mapLayer);
                 const sldXMLtext = SldFactory.create({ mapLayer });
 
-                this.api.addOverlay({
+                const overlayId = this.api.addOverlay({
                     // sourceSrs: 'EPSG:3857',  // Broken in API
                     name: mapLayer.name,
                     sldXMLtext,
                     geojson
                 });
+
+                this.overlays.push(overlayId);
             });
+        }
+
+        removeOverlays() {
+            _.each(this.overlays, overlayId => {
+                this.api.removeOverlay(overlayId);
+            });
+            this.overlays = [];
+        }
+
+        // Doesn't need to remove the overlays from the viewer,
+        // as this is used when we destroy the viewer.
+        reset() {
+            this.overlays = [];
         }
 
         createGeoJsonForFeature(mapLayer) {
