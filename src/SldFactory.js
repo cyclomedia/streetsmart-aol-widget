@@ -1,11 +1,13 @@
 define([
     'esri/renderers/SimpleRenderer',
     'esri/renderers/ClassBreaksRenderer',
-    'esri/renderers/UniqueValueRenderer'
+    'esri/renderers/UniqueValueRenderer',
+    'esri/symbols/SimpleMarkerSymbol'
 ], function (
     SimpleRenderer,
     ClassBreaksRenderer,
-    UniqueValueRenderer
+    UniqueValueRenderer,
+    SimpleMarkerSymbol
 ) {
     'use strict';
 
@@ -136,6 +138,23 @@ define([
             `;
         }
 
+        _createWellKnownName(symbol) {
+            // asdfsdfdsfasdfsaf
+            switch (symbol.style) {
+                case SimpleMarkerSymbol.STYLE_PATH:
+                case SimpleMarkerSymbol.STYLE_SQUARE:
+                case SimpleMarkerSymbol.STYLE_DIAMOND:
+                    return 'square';
+                case SimpleMarkerSymbol.STYLE_X:
+                    // return 'x'; // The StreetSmartAPI does not support 'x'
+                case SimpleMarkerSymbol.STYLE_CROSS:
+                    return 'cross';
+                case SimpleMarkerSymbol.STYLE_CIRCLE:
+                default:
+                    return 'circle';
+            }
+        }
+
         createPointSymbolizer(symbol) {
             let content = '';
             if (symbol.type === 'picturemarkersymbol') {
@@ -147,10 +166,21 @@ define([
                     <Size>100</Size>
                 `;
             } else {
-                const { stroke, fill } = this._createStrokeAndFill(symbol);
+                const wellKnownName = this._createWellKnownName(symbol);
+                let { stroke, fill } = this._createStrokeAndFill(symbol);
+
+                // According to the arcgis docs:
+                // The color property does not apply to marker symbols defined with the cross or x style.
+                // Since these styles are wholly comprised of outlines, you must set the color of symbols with those styles via the setOutline() method.
+                if (symbol.style === SimpleMarkerSymbol.STYLE_X ||
+                    symbol.style === SimpleMarkerSymbol.STYLE_CROSS) {
+                    fill = stroke;
+                    stroke = '';
+                }
+
                 content = `
                     <Mark>
-                        <WellKnownName>circle</WellKnownName>
+                        <WellKnownName>${wellKnownName}</WellKnownName>
                         ${fill}
                         ${stroke}
                     </Mark>

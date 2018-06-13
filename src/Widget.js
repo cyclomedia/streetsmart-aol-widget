@@ -17,7 +17,7 @@ require(REQUIRE_CONFIG, [], function () {
         'dijit/Tooltip',
         'jimu/BaseWidget',
         'esri/geometry/ScreenPoint',
-        'https://streetsmart.cyclomedia.com/api/v18.6/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v18.7/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
