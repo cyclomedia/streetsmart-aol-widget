@@ -33,7 +33,7 @@ define([
     SpatialReference,
     geoJsonUtils,
     utils,
-    SldFactory,
+    SLD,
 ) {
     return class LayerManager {
         constructor({ map, wkid, config, StreetSmartApi }) {
@@ -64,13 +64,13 @@ define([
             const mapLayers = _.values(this.map._layers);
             const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
             _.each(featureLayers, (mapLayer) => {
-                const geojson = this.createGeoJsonForFeature(mapLayer);
-                const sldXMLtext = SldFactory.create({ mapLayer });
+                const sld = new SLD(mapLayer);
+                const geojson = this.createGeoJsonForFeature({ mapLayer, sld });
 
                 const overlayId = this.api.addOverlay({
                     // sourceSrs: 'EPSG:3857',  // Broken in API
                     name: mapLayer.name,
-                    sldXMLtext,
+                    sldXMLtext: sld.xml,
                     geojson
                 });
 
@@ -91,11 +91,51 @@ define([
             this.overlays = [];
         }
 
-        createGeoJsonForFeature(mapLayer) {
+        doesFeatureMatchCase(feature, sldCase) {
+            if (!sldCase.filter) {
+                return true;
+            }
+            return feature.properties[sldCase.filter.attribute] === sldCase.filter.value;
+        }
+
+        // Adds the SLD_DEFAULT_CASE when a feature
+        // matchs none if the special cases of the SLD
+        applyDefaultCaseIfNeeded(feature, sld) {
+            const newFeature = _.cloneDeep(feature);
+            let needsDefaultCase = true;
+
+            for (let i=0; i < sld.cases.length ; i++) {
+                const sldCase = sld.cases[i];
+                const match = this.doesFeatureMatchCase(feature, sldCase);
+                if (match) {
+                    needsDefaultCase = false;
+                    break;
+                }
+            }
+
+            if (needsDefaultCase) {
+                newFeature.properties['SLD_DEFAULT_CASE'] = 1;
+            }
+
+            return newFeature;
+        }
+
+        createGeoJsonForFeature({ mapLayer, sld }) {
             const arcgisFeatureSet = mapLayer.toJson().featureSet;
             const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet);
+            
+            // We can't just create geoJson from the features of the maplayer.
+            // To correctly apply the default case in the Unique Value Renderer,
+            // we make the defaultCase a filter, and make the "other" features in the geoJSON
+            // match by adding a SLD_DEFAULT_CASE:1 property.
+            if (geojson.type === 'FeatureCollection' && sld.containsDefaultCase) {
+                const newFeatures = geojson.features.map((feature) => {
+                    return this.applyDefaultCaseIfNeeded(feature, sld);
+                });
+                geojson.features = newFeatures;
+            }
 
-            // Add the symbol prop to the geoJson so it is styled by the SLD
+            // Make sure the panoramaviewer knows which srs this is in.
             let wkid = _.get(arcgisFeatureSet, 'features[0].geometry.spatialReference.wkid', null);
             if (wkid) {
                 wkid = wkid === 102100 ? 3857 : wkid;
