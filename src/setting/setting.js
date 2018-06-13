@@ -99,7 +99,6 @@ define([
                 this.config.measurement = document.getElementById('enableMeasurement').checked;
                 this.config.overlay = document.getElementById('enableOverlay').checked;
                 this.config.navigation = document.getElementById('enableNavigation').checked;
-                console.log("getconfig", this.config);
                 return this.config;
             },
 
@@ -176,8 +175,8 @@ define([
                     parseFloat(node.MinY),
                     parseFloat(node.MaxX),
                     parseFloat(node.MaxY)
-        ];
-    }
+                ];
+            }
 
 
         });

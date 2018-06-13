@@ -104,6 +104,11 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             async _initApi() {
+                if (this.config.agreement !== true) {
+                    alert(this.nls.agreementWarning);
+                    return
+                }
+
                 const CONFIG = {
                     targetElement: this.panoramaViewerDiv, // I have no idea where this comes from
                     username: this.config.uName,
@@ -148,6 +153,13 @@ require(REQUIRE_CONFIG, [], function () {
                     this._panoramaViewer = newViewer;
                     this._layerManager.addLayers();
                     this._bindViewerDependantEventHandlers();
+                    if (this.config.navigation !== true) {
+                        this._hideNavigation();
+                    }
+                    if (this.config.measurement !== true) {
+                        const measureBtn = StreetSmartApi.PanoramaViewerUi.buttons.MEASURE;
+                        this._panoramaViewer.toggleButtonEnabled(measureBtn);
+                    }
                     this._handleImageChange();
                     this._drawDraggableMarker();
                     return;
@@ -195,11 +207,7 @@ require(REQUIRE_CONFIG, [], function () {
                 const listener = this.addEventListener(this.map, 'zoom-end', (zoomEvent) => {
                     if (zoomEvent.level > this._zoomThreshold) {
                         this.zoomWarning.classList.add('hidden');
-                        if (this.config.agreement !== true) {
-                            alert(this.nls.agreementWarning);
-                        }else {
-                            this._initApi();
-                        }
+                        this._initApi();
                         this.removeEventListener(listener);
                     }
                 });
@@ -211,13 +219,6 @@ require(REQUIRE_CONFIG, [], function () {
                 this._imageChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this._handleImageChange.bind(this));
                 if (!opts.viewerOnly) {
                     this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
-                }
-                if(this.config.navigation !== true) {
-                    this._navigationDisabled();
-                }
-                if (this.config.measurement !== true) {
-                    const measureBtn = StreetSmartApi.PanoramaViewerUi.buttons.MEASURE;
-                    this._panoramaViewer.toggleButtonEnabled(measureBtn);
                 }
             },
 
@@ -246,6 +247,9 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _loadRecordings() {
+                if (!this.config.navigation) {
+                    return;
+                }
                 if (this.map.getZoom() > this._zoomThreshold) {
                     this._recordingClient.load().then((response) => {
                         this._layerManager.updateRecordings(response);
@@ -302,12 +306,12 @@ require(REQUIRE_CONFIG, [], function () {
                 return zoomThreshold;
             },
 
-            _navigationDisabled: function(){
+            _hideNavigation() {
                 this._panoramaViewer.toggleNavbarVisible();
                 this._panoramaViewer.toggleTimeTravelVisible();
-                //this function is not working as expected getting an error from the StreetSmart API
-                //this._panoramaViewer.toggleRecordingsVisible();
-                this._layerManager.recordingLayer.setVisibility(false);
+                setTimeout(() => {
+                    this._panoramaViewer.toggleRecordingsVisible(false);
+                });
             },
 
             onOpen() {
@@ -315,11 +319,7 @@ require(REQUIRE_CONFIG, [], function () {
 
                 // Only open when the zoomThreshold is reached.
                 if (zoomLevel > this._zoomThreshold) {
-                    if (this.config.agreement !== true) {
-                        alert(this.nls.agreementWarning);
-                    }else {
-                        this._initApi();
-                    }
+                    this._initApi();
                 } else {
                     this._openApiWhenZoomedIn();
                 }
