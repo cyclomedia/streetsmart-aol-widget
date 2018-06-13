@@ -1,9 +1,3 @@
-.cmt .tooltip {
-    width: inherit;
-    border: none;
-    background-color: initial;
-}
-
 #panoramaViewerDiv {
     overflow: hidden;
     padding: 0;
