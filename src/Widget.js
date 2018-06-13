@@ -13,21 +13,29 @@ require(REQUIRE_CONFIG, [], function () {
     return define([
         'dojo/_base/declare',
         'dojo/on',
+        'dojo/dom',
+        'dijit/Tooltip',
         'jimu/BaseWidget',
-        'https://streetsmart.cyclomedia.com/api/v18.6/StreetSmartApi.js',
+        'esri/geometry/ScreenPoint',
+        'https://streetsmart.cyclomedia.com/api/v18.7/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
+        './MeasurementHandler',
         './OverlayManager'
     ], function (
-         declare,
-         on,
-         BaseWidget,
-         StreetSmartApi,
-         utils,
-         RecordingClient,
-         LayerManager,
-         OverlayManager
+        declare,
+        on,
+        dom,
+        Tooltip,
+        BaseWidget,
+        ScreenPoint,
+        StreetSmartApi,
+        utils,
+        RecordingClient,
+        LayerManager,
+        MeasurementHandler,
+        OverlayManager
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
@@ -40,9 +48,6 @@ require(REQUIRE_CONFIG, [], function () {
             _zoomThreshold: null,
             _viewerType: StreetSmartApi.ViewerType.PANORAMA,
             _listeners: [],
-
-            // Overlay Object
-            arrayOverlayIds: {},
 
             // CM properties
             _cmtTitleColor: '#98C23C',
@@ -71,14 +76,18 @@ require(REQUIRE_CONFIG, [], function () {
                     removeEventListener: this.removeEventListener.bind(this),
                 });
 
+                this._measurementHandler = new MeasurementHandler({
+                    wkid: this.wkid,
+                    map: this.map,
+                    layer: this._layerManager.measureLayer,
+                    StreetSmartApi: StreetSmartApi
+                });
+
                 this._overlayManager = new OverlayManager({
                     wkid: this.wkid,
                     map: this.map,
                     config: this.config,
                     StreetSmartApi: StreetSmartApi,
-                    arrayOverlayIds: this.arrayOverlayIds,
-                    lineOverlayIds: this.lineOverlayIds,
-                    polyOverlayIds: this.polyOverlayIds,
                 });
 
                 this._applyWidgetStyle();
@@ -95,6 +104,11 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             async _initApi() {
+                if (this.config.agreement !== true) {
+                    alert(this.nls.agreementWarning);
+                    return
+                }
+
                 const CONFIG = {
                     targetElement: this.panoramaViewerDiv, // I have no idea where this comes from
                     username: this.config.uName,
@@ -114,14 +128,11 @@ require(REQUIRE_CONFIG, [], function () {
                     this._bindInitialMapHandlers();
                     this._loadRecordings();
                     this._centerViewerToMap();
-                    if (this.config.overlay === true) {
-                        this._overlayManager.addOverlaysToViewer();
-                    }
                 });
             },
 
             _bindInitialMapHandlers() {
-                const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED
+                const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED;
                 this.addEventListener(StreetSmartApi, measurementChanged, this._handleMeasurementChanged.bind(this));
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
             },
@@ -129,6 +140,7 @@ require(REQUIRE_CONFIG, [], function () {
             _handleMeasurementChanged(e) {
                 const newViewer = e.detail.panoramaViewer;
                 this._handleViewerChanged(newViewer);
+                this._measurementHandler.draw(e)
             },
 
             /**
@@ -141,7 +153,15 @@ require(REQUIRE_CONFIG, [], function () {
                     this._panoramaViewer = newViewer;
                     this._layerManager.addLayers();
                     this._bindViewerDependantEventHandlers();
-                    this._handleConeChange();
+                    if (this.config.navigation !== true) {
+                        this._hideNavigation();
+                    }
+                    if (this.config.measurement !== true) {
+                        const measureBtn = StreetSmartApi.PanoramaViewerUi.buttons.MEASURE;
+                        this._panoramaViewer.toggleButtonEnabled(measureBtn);
+                    }
+                    this._handleImageChange();
+                    this._drawDraggableMarker();
                     return;
                 }
 
@@ -196,7 +216,7 @@ require(REQUIRE_CONFIG, [], function () {
             _bindViewerDependantEventHandlers(options) {
                 const opts = Object.assign({}, options, { viewerOnly: false });
                 this._viewChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.VIEW_CHANGE, this._handleConeChange.bind(this));
-                this._imageChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this._handleConeChange.bind(this));
+                this._imageChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this._handleImageChange.bind(this));
                 if (!opts.viewerOnly) {
                     this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
                 }
@@ -215,14 +235,21 @@ require(REQUIRE_CONFIG, [], function () {
                 this._layerManager.updateViewingCone(this._panoramaViewer);
             },
 
-            _handleExtentChange() {
-                this._loadRecordings();
+            _handleImageChange() {
+                this._handleConeChange();
                 if (this.config.overlay === true) {
-                    // this._overlayManager.addOverlaysToViewer();
+                    this._overlayManager.addOverlaysToViewer();
                 }
             },
 
+            _handleExtentChange() {
+                this._loadRecordings();
+            },
+
             _loadRecordings() {
+                if (!this.config.navigation) {
+                    return;
+                }
                 if (this.map.getZoom() > this._zoomThreshold) {
                     this._recordingClient.load().then((response) => {
                         this._layerManager.updateRecordings(response);
@@ -279,6 +306,14 @@ require(REQUIRE_CONFIG, [], function () {
                 return zoomThreshold;
             },
 
+            _hideNavigation() {
+                this._panoramaViewer.toggleNavbarVisible();
+                this._panoramaViewer.toggleTimeTravelVisible();
+                setTimeout(() => {
+                    this._panoramaViewer.toggleRecordingsVisible(false);
+                });
+            },
+
             onOpen() {
                 const zoomLevel = this.map.getZoom();
 
@@ -293,9 +328,49 @@ require(REQUIRE_CONFIG, [], function () {
             onClose() {
                 StreetSmartApi.destroy({ targetElement: this.panoramaViewerDiv });
                 this.loadingIndicator.classList.remove('hidden');
+                this._overlayManager.reset();
                 this._removeEventListeners();
                 this._layerManager.removeLayers();
                 this._panoramaViewer = null;
+            },
+
+            _drawDraggableMarker() {
+                const nav = this.panoramaViewerDiv.querySelector('.navbar .navbar-right .nav');
+                const exampleButton = nav.querySelector('.btn');
+
+                // Draw the actual button in the same style as the other buttons.
+                const markerButton = dojo.create('button', {
+                    id: 'addMapDropBtn',
+                    class: exampleButton.className,
+                    draggable: true,
+                    ondragend: this._handleMarkerDrop.bind(this),
+                });
+
+                nav.appendChild(markerButton);
+                const toolTipMsg = this.nls.tipDragDrop;
+
+                new Tooltip({
+                    connectId: markerButton,
+                    label: toolTipMsg,
+                    position: ['above']
+                });
+            },
+
+            _handleMarkerDrop(e) {
+                e.preventDefault();
+
+                // Figure out on what pixels (relative to the map) the marker was dropped.
+                const containerOffset = this.map.container.getBoundingClientRect();
+                const mapRelativePixels = {
+                    x: e.clientX - containerOffset.x,
+                    y: e.clientY - containerOffset.y,
+                };
+
+                const sPoint = new ScreenPoint(mapRelativePixels.x, mapRelativePixels.y);
+                const mPoint = this.map.toMap(sPoint);
+                const vPoint = utils.transformProj4js(mPoint, this.wkid);
+
+                this.query(`${vPoint.x},${vPoint.y}`);
             },
 
             // communication method between widgets

@@ -48,7 +48,6 @@ define([
             },
 
             setConfig:function(config) {
-                console.log("setconfig", config);
 
                 this.config = config;
 
@@ -63,18 +62,30 @@ define([
                 }
                 if(this.config.agreement){
                     this.agreementCheck.value = this.config.agreement;
+                    if(this.config.agreement === true){
+                        this.agreementCheck.checked = true;
+                    }
                 }
                 if(this.config.srs){
                     this.srsCyclomedia.value = this.config.srs;
                 }
                 if(this.config.measurement){
                     this.measuementEnable.value = this.config.measurement;
+                    if(this.config.measurement === true){
+                        this.measuementEnable.checked = true;
+                    }
                 }
                 if(this.config.overlay){
                     this.overlayEnable.value = this.config.overlay;
+                    if(this.config.overlay === true) {
+                        this.overlayEnable.checked = true;
+                    }
                 }
                 if(this.config.navigation){
                     this.navigationEnable.value = this.config.navigation;
+                    if(this.config.navigation === true) {
+                        this.navigationEnable.checked = true;
+                    }
                 }
 
             },
@@ -83,12 +94,11 @@ define([
                 this.config.locale = this.selectCyclomediaLocation.value;
                 this.config.uName = this.uNameCyclomedia.value;
                 this.config.uPwd = this.uPwdCyclomedia.value;
-                this.config.agreement = this.agreementCheck.value;
+                this.config.agreement = document.getElementById('acceptCmtAgreement').checked;
                 this.config.srs = dijit.byId('srsComboBox').value;
                 this.config.measurement = document.getElementById('enableMeasurement').checked;
                 this.config.overlay = document.getElementById('enableOverlay').checked;
                 this.config.navigation = document.getElementById('enableNavigation').checked;
-                console.log("getconfig", this.config);
                 return this.config;
             },
 
@@ -142,7 +152,7 @@ define([
                         let srsDropDown = new FilteringSelect({
                             id : "srsComboBox",
                             name : "SRS",
-                            value : "",
+                            value : this.config.srs || '',
                             store : srsStore,
                             SearchAttr : "srs",
                             queryExpr : '*${0}*',
@@ -165,8 +175,8 @@ define([
                     parseFloat(node.MinY),
                     parseFloat(node.MaxX),
                     parseFloat(node.MaxY)
-        ];
-    }
+                ];
+            }
 
 
         });

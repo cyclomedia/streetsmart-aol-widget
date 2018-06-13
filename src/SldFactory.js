@@ -1,25 +1,30 @@
 define([
     'esri/renderers/SimpleRenderer',
     'esri/renderers/ClassBreaksRenderer',
-    'esri/renderers/UniqueValueRenderer'
+    'esri/renderers/UniqueValueRenderer',
+    'esri/symbols/SimpleMarkerSymbol'
 ], function (
     SimpleRenderer,
     ClassBreaksRenderer,
-    UniqueValueRenderer
+    UniqueValueRenderer,
+    SimpleMarkerSymbol
 ) {
     'use strict';
 
-    return {
-        create({ mapLayer }) {
-            const filterSymbolMapping = this.generateFilterSymbolMapping({ mapLayer });
-            const rules = filterSymbolMapping.map(this.createRuleForSymbolCase.bind(this));
-            return this.wrapSld(rules);
-        },
+    return class SLD {
+        constructor(mapLayer) {
+            this.mapLayer = mapLayer;
+            this.containsDefaultCase = false;
+            this.cases = this.generateCases();
+            this.rules = this.cases.map(this.createRuleForSymbolCase.bind(this));
+            this.xml = this.createXml();
+        }
+
         // A mapLayer can render multiple symbols.
         // Each symbol represents a Rule in an SLD.
         // Create a symbol and its correspondig filter per unique symbol.
-        generateFilterSymbolMapping({ mapLayer }) {
-        // ... not really a mapping but meh.
+        generateCases() {
+            const mapLayer = this.mapLayer;
             const renderer = mapLayer.renderer;
             if (renderer instanceof SimpleRenderer) {
                 return [{
@@ -42,12 +47,12 @@ define([
 
                 // Add the "else" symbol (default case) to the list
                 if (renderer.defaultSymbol) {
+                    this.containsDefaultCase = true;
                     const defaultCase = {
-                        // filter: {
-                        //     value: 'TRUE',
-                        //     attribute: 'SLD_DEFAULT_CASE',
-                        // },
-                        filter: null,
+                        filter: {
+                            value: 1,
+                            attribute: 'SLD_DEFAULT_CASE',
+                        },
                         symbol: renderer.defaultSymbol,
                         geometryType: mapLayer.geometryType,
                     };
@@ -62,7 +67,8 @@ define([
                 filter: null,
                 symbol: renderer.defaultSymbol,
             }];
-        },
+        }
+
         createRuleForSymbolCase({ filter, symbol, geometryType }) {
             return `
                 <Rule>
@@ -70,7 +76,8 @@ define([
                     ${this.createSymbolizer(symbol, { geometryType })}
                 </Rule>
             `;
-        },
+        }
+
         // Transform `infos` to filter
         createSldFilter(filter) {
             if (!filter) {
@@ -78,7 +85,8 @@ define([
             }
             const content = `<PropertyName>${filter.attribute}</PropertyName><Literal>${filter.value}</Literal>`
             return `<Filter><PropertyIsEqualTo>${content}</PropertyIsEqualTo></Filter>`;
-        },
+        }
+
         _createStrokeAndFill(symbol) {
             let stroke = '';
             if (symbol.outline) {
@@ -93,7 +101,8 @@ define([
                 <SvgParameter name="fill-opacity">${symbol.color.a}</SvgParameter>
               </Fill>`;
             return { stroke, fill };
-        },
+        }
+
         // Transform arcGis symbol to SLD
         createSymbolizer(symbol, { geometryType }) {
             switch (geometryType) {
@@ -105,7 +114,8 @@ define([
                 default:
                     return this.createPointSymbolizer(symbol);
             }
-        },
+        }
+
         createPolygonSymbolizer(symbol) {
             const { stroke, fill } = this._createStrokeAndFill(symbol);
             return `
@@ -114,7 +124,8 @@ define([
                     ${stroke}
                 </PolygonSymbolizer>
             `;
-        },
+        }
+
         createLineSymbolizer(symbol) {
             return `
                 <LineSymbolizer>
@@ -125,7 +136,25 @@ define([
                     </Stroke>
                 </LineSymbolizer>
             `;
-        },
+        }
+
+        _createWellKnownName(symbol) {
+            // asdfsdfdsfasdfsaf
+            switch (symbol.style) {
+                case SimpleMarkerSymbol.STYLE_PATH:
+                case SimpleMarkerSymbol.STYLE_SQUARE:
+                case SimpleMarkerSymbol.STYLE_DIAMOND:
+                    return 'square';
+                case SimpleMarkerSymbol.STYLE_X:
+                    // return 'x'; // The StreetSmartAPI does not support 'x'
+                case SimpleMarkerSymbol.STYLE_CROSS:
+                    return 'cross';
+                case SimpleMarkerSymbol.STYLE_CIRCLE:
+                default:
+                    return 'circle';
+            }
+        }
+
         createPointSymbolizer(symbol) {
             let content = '';
             if (symbol.type === 'picturemarkersymbol') {
@@ -137,10 +166,21 @@ define([
                     <Size>100</Size>
                 `;
             } else {
-                const { stroke, fill } = this._createStrokeAndFill(symbol);
+                const wellKnownName = this._createWellKnownName(symbol);
+                let { stroke, fill } = this._createStrokeAndFill(symbol);
+
+                // According to the arcgis docs:
+                // The color property does not apply to marker symbols defined with the cross or x style.
+                // Since these styles are wholly comprised of outlines, you must set the color of symbols with those styles via the setOutline() method.
+                if (symbol.style === SimpleMarkerSymbol.STYLE_X ||
+                    symbol.style === SimpleMarkerSymbol.STYLE_CROSS) {
+                    fill = stroke;
+                    stroke = '';
+                }
+
                 content = `
                     <Mark>
-                        <WellKnownName>circle</WellKnownName>
+                        <WellKnownName>${wellKnownName}</WellKnownName>
                         ${fill}
                         ${stroke}
                     </Mark>
@@ -154,26 +194,31 @@ define([
                 </Graphic>
             </PointSymbolizer>
             `;
-        },
-        wrapSld(rules) {
-            return `<sld:StyledLayerDescriptor version="1.0.0"
-              xsi:schemaLocation="http://www.opengis.net/sldStyledLayerDescriptor.xsd"
-              xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
-              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            >
-                <sld:NamedLayer>
-                    <Name>BetaAssets - Utility Structures</Name>
-                    <sld:UserStyle>
-                        <Title>BetaAssets_8551</Title>
-                        <FeatureTypeStyle>
-                             ${rules.join('')}
-                        </FeatureTypeStyle>
-                    </sld:UserStyle>
-                </sld:NamedLayer>
-            </sld:StyledLayerDescriptor>`;
         }
-    };
+
+        createXml() {
+            const { mapLayer, rules } = this;
+
+            return `<?xml version="1.0" encoding="UTF-8"?>
+                    <sld:StyledLayerDescriptor version="1.1.0" 
+                     xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd" 
+                     xmlns="http://www.opengis.net/se" 
+                     xmlns:sld="http://www.opengis.net/sld" 
+                     xmlns:ogc="http://www.opengis.net/ogc" 
+                     xmlns:xlink="http://www.w3.org/1999/xlink" 
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    <sld:NamedLayer>
+                        <Name>${mapLayer.name}</Name>
+                        <sld:UserStyle>
+                            <Title>${mapLayer.id}</Title>
+                            <FeatureTypeStyle>
+                                 ${rules.join('')}
+                            </FeatureTypeStyle>
+                        </sld:UserStyle>
+                    </sld:NamedLayer>
+                </sld:StyledLayerDescriptor>`;
+        }
+    }
 });
 
 
