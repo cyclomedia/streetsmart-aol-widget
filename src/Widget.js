@@ -148,7 +148,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this._panoramaViewer = newViewer;
                     this._layerManager.addLayers();
                     this._bindViewerDependantEventHandlers();
-                    this._handleConeChange();
+                    this._handleImageChange();
                     this._drawDraggableMarker();
                     return;
                 }
@@ -204,7 +204,7 @@ require(REQUIRE_CONFIG, [], function () {
             _bindViewerDependantEventHandlers(options) {
                 const opts = Object.assign({}, options, { viewerOnly: false });
                 this._viewChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.VIEW_CHANGE, this._handleConeChange.bind(this));
-                this._imageChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this._handleConeChange.bind(this));
+                this._imageChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this._handleImageChange.bind(this));
                 if (!opts.viewerOnly) {
                     this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
                 }
@@ -225,6 +225,13 @@ require(REQUIRE_CONFIG, [], function () {
 
             _handleConeChange() {
                 this._layerManager.updateViewingCone(this._panoramaViewer);
+            },
+
+            _handleImageChange() {
+                this._handleConeChange();
+                if (this.config.overlay === true) {
+                    this._overlayManager.addOverlaysToViewer();
+                }
             },
 
             _handleExtentChange() {
@@ -269,11 +276,7 @@ require(REQUIRE_CONFIG, [], function () {
                         viewerType: [this._viewerType],
                         srs: this.config.srs,
                     }
-                ).then(() => {
-                    if (this.config.overlay === true) {
-                        this._overlayManager.addOverlaysToViewer();
-                    }
-                });
+                );
             },
 
             setPanoramaViewerOrientation(orientation) {

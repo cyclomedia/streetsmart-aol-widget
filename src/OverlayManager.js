@@ -67,14 +67,14 @@ define([
                 const sld = new SLD(mapLayer);
                 const geojson = this.createGeoJsonForFeature({ mapLayer, sld });
 
-                const overlayId = this.api.addOverlay({
+                const overlay = this.api.addOverlay({
                     // sourceSrs: 'EPSG:3857',  // Broken in API
                     name: mapLayer.name,
                     sldXMLtext: sld.xml,
                     geojson
                 });
 
-                this.overlays.push(overlayId);
+                this.overlays.push(overlay.id);
             });
         }
 
@@ -123,7 +123,7 @@ define([
         createGeoJsonForFeature({ mapLayer, sld }) {
             const arcgisFeatureSet = mapLayer.toJson().featureSet;
             const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet);
-            
+
             // We can't just create geoJson from the features of the maplayer.
             // To correctly apply the default case in the Unique Value Renderer,
             // we make the defaultCase a filter, and make the "other" features in the geoJSON
