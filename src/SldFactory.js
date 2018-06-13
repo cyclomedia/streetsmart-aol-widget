@@ -169,22 +169,24 @@ define([
         createXml() {
             const { mapLayer, rules } = this;
 
-            return `<sld:StyledLayerDescriptor version="1.0.0"
-              xsi:schemaLocation="http://www.opengis.net/sldStyledLayerDescriptor.xsd"
-              xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
-              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            >
-                <sld:NamedLayer>
-                    <Name>${mapLayer.name}</Name>
-                    <sld:UserStyle>
-                        <Title>${mapLayer.id}</Title>
-                        <FeatureTypeStyle>
-                             ${rules.join('')}
-                        </FeatureTypeStyle>
-                    </sld:UserStyle>
-                </sld:NamedLayer>
-            </sld:StyledLayerDescriptor>`;
+            return `<?xml version="1.0" encoding="UTF-8"?>
+                    <sld:StyledLayerDescriptor version="1.1.0" 
+                     xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd" 
+                     xmlns="http://www.opengis.net/se" 
+                     xmlns:sld="http://www.opengis.net/sld" 
+                     xmlns:ogc="http://www.opengis.net/ogc" 
+                     xmlns:xlink="http://www.w3.org/1999/xlink" 
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    <sld:NamedLayer>
+                        <Name>${mapLayer.name}</Name>
+                        <sld:UserStyle>
+                            <Title>${mapLayer.id}</Title>
+                            <FeatureTypeStyle>
+                                 ${rules.join('')}
+                            </FeatureTypeStyle>
+                        </sld:UserStyle>
+                    </sld:NamedLayer>
+                </sld:StyledLayerDescriptor>`;
         }
     }
 });
