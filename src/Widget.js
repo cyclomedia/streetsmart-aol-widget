@@ -13,26 +13,36 @@ require(REQUIRE_CONFIG, [], function () {
     return define([
         'dojo/_base/declare',
         'dojo/on',
+        'dojo/dom',
+        'dijit/Tooltip',
         'jimu/BaseWidget',
-        'https://streetsmart.cyclomedia.com/api/v18.6/StreetSmartApi.js',
+        'esri/geometry/ScreenPoint',
+        'https://streetsmart.cyclomedia.com/api/v18.7/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
+        './MeasurementHandler',
+        './OverlayManager'
     ], function (
-         declare,
-         on,
-         BaseWidget,
-         StreetSmartApi,
-         utils,
-         RecordingClient,
-         LayerManager
+        declare,
+        on,
+        dom,
+        Tooltip,
+        BaseWidget,
+        ScreenPoint,
+        StreetSmartApi,
+        utils,
+        RecordingClient,
+        LayerManager,
+        MeasurementHandler,
+        OverlayManager
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
             // Custom widget code goes here
             baseClass: 'jimu-widget-streetsmartwidget',
 
-            // This property is set by the framework when widget is loaded.
+            // This property is `set by the framework when widget is loaded.
             name: 'Street Smart by CycloMedia',
 
             _zoomThreshold: null,
@@ -62,8 +72,24 @@ require(REQUIRE_CONFIG, [], function () {
                     onRecordingLayerClick: this._handleRecordingClick.bind(this),
                     setPanoramaViewerOrientation: this.setPanoramaViewerOrientation.bind(this),
                     addEventListener: this.addEventListener.bind(this),
+                    config: this.config,
                     removeEventListener: this.removeEventListener.bind(this),
                 });
+
+                this._measurementHandler = new MeasurementHandler({
+                    wkid: this.wkid,
+                    map: this.map,
+                    layer: this._layerManager.measureLayer,
+                    StreetSmartApi: StreetSmartApi
+                });
+
+                this._overlayManager = new OverlayManager({
+                    wkid: this.wkid,
+                    map: this.map,
+                    config: this.config,
+                    StreetSmartApi: StreetSmartApi,
+                });
+
                 this._applyWidgetStyle();
                 this._determineZoomThreshold();
             },
@@ -78,6 +104,11 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             async _initApi() {
+                if (this.config.agreement !== true) {
+                    alert(this.nls.agreementWarning);
+                    return
+                }
+
                 const CONFIG = {
                     targetElement: this.panoramaViewerDiv, // I have no idea where this comes from
                     username: this.config.uName,
@@ -101,24 +132,43 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _bindInitialMapHandlers() {
-                const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED
+                const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED;
                 this.addEventListener(StreetSmartApi, measurementChanged, this._handleMeasurementChanged.bind(this));
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
             },
 
             _handleMeasurementChanged(e) {
                 const newViewer = e.detail.panoramaViewer;
+                this._handleViewerChanged(newViewer);
+                this._measurementHandler.draw(e)
+            },
 
+            /**
+             * Handles the viewer change and event handler rebinding,
+             * starting measurement mode changes the viewer.
+             */
+            _handleViewerChanged(newViewer) {
                 // Handle initial viewer creation
                 if (!this._panoramaViewer && newViewer) {
                     this._panoramaViewer = newViewer;
                     this._layerManager.addLayers();
                     this._bindViewerDependantEventHandlers();
-                    this._handleConeChange();
+                    if (this.config.navigation !== true) {
+                        this._hideNavigation();
+                    }
+                    if (this.config.measurement !== true) {
+                        const measureBtn = StreetSmartApi.PanoramaViewerUi.buttons.MEASURE;
+                        this._panoramaViewer.toggleButtonEnabled(measureBtn);
+                    }
+                    this._handleImageChange();
+                    this._drawDraggableMarker();
                     return;
                 }
 
-                if (newViewer !== this._panoramaViewer) {
+                // Update the event handlers and everything else once the viewer changed
+                // Always make sure newViewer is set as newViewer can be undefined
+                // while this._panoramaViewer can be null
+                if (newViewer && newViewer !== this._panoramaViewer) {
                     this.removeEventListener(this._viewChangeListener);
                     this.removeEventListener(this._imageChangeListener);
                     this._panoramaViewer = newViewer;
@@ -166,7 +216,7 @@ require(REQUIRE_CONFIG, [], function () {
             _bindViewerDependantEventHandlers(options) {
                 const opts = Object.assign({}, options, { viewerOnly: false });
                 this._viewChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.VIEW_CHANGE, this._handleConeChange.bind(this));
-                this._imageChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this._handleConeChange.bind(this));
+                this._imageChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this._handleImageChange.bind(this));
                 if (!opts.viewerOnly) {
                     this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
                 }
@@ -185,11 +235,21 @@ require(REQUIRE_CONFIG, [], function () {
                 this._layerManager.updateViewingCone(this._panoramaViewer);
             },
 
+            _handleImageChange() {
+                this._handleConeChange();
+                if (this.config.overlay === true) {
+                    this._overlayManager.addOverlaysToViewer();
+                }
+            },
+
             _handleExtentChange() {
                 this._loadRecordings();
             },
 
             _loadRecordings() {
+                if (!this.config.navigation) {
+                    return;
+                }
                 if (this.map.getZoom() > this._zoomThreshold) {
                     this._recordingClient.load().then((response) => {
                         this._layerManager.updateRecordings(response);
@@ -224,7 +284,7 @@ require(REQUIRE_CONFIG, [], function () {
 
             query(query) {
                 return StreetSmartApi.open(query, {
-                        viewerType: [this.viewerType],
+                        viewerType: [this._viewerType],
                         srs: this.config.srs,
                     }
                 );
@@ -246,6 +306,14 @@ require(REQUIRE_CONFIG, [], function () {
                 return zoomThreshold;
             },
 
+            _hideNavigation() {
+                this._panoramaViewer.toggleNavbarVisible();
+                this._panoramaViewer.toggleTimeTravelVisible();
+                setTimeout(() => {
+                    this._panoramaViewer.toggleRecordingsVisible(false);
+                });
+            },
+
             onOpen() {
                 const zoomLevel = this.map.getZoom();
 
@@ -260,9 +328,49 @@ require(REQUIRE_CONFIG, [], function () {
             onClose() {
                 StreetSmartApi.destroy({ targetElement: this.panoramaViewerDiv });
                 this.loadingIndicator.classList.remove('hidden');
+                this._overlayManager.reset();
                 this._removeEventListeners();
                 this._layerManager.removeLayers();
                 this._panoramaViewer = null;
+            },
+
+            _drawDraggableMarker() {
+                const nav = this.panoramaViewerDiv.querySelector('.navbar .navbar-right .nav');
+                const exampleButton = nav.querySelector('.btn');
+
+                // Draw the actual button in the same style as the other buttons.
+                const markerButton = dojo.create('button', {
+                    id: 'addMapDropBtn',
+                    class: exampleButton.className,
+                    draggable: true,
+                    ondragend: this._handleMarkerDrop.bind(this),
+                });
+
+                nav.appendChild(markerButton);
+                const toolTipMsg = this.nls.tipDragDrop;
+
+                new Tooltip({
+                    connectId: markerButton,
+                    label: toolTipMsg,
+                    position: ['above']
+                });
+            },
+
+            _handleMarkerDrop(e) {
+                e.preventDefault();
+
+                // Figure out on what pixels (relative to the map) the marker was dropped.
+                const containerOffset = this.map.container.getBoundingClientRect();
+                const mapRelativePixels = {
+                    x: e.clientX - containerOffset.x,
+                    y: e.clientY - containerOffset.y,
+                };
+
+                const sPoint = new ScreenPoint(mapRelativePixels.x, mapRelativePixels.y);
+                const mPoint = this.map.toMap(sPoint);
+                const vPoint = utils.transformProj4js(mPoint, this.wkid);
+
+                this.query(`${vPoint.x},${vPoint.y}`);
             },
 
             // communication method between widgets

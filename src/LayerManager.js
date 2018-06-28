@@ -9,9 +9,10 @@ define([
     'esri/symbols/SimpleLineSymbol',
     'esri/symbols/SimpleFillSymbol',
     'esri/renderers/SimpleRenderer',
+    'esri/layers/FeatureLayer',
     'esri/layers/GraphicsLayer',
     'esri/SpatialReference',
-    './utils',
+    './utils'
 ], function (
     Color,
     on,
@@ -23,9 +24,10 @@ define([
     SimpleLineSymbol,
     SimpleFillSymbol,
     SimpleRenderer,
+    FeatureLayer,
     GraphicsLayer,
     SpatialReference,
-    utils,
+    utils
 ) {
     return class LayerManager {
         constructor({ map, wkid, onRecordingLayerClick, addEventListener, removeEventListener, setPanoramaViewerOrientation }) {
@@ -38,6 +40,7 @@ define([
             this.setPanoramaViewerOrientation = setPanoramaViewerOrientation;
             this.recordingLayer = this._createRecordingLayer({ onClick: onRecordingLayerClick });
             this.viewingConeLayer = this._createViewingConeLayer();
+            this.measureLayer = this._createMeasureLayer();
             this.srs = new SpatialReference({ wkid });
 
         }
@@ -45,15 +48,17 @@ define([
         addLayers() {
             this.map.addLayer(this.recordingLayer);
             this.map.addLayer(this.viewingConeLayer);
-
             this.addEventListener(this.viewingConeLayer, 'mouse-down', this.startConeInteraction.bind(this));
+            this.map.addLayer(this.measureLayer);
         }
 
         removeLayers() {
             this.recordingLayer.clear();
             this.viewingConeLayer.clear();
+            this.measureLayer.clear();
             this.map.removeLayer(this.recordingLayer);
             this.map.removeLayer(this.viewingConeLayer);
+            this.map.removeLayer(this.measureLayer);
         }
 
         updateRecordings(recordingData) {
@@ -122,6 +127,28 @@ define([
 
         _createViewingConeLayer() {
             const layer = new GraphicsLayer({ id: 'cmd_viewingConeLayer' });
+            return layer;
+        }
+
+        _createMeasureLayer(){
+            const measureCollection = {
+                layerDefinition: {
+                    geometryType: 'esriGeometryPoint',
+                    fields: [{
+                        name: 'id',
+                        alias: 'ID',
+                        type: 'esriFieldTypeOID'
+                    }]
+                },
+                featureSet: null
+            };
+
+            const measureSymbol = new SimpleMarkerSymbol();
+            measureSymbol.setStyle(SimpleMarkerSymbol.STYLE_CROSS);
+            measureSymbol.setAngle(47);
+            const renderer = new SimpleRenderer(measureSymbol);
+            const layer = new FeatureLayer(measureCollection, {id: 'cmt_measure'});
+            layer.setRenderer(renderer);
             return layer;
         }
 
