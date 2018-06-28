@@ -374,15 +374,14 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             // communication method between widgets
-            onReceiveData(name, widgetId, data, historyData) {
-                if(name !== 'Search'){
+            onReceiveData(name, widgetId, data) {
+                if (name !== 'Search'){
                     return;
                 }
-                if(data.selectResult) {
-                    let searchedPoint = data.selectResult.result.feature.geometry;
-                    let mapSRS = this.config.srs;
-                    let usableSRS = mapSRS.split(":");
-                    let searchedPtLocal = utils.transformProj4js(searchedPoint, usableSRS[1]);
+                
+                if (data.selectResult) {
+                    const searchedPoint = data.selectResult.result.feature.geometry;
+                    const searchedPtLocal = utils.transformProj4js(searchedPoint, this.wkid);
                     this.query((`${searchedPtLocal.x},${searchedPtLocal.y}`));
                 }
             },
