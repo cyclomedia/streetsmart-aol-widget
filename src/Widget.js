@@ -104,6 +104,11 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             async _initApi() {
+                if (this.config.agreement !== true) {
+                    alert(this.nls.agreementWarning);
+                    return
+                }
+
                 const CONFIG = {
                     targetElement: this.panoramaViewerDiv, // I have no idea where this comes from
                     username: this.config.uName,
@@ -148,6 +153,13 @@ require(REQUIRE_CONFIG, [], function () {
                     this._panoramaViewer = newViewer;
                     this._layerManager.addLayers();
                     this._bindViewerDependantEventHandlers();
+                    if (this.config.navigation !== true) {
+                        this._hideNavigation();
+                    }
+                    if (this.config.measurement !== true) {
+                        const measureBtn = StreetSmartApi.PanoramaViewerUi.buttons.MEASURE;
+                        this._panoramaViewer.toggleButtonEnabled(measureBtn);
+                    }
                     this._handleImageChange();
                     this._drawDraggableMarker();
                     return;
@@ -208,10 +220,6 @@ require(REQUIRE_CONFIG, [], function () {
                 if (!opts.viewerOnly) {
                     this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
                 }
-                if (this.config.measurement !== true) {
-                    const measureBtn = StreetSmartApi.PanoramaViewerUi.buttons.MEASURE;
-                    this._panoramaViewer.toggleButtonEnabled(measureBtn);
-                }
             },
 
             // We do not use removeEventListener for this,
@@ -239,6 +247,9 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _loadRecordings() {
+                if (!this.config.navigation) {
+                    return;
+                }
                 if (this.map.getZoom() > this._zoomThreshold) {
                     this._recordingClient.load().then((response) => {
                         this._layerManager.updateRecordings(response);
@@ -293,6 +304,14 @@ require(REQUIRE_CONFIG, [], function () {
                 }
                 this._zoomThreshold = zoomThreshold;
                 return zoomThreshold;
+            },
+
+            _hideNavigation() {
+                this._panoramaViewer.toggleNavbarVisible();
+                this._panoramaViewer.toggleTimeTravelVisible();
+                setTimeout(() => {
+                    this._panoramaViewer.toggleRecordingsVisible(false);
+                });
             },
 
             onOpen() {
@@ -355,8 +374,16 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             // communication method between widgets
-            onReceiveData(name, widgetId, data, historyData) {
-                console.log('onReceiveData', name, widgetId, data, historyData);
+            onReceiveData(name, widgetId, data) {
+                if (name !== 'Search'){
+                    return;
+                }
+                
+                if (data.selectResult) {
+                    const searchedPoint = data.selectResult.result.feature.geometry;
+                    const searchedPtLocal = utils.transformProj4js(searchedPoint, this.wkid);
+                    this.query((`${searchedPtLocal.x},${searchedPtLocal.y}`));
+                }
             },
         });
     });
