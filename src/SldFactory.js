@@ -157,6 +157,7 @@ define([
 
         createPointSymbolizer(symbol) {
             let content = '';
+            if(symbol === undefined){ return; }
             if (symbol.type === 'picturemarkersymbol') {
                 content = `
                     <ExternalGraphic>
