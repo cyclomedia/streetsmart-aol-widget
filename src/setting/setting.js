@@ -75,6 +75,12 @@ define([
                         this.measuementEnable.checked = true;
                     }
                 }
+                if(this.config.saveMeasurements){
+                    this.saveMeasuementEnable.value = this.config.saveMeasurements;
+                    if(this.config.saveMeasurements === true){
+                        this.saveMeasuementEnable.checked = true;
+                    }
+                }
                 if(this.config.overlay){
                     this.overlayEnable.value = this.config.overlay;
                     if(this.config.overlay === true) {
@@ -97,6 +103,7 @@ define([
                 this.config.agreement = document.getElementById('acceptCmtAgreement').checked;
                 this.config.srs = dijit.byId('srsComboBox').value;
                 this.config.measurement = document.getElementById('enableMeasurement').checked;
+                this.config.saveMeasurements = document.getElementById('saveMeasurement').checked;
                 this.config.overlay = document.getElementById('enableOverlay').checked;
                 this.config.navigation = document.getElementById('enableNavigation').checked;
                 return this.config;

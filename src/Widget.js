@@ -160,8 +160,12 @@ require(REQUIRE_CONFIG, [], function () {
                         const measureBtn = StreetSmartApi.PanoramaViewerUi.buttons.MEASURE;
                         this._panoramaViewer.toggleButtonEnabled(measureBtn);
                     }
+                    if(this.config.saveMeasurements === true){
+                        this._showLayersButton();
+                    }
                     this._handleImageChange();
                     this._drawDraggableMarker();
+
                     return;
                 }
 
@@ -371,6 +375,33 @@ require(REQUIRE_CONFIG, [], function () {
                 const vPoint = utils.transformProj4js(mPoint, this.wkid);
 
                 this.query(`${vPoint.x},${vPoint.y}`);
+            },
+
+            _showLayersButton(){
+                const nav = this.panoramaViewerDiv.querySelector('.navbar .navbar-right .nav');
+                const exampleButton = nav.querySelector('.btn');
+
+                // Draw the actual button in the same style as the other buttons.
+                const editLayersButton = dojo.create('button', {
+                    id: 'showLayersBtn',
+                    class: exampleButton.className,
+                    onclick: this._displayEditableLayers.bind(this),
+                });
+
+                nav.appendChild(editLayersButton);
+                const toolTipMsg = this.nls.tipEditLayers;
+
+                new Tooltip({
+                    connectId: editLayersButton,
+                    label: toolTipMsg,
+                    position: ['above']
+                });
+            },
+
+            _displayEditableLayers(){
+                console.info("clicked editable layers");
+                const overlayPanel = this.panoramaViewerDiv.querySelector('.cmtViewerPanel');
+                console.log(overlayPanel);
             },
 
             // communication method between widgets

@@ -62,6 +62,17 @@
     background-repeat: no-repeat;
 }
 
+#showLayersBtn{
+    background-image: url('../images/addJson.png');
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#showLayersBtn:hover{
+    background-image: url('../images/addHoverJson.png') !important;
+    background-repeat: no-repeat;
+}
+
 #uploadJsonBtn{
     display: none;
 }

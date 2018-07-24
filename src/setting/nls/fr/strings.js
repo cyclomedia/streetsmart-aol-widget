@@ -8,6 +8,7 @@
        agreement2: "Termes et conditions de l'utilisateur pour Street Smart.",
        headAgreement: "Accord de l'utilisateur",
        measure: "Mesures",
+       storeMeasurements: "Enregistrer les mesures",
        overlay: "Superpositions",
        navigation: "La navigation",
        typeSrs: "Tapez ou sélectionnez SRS",
