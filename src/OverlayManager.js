@@ -65,6 +65,9 @@ define([
             const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
             _.each(featureLayers, (mapLayer) => {
                 const sld = new SLD(mapLayer);
+                if(sld.xml === undefined){
+                    return;
+                }
                 const geojson = this.createGeoJsonForFeature({ mapLayer, sld });
 
                 const overlay = this.api.addOverlay({
