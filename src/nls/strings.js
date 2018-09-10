@@ -3,7 +3,8 @@
         zoomWarning: "Zoom into the map to open the Cyclomedia Imagery.",
         agreementWarning: "Please accept the CycloMedia terms and agreements in the widget settings",
         tipDragDrop: "Drag and Drop on map to Open Panorama",
-        tipEditLayers: "Choose a feature layer to save the measurements"
+        tipEditLayers: "Choose a feature layer to save the measurements",
+        tipSaveMeasurement: "Click to save the measurements to the selected layer"
     }) ,
     "de": true,
     "nl": true,

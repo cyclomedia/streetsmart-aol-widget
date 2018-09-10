@@ -73,6 +73,17 @@
     background-repeat: no-repeat;
 }
 
+#saveMeasurementsBtn{
+    background-image: url('../images/save.png');
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#saveMeasurementsBtn:hover{
+    background-image: url('../images/saveHover.png') !important;
+    background-repeat: no-repeat;
+}
+
 #uploadJsonBtn{
     display: none;
 }

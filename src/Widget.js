@@ -2,9 +2,9 @@ const REQUIRE_CONFIG = {
     async: true,
     locale: 'en',
     paths: {
-        'react': 'https://unpkg.com/react@16.2.0/umd/react.production.min',
-        'react-dom': 'https://unpkg.com/react-dom@16.2.0/umd/react-dom.production.min',
-        'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/ol3/4.0.1/ol',
+        'react': 'https://cdnjs.cloudflare.com/ajax/libs/react/15.3.0/react.min',
+        'react-dom': 'https://cdnjs.cloudflare.com/ajax/libs/react/15.3.0/react-dom.min',
+        'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/ol3/3.17.1/ol',
         'lodash': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min'
     }
 };
@@ -14,19 +14,22 @@ require(REQUIRE_CONFIG, [], function () {
         'dojo/_base/declare',
         'dojo/on',
         'dojo/dom',
+        'dojo/dom-construct',
         'dijit/Tooltip',
         'jimu/BaseWidget',
         'esri/geometry/ScreenPoint',
-        'https://streetsmart.cyclomedia.com/api/v18.7/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v18.9/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
         './MeasurementHandler',
-        './OverlayManager'
+        './OverlayManager',
+        './FeatureLayerManager'
     ], function (
         declare,
         on,
         dom,
+        domConstruct,
         Tooltip,
         BaseWidget,
         ScreenPoint,
@@ -35,7 +38,8 @@ require(REQUIRE_CONFIG, [], function () {
         RecordingClient,
         LayerManager,
         MeasurementHandler,
-        OverlayManager
+        OverlayManager,
+        FeatureLayerManager
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
@@ -48,6 +52,8 @@ require(REQUIRE_CONFIG, [], function () {
             _zoomThreshold: null,
             _viewerType: StreetSmartApi.ViewerType.PANORAMA,
             _listeners: [],
+            _saveMeasurements: false,
+            _measurementDetails: null,
 
             // CM properties
             _cmtTitleColor: '#98C23C',
@@ -73,6 +79,7 @@ require(REQUIRE_CONFIG, [], function () {
                     setPanoramaViewerOrientation: this.setPanoramaViewerOrientation.bind(this),
                     addEventListener: this.addEventListener.bind(this),
                     config: this.config,
+
                     removeEventListener: this.removeEventListener.bind(this),
                 });
 
@@ -87,9 +94,15 @@ require(REQUIRE_CONFIG, [], function () {
                     wkid: this.wkid,
                     map: this.map,
                     config: this.config,
-                    StreetSmartApi: StreetSmartApi,
+                    StreetSmartApi: StreetSmartApi
                 });
 
+                this._featureLayerManager = new FeatureLayerManager({
+                    map: this.map,
+                    wkid: this.wkid,
+                    StreetSmartApi: StreetSmartApi
+                });
+  
                 this._applyWidgetStyle();
                 this._determineZoomThreshold();
             },
@@ -140,7 +153,11 @@ require(REQUIRE_CONFIG, [], function () {
             _handleMeasurementChanged(e) {
                 const newViewer = e.detail.panoramaViewer;
                 this._handleViewerChanged(newViewer);
-                this._measurementHandler.draw(e)
+                this._measurementHandler.draw(e);
+                if(dom.byId("saveMeasurementsBtn") !== null){
+                    const {activeMeasurement} = e.detail;
+                    this._measurementDetails = activeMeasurement;
+                }
             },
 
             /**
@@ -385,7 +402,7 @@ require(REQUIRE_CONFIG, [], function () {
                 const editLayersButton = dojo.create('button', {
                     id: 'showLayersBtn',
                     class: exampleButton.className,
-                    onclick: this._displayEditableLayers.bind(this),
+                    onclick: this._checkEditableLayers.bind(this),
                 });
 
                 nav.appendChild(editLayersButton);
@@ -398,10 +415,112 @@ require(REQUIRE_CONFIG, [], function () {
                 });
             },
 
+            _checkEditableLayers(){
+                if(dom.byId("saveMeasurementLayersDiv") === null){
+                    this._displayEditableLayers();
+                }else{
+                    domConstruct.destroy("saveMeasurementLayersDiv");
+                    // if(dom.byId("saveMeasurementsBtn") !== null){
+                    //     domConstruct.destroy("saveMeasurementsBtn");
+                    // }
+                }
+            },
+
             _displayEditableLayers(){
-                console.info("clicked editable layers");
-                const overlayPanel = this.panoramaViewerDiv.querySelector('.cmtViewerPanel');
-                console.log(overlayPanel);
+                const layerDivs = this._filterEditableLayers();
+                const nav = this.panoramaViewerDiv.querySelector('.cmtMousePosition');
+                const overlayHtml = '<div id="saveMeasurementLayersDiv" class="cmtViewerPanel">' +
+                    '<div class="cmtOverlayPanel cmtNavBarPanel panel panel-default">' +
+                    '<div class="panel-heading">Select Layer To Save Measurements</div>'+
+                    '<div class="panel-body">' +
+                    '<div id="1" class="clearfix fix-bootstrap-row row">' +
+                    '<div class="fix-bootstrap-col col-xs-3">' +
+                    '<ul role="tablist" class="nav nav-pills nav-stacked">' +
+                    '<li role="presentation" class="active"><a id="1-tab-1" role="tab" aria-controls="1-pane-1" aria-selected="true" href="#">Feature Layers</a></li>' +
+                    '</ul>' +
+                    '</div>' +
+                    '<div class="fix-bootstrap-col col-xs-9">' +
+                    '<div class="tab-content">' +
+                    '<div id="1-pane-1" aria-labelledby="1-tab-1" role="tabpanel" aria-hidden="false" class="tab-pane active fade in">' +
+                    '<div class="layerpanel panel-overlays panel panel-default" style="max-height: 345px;">' +
+                    '<div class="panel-body">' +
+                    '<table class="checklist table table-hover">' +
+                    '<tbody id="layersTable">' +
+                    '</tbody>' +
+                    '</table>' +
+                    '</div></div>' +
+                    '<table class="checklist table table-hover">' +
+                    '<tbody></tbody>' +
+                    '</table></div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>'+
+                    '</div>';
+                const overlayDom = domConstruct.toDom(overlayHtml);
+                domConstruct.place(overlayDom, nav, "after");
+                const layerTableId = dom.byId("layersTable");
+                _.each(layerDivs, (layer) => {
+                    domConstruct.place(layer.layerDiv, layerTableId, );
+                    this.saveLayerEvent = this.addEventListener(dom.byId(layer.id), 'click', () => this._SelectLayerToSave(layer));
+                });
+
+            },
+
+            _filterEditableLayers(){
+                const mapLayers = _.values(this.map._layers);
+                const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
+                const editableLayers = _.filter(featureLayers, l => l.isEditable() === true );
+                const displayLayerNames = [];
+                _.each(editableLayers, (mapLayer) => {
+                    const id = `editable-layer-${mapLayer.name}`;
+                    const layerCheckBox = `<tr><td><div class="form-group" id="${id}">` +
+                                            '<div class="checklist_location">' +
+                                                '<div class="checkbox">' +
+                                                    `<label title=""><input type="checkbox" value="off">` +
+                                                        `<span>${mapLayer.name}</span>` +
+                                                    '</label>' +
+                                                '</div>' +
+                                            '</div>' +
+                                        '</div></td></tr>';
+                    const layerHtml = domConstruct.toDom(layerCheckBox);
+                    const layerNameUrl = {
+                        url: mapLayer.url,
+                        name: mapLayer.name,
+                        layerDiv : layerHtml,
+                        id
+                    };
+                    displayLayerNames.push(layerNameUrl);
+
+                });
+                return displayLayerNames;
+            },
+
+            _SelectLayerToSave(layer){
+                if(dom.byId("saveMeasurementsBtn") !== null){
+                    domConstruct.destroy("saveMeasurementsBtn");
+                    this._saveMeasurements = false;
+                }
+                if(this._saveMeasurements === false) {
+                    const nav = this.panoramaViewerDiv.querySelector('.navbar .navbar-right .nav');
+                    const exampleButton = nav.querySelector('.btn');
+                    // Draw the actual button in the same style as the other buttons.
+                    const saveMeasurementsButton = dojo.create('button', {
+                        id: 'saveMeasurementsBtn',
+                        class: exampleButton.className
+                    });
+                    nav.appendChild(saveMeasurementsButton);
+                    const toolTipMsg = this.nls.tipSaveMeasurement;
+
+                    new Tooltip({
+                        connectId: saveMeasurementsButton,
+                        label: toolTipMsg,
+                        position: ['above']
+                    });
+                    this._saveMeasurements = true;
+                    this.addEventListener(dom.byId('saveMeasurementsBtn'), 'click', () => this._featureLayerManager._saveMeasurementsToLayer(layer,this._measurementDetails));
+                }
             },
 
             // communication method between widgets
