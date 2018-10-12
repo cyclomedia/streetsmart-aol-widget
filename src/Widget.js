@@ -2,10 +2,10 @@ const REQUIRE_CONFIG = {
     async: true,
     locale: 'en',
     paths: {
-        'react': 'https://cdnjs.cloudflare.com/ajax/libs/react/15.3.0/react.min',
-        'react-dom': 'https://cdnjs.cloudflare.com/ajax/libs/react/15.3.0/react-dom.min',
-        'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/ol3/3.17.1/ol',
-        'lodash': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min'
+        'react': 'https://unpkg.com/react@16.4.1/umd/react.production.min',
+        'react-dom': 'https://unpkg.com/react-dom@16.4.1/umd/react-dom.production.min',
+        'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.3.3/ol',
+        'lodash': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.min'
     }
 };
 
@@ -18,7 +18,7 @@ require(REQUIRE_CONFIG, [], function () {
         'dijit/Tooltip',
         'jimu/BaseWidget',
         'esri/geometry/ScreenPoint',
-        'https://streetsmart.cyclomedia.com/api/v18.9/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v18.11/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -420,9 +420,6 @@ require(REQUIRE_CONFIG, [], function () {
                     this._displayEditableLayers();
                 }else{
                     domConstruct.destroy("saveMeasurementLayersDiv");
-                    // if(dom.byId("saveMeasurementsBtn") !== null){
-                    //     domConstruct.destroy("saveMeasurementsBtn");
-                    // }
                 }
             },
 

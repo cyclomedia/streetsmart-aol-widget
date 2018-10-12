@@ -28,8 +28,6 @@ define([
         }
 
         _saveMeasurementsToLayer(layer, measurementEvent){
-            console.log(layer, measurementEvent);
-            //this.layerUrl = layer.url;
             const geometryType = measurementEvent.features[0].geometry.type;
             switch (geometryType) {
                 case 'Point':
