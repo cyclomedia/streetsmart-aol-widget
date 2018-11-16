@@ -67,19 +67,7 @@ define([
                 "attributes":{}
             }];
 
-            if(zValue !== null){
-                esriRequest.setRequestPreCallback(function(options){
-                    let zAdd = JSON.parse(options.content.adds);
-                    if(zAdd[0] && zAdd[0].geometry) {
-                        zAdd[0].geometry.z =  zValue;
-                    }
-                    options.content.adds = JSON.stringify(zAdd);
-
-                    return options;
-
-                });
-            }
-
+            this._addZvalueForPoints(zValue);
             this._saveToFeatureLayer(layer, pointJson);
 
         }
@@ -92,6 +80,8 @@ define([
                 return;
             }
             const transformedCoords = this._transformPoints(coords);
+            const z1 = coords[0][2];
+            const z2 = coords[1][2];
 
             const lineJson = [{"geometry":
                     {"paths":[transformedCoords],
@@ -101,6 +91,7 @@ define([
                 }
             }];
 
+            this._addZvalueForLines(z1, z2);
             this._saveToFeatureLayer(layer, lineJson);
 
 
@@ -115,6 +106,11 @@ define([
             }
 
             const transformedCoords = this._transformPoints(coords);
+            const zArray = [];
+            _.each(coords, (coord, i) => {
+                zArray.push(coord[2]);
+            });
+            console.log(zArray);
 
             const polyJson = [{"geometry":
                     {"rings":[transformedCoords],
@@ -124,7 +120,51 @@ define([
                 }
             }];
 
+            this._addZvalueForPolygons(zArray);
             this._saveToFeatureLayer(layer, polyJson);
+
+        }
+
+        _addZvalueForPoints(zValue){
+            esriRequest.setRequestPreCallback(function(options){
+                let zAdd = JSON.parse(options.content.adds);
+                if(zAdd[0] && zAdd[0].geometry) {
+                    zAdd[0].geometry.z =  zValue;
+                }
+                options.content.adds = JSON.stringify(zAdd);
+
+                return options;
+            });
+        }
+
+        _addZvalueForLines(z1, z2){
+            esriRequest.setRequestPreCallback(function(options){
+                let zAdd = JSON.parse(options.content.adds);
+                if(zAdd[0] && zAdd[0].geometry) {
+                    zAdd[0].geometry.paths[0][0][2] =  z1;
+                    zAdd[0].geometry.paths[0][1][2] =  z2;
+                }
+                options.content.adds = JSON.stringify(zAdd);
+
+                return options;
+
+            });
+
+        }
+
+        _addZvalueForPolygons(zArray){
+            esriRequest.setRequestPreCallback(function(options){
+                let zAdd = JSON.parse(options.content.adds);
+                if(zAdd[0] && zAdd[0].geometry) {
+                    _.each(zArray, (zValue, i) =>{
+                        zAdd[0].geometry.rings[0][i][2] = zValue;
+                    });
+                }
+                options.content.adds = JSON.stringify(zAdd);
+
+                return options;
+
+            });
 
         }
 

@@ -18,7 +18,7 @@ require(REQUIRE_CONFIG, [], function () {
         'dijit/Tooltip',
         'jimu/BaseWidget',
         'esri/geometry/ScreenPoint',
-        'https://streetsmart.cyclomedia.com/api/v18.11/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v18.14/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -145,18 +145,37 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _bindInitialMapHandlers() {
-                const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED;
-                this.addEventListener(StreetSmartApi, measurementChanged, this._handleMeasurementChanged.bind(this));
+                // const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED;
+                // this.addEventListener(StreetSmartApi, measurementChanged, this._handleMeasurementChanged.bind(this));
+                const measurementEvents = StreetSmartApi.Events.measurement;
+                const viewerEvents = StreetSmartApi.Events.viewer;
+                this.addEventListener(StreetSmartApi, measurementEvents.MEASUREMENT_CHANGED, this._handleMeasurementChanged.bind(this));
+                this.addEventListener(StreetSmartApi, viewerEvents.VIEWER_ADDED, this._handleViewerAdded.bind(this));
+                this.addEventListener(StreetSmartApi, viewerEvents.VIEWER_REMOVED, this._handleViewerChanged.bind(this));
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
+
             },
 
             _handleMeasurementChanged(e) {
                 const newViewer = e.detail.panoramaViewer;
-                this._handleViewerChanged(newViewer);
+                //this._handleViewerChanged(newViewer);
                 this._measurementHandler.draw(e);
                 if(dom.byId("saveMeasurementsBtn") !== null){
                     const {activeMeasurement} = e.detail;
                     this._measurementDetails = activeMeasurement;
+                }
+            },
+
+             _handleViewerAdded(viewerEvent) {
+                if (viewerEvent && viewerEvent.detail) {
+                    let viewer = viewerEvent.detail.viewer;
+
+                    if (viewer) {
+                        if ((viewer.getType() === StreetSmartApi.ViewerType.PANORAMA) && (window.panoramaViewer !== viewer)) {
+                            //window.panoramaViewer = viewer;
+                            this._handleViewerChanged(viewer);
+                        }
+                    }
                 }
             },
 
@@ -166,6 +185,7 @@ require(REQUIRE_CONFIG, [], function () {
              */
             _handleViewerChanged(newViewer) {
                 // Handle initial viewer creation
+                console.log(this);
                 if (!this._panoramaViewer && newViewer) {
                     this._panoramaViewer = newViewer;
                     this._layerManager.addLayers();
@@ -364,7 +384,7 @@ require(REQUIRE_CONFIG, [], function () {
                     id: 'addMapDropBtn',
                     class: exampleButton.className,
                     draggable: true,
-                    ondragend: this._handleMarkerDrop.bind(this),
+                    onDragEnd: this._handleMarkerDrop.bind(this),
                 });
 
                 nav.appendChild(markerButton);
