@@ -27,15 +27,16 @@ define([
             this.StreetSmartApi = StreetSmartApi;
         }
 
-        _saveMeasurementsToLayer(layer, measurementEvent){
-            const geometryType = measurementEvent.features[0].geometry.type;
+        _saveMeasurementsToLayer(layer){
+            const activeMeasurment = this.StreetSmartApi.getActiveMeasurement();
+            const geometryType = activeMeasurment.features[0].geometry.type;
             switch (geometryType) {
                 case 'Point':
-                    return this.pointLayer(layer, measurementEvent);
+                    return this.pointLayer(layer, activeMeasurment);
                 case 'LineString':
-                    return this.lineLayer(layer, measurementEvent);
+                    return this.lineLayer(layer, activeMeasurment);
                 case 'Polygon':
-                    return this.polygonLayer(layer, measurementEvent);
+                    return this.polygonLayer(layer, activeMeasurment);
             }
 
         }

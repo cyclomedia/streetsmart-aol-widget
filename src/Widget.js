@@ -24,7 +24,7 @@ require(REQUIRE_CONFIG, [], function () {
         './LayerManager',
         './MeasurementHandler',
         './OverlayManager',
-        './FeatureLayerManager'
+        './FeatureLayerEditsManager',
     ], function (
         declare,
         on,
@@ -39,7 +39,7 @@ require(REQUIRE_CONFIG, [], function () {
         LayerManager,
         MeasurementHandler,
         OverlayManager,
-        FeatureLayerManager
+        FeatureLayerEditsManager
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
@@ -52,7 +52,6 @@ require(REQUIRE_CONFIG, [], function () {
             _zoomThreshold: null,
             _viewerType: StreetSmartApi.ViewerType.PANORAMA,
             _listeners: [],
-            _saveMeasurements: false,
             _measurementDetails: null,
 
             // CM properties
@@ -97,12 +96,15 @@ require(REQUIRE_CONFIG, [], function () {
                     StreetSmartApi: StreetSmartApi
                 });
 
-                this._featureLayerManager = new FeatureLayerManager({
+                this._featureLayerEditManager = new FeatureLayerEditsManager({
                     map: this.map,
                     wkid: this.wkid,
-                    StreetSmartApi: StreetSmartApi
+                    StreetSmartApi: StreetSmartApi,
+                    addEventListener: this.addEventListener.bind(this),
+                    panoramaViewerDiv: this.panoramaViewerDiv,
+                    nls: this.nls
                 });
-  
+
                 this._applyWidgetStyle();
                 this._determineZoomThreshold();
             },
@@ -160,13 +162,13 @@ require(REQUIRE_CONFIG, [], function () {
                 const newViewer = e.detail.panoramaViewer;
                 //this._handleViewerChanged(newViewer);
                 this._measurementHandler.draw(e);
-                if(dom.byId("saveMeasurementsBtn") !== null){
+                if (dom.byId("saveMeasurementsBtn") !== null) {
                     const {activeMeasurement} = e.detail;
                     this._measurementDetails = activeMeasurement;
                 }
             },
 
-             _handleViewerAdded(viewerEvent) {
+            _handleViewerAdded(viewerEvent) {
                 if (viewerEvent && viewerEvent.detail) {
                     let viewer = viewerEvent.detail.viewer;
 
@@ -185,7 +187,6 @@ require(REQUIRE_CONFIG, [], function () {
              */
             _handleViewerChanged(newViewer) {
                 // Handle initial viewer creation
-                console.log(this);
                 if (!this._panoramaViewer && newViewer) {
                     this._panoramaViewer = newViewer;
                     this._layerManager.addLayers();
@@ -197,7 +198,7 @@ require(REQUIRE_CONFIG, [], function () {
                         const measureBtn = StreetSmartApi.PanoramaViewerUi.buttons.MEASURE;
                         this._panoramaViewer.toggleButtonEnabled(measureBtn);
                     }
-                    if(this.config.saveMeasurements === true){
+                    if (this.config.saveMeasurements === true) {
                         this._showLayersButton();
                     }
                     this._handleImageChange();
@@ -213,7 +214,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this.removeEventListener(this._viewChangeListener);
                     this.removeEventListener(this._imageChangeListener);
                     this._panoramaViewer = newViewer;
-                    this._bindViewerDependantEventHandlers({ viewerOnly: true});
+                    this._bindViewerDependantEventHandlers({viewerOnly: true});
                 }
             },
 
@@ -255,7 +256,7 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _bindViewerDependantEventHandlers(options) {
-                const opts = Object.assign({}, options, { viewerOnly: false });
+                const opts = Object.assign({}, options, {viewerOnly: false});
                 this._viewChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.VIEW_CHANGE, this._handleConeChange.bind(this));
                 this._imageChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this._handleImageChange.bind(this));
                 if (!opts.viewerOnly) {
@@ -367,7 +368,7 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             onClose() {
-                StreetSmartApi.destroy({ targetElement: this.panoramaViewerDiv });
+                StreetSmartApi.destroy({targetElement: this.panoramaViewerDiv});
                 this.loadingIndicator.classList.remove('hidden');
                 this._overlayManager.reset();
                 this._removeEventListeners();
@@ -414,7 +415,7 @@ require(REQUIRE_CONFIG, [], function () {
                 this.query(`${vPoint.x},${vPoint.y}`);
             },
 
-            _showLayersButton(){
+            _showLayersButton() {
                 const nav = this.panoramaViewerDiv.querySelector('.navbar .navbar-right .nav');
                 const exampleButton = nav.querySelector('.btn');
 
@@ -435,117 +436,20 @@ require(REQUIRE_CONFIG, [], function () {
                 });
             },
 
-            _checkEditableLayers(){
-                if(dom.byId("saveMeasurementLayersDiv") === null){
-                    this._displayEditableLayers();
-                }else{
+            _checkEditableLayers() {
+                if (dom.byId("saveMeasurementLayersDiv") === null) {
+                    this._featureLayerEditManager._displayEditableLayers();
+                } else {
                     domConstruct.destroy("saveMeasurementLayersDiv");
-                }
-            },
-
-            _displayEditableLayers(){
-                const layerDivs = this._filterEditableLayers();
-                const nav = this.panoramaViewerDiv.querySelector('.cmtMousePosition');
-                const overlayHtml = '<div id="saveMeasurementLayersDiv" class="cmtViewerPanel">' +
-                    '<div class="cmtOverlayPanel cmtNavBarPanel panel panel-default">' +
-                    '<div class="panel-heading">Select Layer To Save Measurements</div>'+
-                    '<div class="panel-body">' +
-                    '<div id="1" class="clearfix fix-bootstrap-row row">' +
-                    '<div class="fix-bootstrap-col col-xs-3">' +
-                    '<ul role="tablist" class="nav nav-pills nav-stacked">' +
-                    '<li role="presentation" class="active"><a id="1-tab-1" role="tab" aria-controls="1-pane-1" aria-selected="true" href="#">Feature Layers</a></li>' +
-                    '</ul>' +
-                    '</div>' +
-                    '<div class="fix-bootstrap-col col-xs-9">' +
-                    '<div class="tab-content">' +
-                    '<div id="1-pane-1" aria-labelledby="1-tab-1" role="tabpanel" aria-hidden="false" class="tab-pane active fade in">' +
-                    '<div class="layerpanel panel-overlays panel panel-default" style="max-height: 345px;">' +
-                    '<div class="panel-body">' +
-                    '<table class="checklist table table-hover">' +
-                    '<tbody id="layersTable">' +
-                    '</tbody>' +
-                    '</table>' +
-                    '</div></div>' +
-                    '<table class="checklist table table-hover">' +
-                    '<tbody></tbody>' +
-                    '</table></div>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>'+
-                    '</div>';
-                const overlayDom = domConstruct.toDom(overlayHtml);
-                domConstruct.place(overlayDom, nav, "after");
-                const layerTableId = dom.byId("layersTable");
-                _.each(layerDivs, (layer) => {
-                    domConstruct.place(layer.layerDiv, layerTableId, );
-                    this.saveLayerEvent = this.addEventListener(dom.byId(layer.id), 'click', () => this._SelectLayerToSave(layer));
-                });
-
-            },
-
-            _filterEditableLayers(){
-                const mapLayers = _.values(this.map._layers);
-                const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
-                const editableLayers = _.filter(featureLayers, l => l.isEditable() === true );
-                const displayLayerNames = [];
-                _.each(editableLayers, (mapLayer) => {
-                    const id = `editable-layer-${mapLayer.name}`;
-                    const layerCheckBox = `<tr><td><div class="form-group" id="${id}">` +
-                                            '<div class="checklist_location">' +
-                                                '<div class="checkbox">' +
-                                                    `<label title=""><input type="checkbox" value="off">` +
-                                                        `<span>${mapLayer.name}</span>` +
-                                                    '</label>' +
-                                                '</div>' +
-                                            '</div>' +
-                                        '</div></td></tr>';
-                    const layerHtml = domConstruct.toDom(layerCheckBox);
-                    const layerNameUrl = {
-                        url: mapLayer.url,
-                        name: mapLayer.name,
-                        layerDiv : layerHtml,
-                        id
-                    };
-                    displayLayerNames.push(layerNameUrl);
-
-                });
-                return displayLayerNames;
-            },
-
-            _SelectLayerToSave(layer){
-                if(dom.byId("saveMeasurementsBtn") !== null){
-                    domConstruct.destroy("saveMeasurementsBtn");
-                    this._saveMeasurements = false;
-                }
-                if(this._saveMeasurements === false) {
-                    const nav = this.panoramaViewerDiv.querySelector('.navbar .navbar-right .nav');
-                    const exampleButton = nav.querySelector('.btn');
-                    // Draw the actual button in the same style as the other buttons.
-                    const saveMeasurementsButton = dojo.create('button', {
-                        id: 'saveMeasurementsBtn',
-                        class: exampleButton.className
-                    });
-                    nav.appendChild(saveMeasurementsButton);
-                    const toolTipMsg = this.nls.tipSaveMeasurement;
-
-                    new Tooltip({
-                        connectId: saveMeasurementsButton,
-                        label: toolTipMsg,
-                        position: ['above']
-                    });
-                    this._saveMeasurements = true;
-                    this.addEventListener(dom.byId('saveMeasurementsBtn'), 'click', () => this._featureLayerManager._saveMeasurementsToLayer(layer,this._measurementDetails));
                 }
             },
 
             // communication method between widgets
             onReceiveData(name, widgetId, data) {
-                if (name !== 'Search'){
+                if (name !== 'Search') {
                     return;
                 }
-                
+
                 if (data.selectResult) {
                     const searchedPoint = data.selectResult.result.feature.geometry;
                     const searchedPtLocal = utils.transformProj4js(searchedPoint, this.wkid);
