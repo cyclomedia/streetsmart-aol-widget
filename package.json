@@ -1,7 +1,7 @@
 {
   "name": "streetsmart-widget",
   "description": "Street Smart Widget for ArcGIS Online",
-  "version": "2.0.0",
+  "version": "18.2.0",
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {
