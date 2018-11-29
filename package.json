@@ -1,4 +1,9 @@
 {
+  "name": "streetsmart-widget",
+  "description": "Street Smart Widget for ArcGIS Online",
+  "version": "2.0.0",
+  "license": "UNLICENSED",
+  "private": true,
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
@@ -12,5 +17,27 @@
   "scripts": {
     "start": "gulp watch",
     "build": "gulp"
-  }
+  },
+  "author": "CycloMedia Technology B.V.",
+  "contributors": [
+    {
+      "name": "Gijs Boekema",
+      "email": "gboekema@cyclomedia.com",
+      "url": "https://github.com/gpcboekema"
+    },
+    {
+      "name": "Sarath Chandra Kalluri",
+      "email": "skalluri@cyclomedia.com",
+      "url": "https://github.com/kalluris"
+    },
+    {
+      "name": "Jasper Roosenmaallen",
+      "email": "jroosenmaallen@cyclomedia.com",
+      "url": "https://github.com/blazery"
+    },
+    {
+      "name": "Jasper Stam",
+      "url": "https://github.com/stam"
+    }
+  ]
 }
