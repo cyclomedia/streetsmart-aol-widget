@@ -153,13 +153,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this._panoramaViewer = newViewer;
                     this._layerManager.addLayers();
                     this._bindViewerDependantEventHandlers();
-                    if (this.config.navigation !== true) {
-                        this._hideNavigation();
-                    }
-                    if (this.config.measurement !== true) {
-                        const measureBtn = StreetSmartApi.PanoramaViewerUi.buttons.MEASURE;
-                        this._panoramaViewer.toggleButtonEnabled(measureBtn);
-                    }
+                    this._setButtonVisibilityInApi();
                     this._handleImageChange();
                     this._drawDraggableMarker();
                     return;
@@ -173,6 +167,29 @@ require(REQUIRE_CONFIG, [], function () {
                     this.removeEventListener(this._imageChangeListener);
                     this._panoramaViewer = newViewer;
                     this._bindViewerDependantEventHandlers({ viewerOnly: true});
+                }
+            },
+
+            _setButtonVisibilityInApi() {
+                const bv = this.config.buttonVisibility;
+                const helperFunction = (key) => {
+                    if(bv[key] !== undefined) {
+                        const button = StreetSmartApi.PanoramaViewerUi.buttons[key];
+                        this._panoramaViewer.toggleButtonEnabled(button, !!bv[key]);
+                    } else {
+                      console.warn('undefined key found, ' + key);
+                    }
+                };
+                if(bv){
+                    helperFunction( 'OVERLAYS');
+                    helperFunction( 'ELEVATION');
+                    helperFunction( 'REPORT_BLURRING');
+                    helperFunction( 'OPEN_OBLIQUE');
+                    helperFunction( 'MEASURE');
+                    helperFunction( 'SAVE_IMAGE');
+                    helperFunction( 'IMAGE_INFORMATION');
+                    helperFunction( 'ZOOM_IN');
+                    helperFunction( 'ZOOM_OUT');
                 }
             },
 
@@ -286,8 +303,17 @@ require(REQUIRE_CONFIG, [], function () {
                 return StreetSmartApi.open(query, {
                         viewerType: [this._viewerType],
                         srs: this.config.srs,
+                        panoramaViewer: {
+                            closable: false,
+                            maximizable: true,
+                            timeTravelVisible: this.config.timetravel !== undefined ? this.config.timetravel : true,
+                            navbarVisible: this.config.navigation !== undefined ? this.config.navigation : true,
+                        },
                     }
-                );
+                ).then(result => {
+                    const viewer = result.length ? result[0] : null;
+                    this._handleViewerChanged(viewer);
+                });
             },
 
             setPanoramaViewerOrientation(orientation) {
@@ -378,7 +404,7 @@ require(REQUIRE_CONFIG, [], function () {
                 if (name !== 'Search'){
                     return;
                 }
-                
+
                 if (data.selectResult) {
                     const searchedPoint = data.selectResult.result.feature.geometry;
                     const searchedPtLocal = utils.transformProj4js(searchedPoint, this.wkid);

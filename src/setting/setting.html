@@ -31,9 +31,53 @@
             <input data-dojo-attach-point="overlayEnable" type="checkbox" id="enableOverlay">
         </div>
         <div class="settingsForm">
+            <div class="settingsLabel">${nls.timetravel}</div>
+            <input data-dojo-attach-point="timetravelEnable" type="checkbox" id="TIME_TRAVEL">
+        </div>
+        <div class="settingsForm">
             <div class="settingsLabel">${nls.navigation}</div>
             <input data-dojo-attach-point="navigationEnable" type="checkbox" id="enableNavigation">
         </div>
+
+
+        <div class="settingsForm">
+            <div class="settingsLabel"><b>${nls.navigationButtons}</b></div>
+        </div>
+        <div class="settingsForm">
+            <div class="settingsLabel">${nls.overlaysButton}</div>
+            <input data-dojo-attach-point="overlaysButtonEnable" type="checkbox" id="OVERLAYS">
+        </div>
+        <div class="settingsForm">
+            <div class="settingsLabel">${nls.elevationButton}</div>
+            <input data-dojo-attach-point="elevationButtonEnable" type="checkbox" id="ELEVATION">
+        </div>
+        <div class="settingsForm">
+            <div class="settingsLabel">${nls.reportblurringButton}</div>
+            <input data-dojo-attach-point="reportblurringButtonEnable" type="checkbox" id="REPORT_BLURRING">
+        </div>
+        <div class="settingsForm">
+            <div class="settingsLabel">${nls.measureButton}</div>
+            <input data-dojo-attach-point="measureButtonEnable" type="checkbox" id="MEASURE">
+        </div>
+        <div class="settingsForm">
+            <div class="settingsLabel">${nls.saveimageButtonEnable}</div>
+            <input data-dojo-attach-point="saveimageButtonEnable" type="checkbox" id="SAVE_IMAGE">
+        </div>
+        <div class="settingsForm">
+            <div class="settingsLabel">${nls.imageinformationButton}</div>
+            <input data-dojo-attach-point="imageinformationButtonEnable" type="checkbox" id="IMAGE_INFORMATION">
+        </div>
+        <div class="settingsForm">
+            <div class="settingsLabel">${nls.zoominButton}</div>
+            <input data-dojo-attach-point="zoominButtonEnable" type="checkbox" id="ZOOM_IN">
+        </div>
+        <div class="settingsForm">
+            <div class="settingsLabel">${nls.zoomoutButton}</div>
+            <input data-dojo-attach-point="zoomoutButtonEnable" type="checkbox" id="ZOOM_OUT">
+        </div>
+
+
+
         <div class="settingsForm">
             <div class="settingsLabel">${nls.agreement1} <a href="#" id="userAgreementLink" > ${nls.agreement2}</a></div>
             <input data-dojo-attach-point="agreementCheck" id="acceptCmtAgreement" type="checkbox" name="userAgreement" >
