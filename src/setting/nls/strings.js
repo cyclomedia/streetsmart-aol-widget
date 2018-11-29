@@ -11,7 +11,7 @@ define({
       overlay: "Overlays",
       navigation: "Navigation",
       typeSrs: "Type or Select SRS",
-      version: "Street Smart Widget for Web AppBuilder @ version 18.1"
+      version: "Street Smart Widget for Web AppBuilder @ version 18.2"
   }),
   "de": true,
   "nl": true,
