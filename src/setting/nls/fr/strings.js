@@ -2,9 +2,9 @@
    ({
        username: "Nom d'utilisateur",
        password: "Mot de passe",
-       locale: "lieu",
+       locale: "Lieu",
        srs: "SRS",
-       agreement1: "je suis d'accord avec les",
+       agreement1: "Je suis d'accord avec les",
        agreement2: "Termes et conditions de l'utilisateur pour Street Smart.",
        headAgreement: "Accord de l'utilisateur",
        measure: "Mesures",
