@@ -9,7 +9,19 @@
        headAgreement: "Accord de l'utilisateur",
        measure: "Mesures",
        overlay: "Superpositions",
+       timetravel: 'Time Travel',
+
        navigation: "La navigation",
+       navigationButtons: 'Navigation Buttons',
+       overlaysButton: 'Overlays Button',
+       elevationButton: 'Elevation Button',
+       reportblurringButton: 'Report Issue Button',
+       measureButton: 'Measurement Button',
+       saveimageButtonEnable: 'Save Image Button',
+       imageinformationButton: 'Image Information Button',
+       zoominButton: 'Zoom-in Button',
+       zoomoutButton: 'Zoom-out Button',
+
        typeSrs: "Tapez ou sélectionnez SRS",
        version: "Street Smart Widget pour Web AppBuilder @ version 18.1"
   })
