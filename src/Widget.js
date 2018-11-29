@@ -300,13 +300,19 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             query(query) {
+                const timeTravelVisible =
+                    this.config.timetravel !== undefined &&
+                    this.config.navigation === true
+                        ? this.config.timetravel : false;
+
+
                 return StreetSmartApi.open(query, {
                         viewerType: [this._viewerType],
                         srs: this.config.srs,
                         panoramaViewer: {
                             closable: false,
                             maximizable: true,
-                            timeTravelVisible: this.config.timetravel !== undefined ? this.config.timetravel : true,
+                            timeTravelVisible,
                             navbarVisible: this.config.navigation !== undefined ? this.config.navigation : true,
                         },
                     }
@@ -333,8 +339,8 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _hideNavigation() {
-                this._panoramaViewer.toggleNavbarVisible();
-                this._panoramaViewer.toggleTimeTravelVisible();
+                this._panoramaViewer.toggleNavbarVisible(false);
+                this._panoramaViewer.toggleTimeTravelVisible(false);
                 setTimeout(() => {
                     this._panoramaViewer.toggleRecordingsVisible(false);
                 });
@@ -362,6 +368,8 @@ require(REQUIRE_CONFIG, [], function () {
 
             _drawDraggableMarker() {
                 const nav = this.panoramaViewerDiv.querySelector('.navbar .navbar-right .nav');
+                if(!nav) return;
+
                 const exampleButton = nav.querySelector('.btn');
 
                 // Draw the actual button in the same style as the other buttons.

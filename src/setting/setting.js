@@ -67,18 +67,7 @@ define([
                 if(this.config.srs){
                     this.srsCyclomedia.value = this.config.srs;
                 }
-                if(this.config.measurement){
-                    this.measuementEnable.value = this.config.measurement;
-                    if(this.config.measurement === true){
-                        this.measuementEnable.checked = true;
-                    }
-                }
-                if(this.config.overlay){
-                    this.overlayEnable.value = this.config.overlay;
-                    if(this.config.overlay === true) {
-                        this.overlayEnable.checked = true;
-                    }
-                }
+
                 if(this.config.navigation){
                     this.navigationEnable.value = this.config.navigation;
                     if(this.config.navigation === true) {
@@ -111,8 +100,6 @@ define([
                 this.config.uPwd = this.uPwdCyclomedia.value;
                 this.config.agreement = this.agreementCheck.checked;
                 this.config.srs = this.srsCyclomedia.value;
-                this.config.measurement = this.measuementEnable.checked;
-                this.config.overlay = this.overlayEnable.checked;
                 this.config.navigation = this.navigationEnable.checked;
                 this.config.timetravel = this.timetravelEnable.checked;
                 this.config.buttonVisibility = {
