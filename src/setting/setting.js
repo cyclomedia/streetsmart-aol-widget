@@ -166,7 +166,7 @@ define([
                         let srsDropDown = new FilteringSelect({
                             id : "srsComboBox",
                             name : "SRS",
-                            value : this.config.srs || this.navigationEnable.checked,
+                            value : this.config.srs || '',
                             store : srsStore,
                             SearchAttr : "srs",
                             queryExpr : '*${0}*',
