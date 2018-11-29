@@ -156,8 +156,13 @@ require(REQUIRE_CONFIG, [], function () {
                     this._setButtonVisibilityInApi();
                     this._handleImageChange();
                     this._drawDraggableMarker();
+
+                    if(this.config.navigation === false){
+                        this._hideNavigation();
+                    }
                     return;
                 }
+
 
                 // Update the event handlers and everything else once the viewer changed
                 // Always make sure newViewer is set as newViewer can be undefined
