@@ -144,8 +144,13 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _handleMapMovement(e){
+                const diff = e.delta.x + e.delta.y;
                 if(!this._disableLinkToMap && this.config.linkMapMove === true && !this._panoramaViewer.props.activeMeasurement) {
-                    this._centerViewerToMap(e.extent.getCenter());
+                    if(diff) {
+                        this._centerViewerToMap(e.extent.getCenter());
+                    }
+                }else if(this._disableLinkToMap) {
+                    this._disableLinkToMap = false;
                 }
             },
 
@@ -292,10 +297,8 @@ require(REQUIRE_CONFIG, [], function () {
                     const coord = new Point(x, y, this._layerManager.srs);
                     // Transform local SRS to Web Mercator:
                     const coordLocal = utils.transformProj4js(coord, this.map.spatialReference.wkid);
+                    this.map.centerAt(coordLocal);
                     this._disableLinkToMap = true;
-                    this.map.centerAt(coordLocal).then(() => {
-                        this._disableLinkToMap = false;
-                    });
                 }
             },
 
@@ -340,8 +343,6 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             query(query) {
-                if(this._disableLinkToMap) return;
-
                 const timeTravelVisible = this.config.timetravel !== undefined && this.config.navigation === true ? this.config.timetravel : false;
                 const navbarVisible = this.config.navigation !== undefined ? this.config.navigation : true;
 
@@ -359,7 +360,7 @@ require(REQUIRE_CONFIG, [], function () {
                 ).then(result => {
                     const viewer = result.length ? result[0] : null;
                     this._handleViewerChanged(viewer);
-                    this._disableLinkToMap = false;
+                    this._handleConeChange();
                 });
             },
 
