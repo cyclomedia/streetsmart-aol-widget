@@ -16,6 +16,8 @@ require(REQUIRE_CONFIG, [], function () {
         'dojo/dom',
         'dijit/Tooltip',
         'jimu/BaseWidget',
+        'esri/SpatialReference',
+        'esri/geometry/Point',
         'esri/geometry/ScreenPoint',
         'https://streetsmart.cyclomedia.com/api/v18.7/StreetSmartApi.js',
         './utils',
@@ -29,6 +31,8 @@ require(REQUIRE_CONFIG, [], function () {
         dom,
         Tooltip,
         BaseWidget,
+        SpatialReference,
+        Point,
         ScreenPoint,
         StreetSmartApi,
         utils,
@@ -48,6 +52,7 @@ require(REQUIRE_CONFIG, [], function () {
             _zoomThreshold: null,
             _viewerType: StreetSmartApi.ViewerType.PANORAMA,
             _listeners: [],
+            _disableLinkToMap: false,
 
             // CM properties
             _cmtTitleColor: '#98C23C',
@@ -135,6 +140,13 @@ require(REQUIRE_CONFIG, [], function () {
                 const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED;
                 this.addEventListener(StreetSmartApi, measurementChanged, this._handleMeasurementChanged.bind(this));
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
+                this.addEventListener(this.map, 'pan-end', this._handleMapMovement.bind(this));
+            },
+
+            _handleMapMovement(e){
+                if(!this._disableLinkToMap && this.config.linkMapMove === true && !this._panoramaViewer.props.activeMeasurement) {
+                    this._centerViewerToMap(e.extent.getCenter());
+                }
             },
 
             _handleMeasurementChanged(e) {
@@ -262,6 +274,29 @@ require(REQUIRE_CONFIG, [], function () {
                 if (this.config.overlay === true) {
                     this._overlayManager.addOverlaysToViewer();
                 }
+
+                if(!this._disableLinkToMap && this.config.linkMapMove === true && !this._panoramaViewer.props.activeMeasurement){
+                    const viewer = this._panoramaViewer._viewer;
+                    const recording = viewer._activeRecording;
+                    if (!recording || !recording.xyz) {
+                        return;
+                    }
+
+                    const x = recording.xyz[0];
+                    const y = recording.xyz[1];
+
+                    if (!x || !y) {
+                        return;
+                    }
+
+                    const coord = new Point(x, y, this._layerManager.srs);
+                    // Transform local SRS to Web Mercator:
+                    const coordLocal = utils.transformProj4js(coord, this.map.spatialReference.wkid);
+                    this._disableLinkToMap = true;
+                    this.map.centerAt(coordLocal).then(() => {
+                        this._disableLinkToMap = false;
+                    });
+                }
             },
 
             _handleExtentChange() {
@@ -294,8 +329,8 @@ require(REQUIRE_CONFIG, [], function () {
                 panel.containerNode.children[0].style.padding = '0px';
             },
 
-            _centerViewerToMap() {
-                const mapCenter = this.map.extent.getCenter();
+            _centerViewerToMap(center) {
+                const mapCenter = center || this.map.extent.getCenter();
                 const mapSRS = this.config.srs.split(':')[1];
                 const localCenter = utils.transformProj4js(mapCenter, mapSRS);
 
@@ -305,8 +340,11 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             query(query) {
+                if(this._disableLinkToMap) return;
+
                 const timeTravelVisible = this.config.timetravel !== undefined && this.config.navigation === true ? this.config.timetravel : false;
                 const navbarVisible = this.config.navigation !== undefined ? this.config.navigation : true;
+
 
                 return StreetSmartApi.open(query, {
                         viewerType: [this._viewerType],
@@ -321,6 +359,7 @@ require(REQUIRE_CONFIG, [], function () {
                 ).then(result => {
                     const viewer = result.length ? result[0] : null;
                     this._handleViewerChanged(viewer);
+                    this._disableLinkToMap = false;
                 });
             },
 

@@ -24,6 +24,7 @@ define({
 
       typeSrs: "Type or Select SRS",
       version: "Street Smart Widget for Web AppBuilder @ version 18.2"
+      linkMapMove: '',
   }),
   "de": true,
   "nl": true,
