@@ -10,8 +10,8 @@ define([
         'dijit/_WidgetsInTemplateMixin',
         'jimu/BaseWidgetSetting',
         './commonmark',
-        './xml2json'
-    ], function(declare, lang,dojoArray, dRequest, dom, on, Memory, FilteringSelect, _WidgetsInTemplateMixin, BaseWidgetSetting, commonmark, xml2js) {
+        './xml2json',
+    ], function(declare, lang, dojoArray, dRequest, dom, on, Memory, FilteringSelect, _WidgetsInTemplateMixin, BaseWidgetSetting, commonmark, xml2json) {
 
         return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
             baseClass: 'jimu-widget-streetsmartwidget-setting',
@@ -19,13 +19,11 @@ define([
             postCreate:function() {
                 this.inherited(arguments);
                 this.getSrsData();
-
                 if(this.config) {
                     this.setConfig(this.config);
                 } else {
                     this.getConfig();
                 }
-
             },
             startup: function() {
                 let self = this;
@@ -69,36 +67,52 @@ define([
                 if(this.config.srs){
                     this.srsCyclomedia.value = this.config.srs;
                 }
-                if(this.config.measurement){
-                    this.measuementEnable.value = this.config.measurement;
-                    if(this.config.measurement === true){
-                        this.measuementEnable.checked = true;
-                    }
-                }
-                if(this.config.overlay){
-                    this.overlayEnable.value = this.config.overlay;
-                    if(this.config.overlay === true) {
-                        this.overlayEnable.checked = true;
-                    }
-                }
+
                 if(this.config.navigation){
                     this.navigationEnable.value = this.config.navigation;
                     if(this.config.navigation === true) {
                         this.navigationEnable.checked = true;
                     }
                 }
+                if(this.config.timetravel){
+                    this.timetravelEnable.value = this.config.timetravel;
+                    if(this.config.timetravel === true) {
+                        this.timetravelEnable.checked = true;
+                    }
+                }
 
+                if(this.config.buttonVisibility){
+                    const bv = this.config.buttonVisibility;
+                    if(bv.OVERLAYS !== undefined) this.overlaysButtonEnable.checked = !!bv.OVERLAYS;
+                    if(bv.ELEVATION !== undefined) this.elevationButtonEnable.checked = !!bv.ELEVATION;
+                    if(bv.REPORT_BLURRING !== undefined) this.reportblurringButtonEnable.checked = !!bv.REPORT_BLURRING;
+                    if(bv.MEASURE !== undefined) this.measureButtonEnable.checked = !!bv.MEASURE;
+                    if(bv.SAVE_IMAGE !== undefined) this.saveimageButtonEnable.checked = !!bv.SAVE_IMAGE;
+                    if(bv.IMAGE_INFORMATION !== undefined) this.imageinformationButtonEnable.checked = !!bv.IMAGE_INFORMATION;
+                    if(bv.ZOOM_IN !== undefined) this.zoominButtonEnable.checked = !!bv.ZOOM_IN;
+                    if(bv.ZOOM_OUT !== undefined) this.zoomoutButtonEnable.checked = !!bv.ZOOM_OUT;
+                }
             },
 
             getConfig: function () {
                 this.config.locale = this.selectCyclomediaLocation.value;
                 this.config.uName = this.uNameCyclomedia.value;
                 this.config.uPwd = this.uPwdCyclomedia.value;
-                this.config.agreement = document.getElementById('acceptCmtAgreement').checked;
+                this.config.agreement = this.agreementCheck.checked;
                 this.config.srs = dijit.byId('srsComboBox').value;
-                this.config.measurement = document.getElementById('enableMeasurement').checked;
-                this.config.overlay = document.getElementById('enableOverlay').checked;
-                this.config.navigation = document.getElementById('enableNavigation').checked;
+                this.config.navigation = this.navigationEnable.checked;
+                this.config.timetravel = this.timetravelEnable.checked;
+                this.config.buttonVisibility = {
+                    OVERLAYS: this.overlaysButtonEnable.checked,
+                    ELEVATION: this.elevationButtonEnable.checked,
+                    REPORT_BLURRING: this.reportblurringButtonEnable.checked,
+                    OPEN_OBLIQUE: false,
+                    MEASURE: this.measureButtonEnable.checked,
+                    SAVE_IMAGE: this.saveimageButtonEnable.checked,
+                    IMAGE_INFORMATION: this.imageinformationButtonEnable.checked,
+                    ZOOM_IN: this.zoominButtonEnable.checked,
+                    ZOOM_OUT: this.zoomoutButtonEnable.checked,
+                };
                 return this.config;
             },
 
@@ -111,7 +125,7 @@ define([
 
                 dRequest(spatialReferences, {headers: {"X-Requested-With": null}})
                     .then(lang.hitch(this, function(srsData){
-                        let srsJson = toJSON(srsData);
+                        let srsJson = xml2json.toJSON(srsData);
                         dojoArray.forEach(srsJson.children, function(spatialreference, i ) {
                             let srsObj = {};
                             srsObj['Name'] = spatialreference.children[0].content;

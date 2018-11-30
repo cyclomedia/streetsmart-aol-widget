@@ -1,3 +1,42 @@
+
+define([], function() {
+    return {
+        /**
+         * 传入XML字符串转为JSON
+         * pass xml string and will return a JSON object
+         *
+         * @param {string} xmlString
+         * @return {object} json
+         */
+         toJSON(xmlString) {
+            var doc = this.getXmlObject(xmlString);
+            return  _getChildInfo(doc.childNodes)[0];
+        },
+
+        /**
+         * 传入JSON转为XML对象
+         * pass JSON object and will return XML Object
+         * @param {object} json
+         * @return {object} xmlObject
+         */
+         toXML(json) {
+            return _renderXMLTree(json);
+        },
+
+        /**
+         * 你需要传递一个XML字符串到形参上,然后会获取到原生操作XML的对象
+         * you should pass a XML string content to the first parameter,and it's will return a Object which can maintain XML info
+         *
+         * @param {string} xmlString
+         * @return {object} xmlObject
+         */
+         getXmlObject(xmlString) {
+            var parser = new DOMParser();
+            var xmlDoc = parser.parseFromString(xmlString, "text/xml");
+            return xmlDoc;
+        }
+}});
+
 /**
  * @date: 2017-8-1 11:53:30
  * @author: laihuanmin
@@ -18,8 +57,10 @@ function _getAllAttr(node) {
         return {};
     }
     var result = {};
-    for (let attr of attributes) {
+    for (let i = 0; i < attributes.length; i++){
+        const attr = attributes[i];
         result[attr.name] = attr.value;
+
     }
     return result;
 }
@@ -28,7 +69,7 @@ function _getAllAttr(node) {
  * @private
  */
 function _getContent(node) {
-    return node.innerHTML;
+    return node.innerHTML || node.textContent;
 }
 
 /**
@@ -44,7 +85,8 @@ function _getTagName(node) {
 function _getChildren(parent) {
     var childNodes = parent.childNodes;
     var children = [];
-    for (let child of childNodes) {
+    for (let i = 0; i < childNodes.length; i++) {
+        const child = childNodes[i];
         if (child.nodeType !== 1) {
             continue;
         } else {
@@ -59,18 +101,19 @@ function _getChildren(parent) {
  */
 function _getChildInfo(children) {
     var resultArr = [];
-    for (var child of children) {
+    for (let i = 0; i < children.length; i++) {
+        const child = children[i];
         var eachChildInfo = {
-            tagName: _getTagName(child),
-            content: _getContent(child),
-            attr: _getAllAttr(child),
+            tagName: this._getTagName(child),
+            content: this._getContent(child),
+            attr: this._getAllAttr(child),
             isParent: false,
             hasAttr: child.hasAttributes()
         };
-        var subChildren = _getChildren(child);
+        var subChildren = this._getChildren(child);
         if (subChildren.length !== 0) {
             eachChildInfo.isParent = true;
-            eachChildInfo.children = _getChildInfo(subChildren);
+            eachChildInfo.children = this._getChildInfo(subChildren);
         }
         resultArr.push(eachChildInfo);
     }
@@ -101,41 +144,3 @@ function _renderXMLTree(parent) {
     }
     return parentEle;
 }
-
-/**
- * 传入XML字符串转为JSON
- * pass xml string and will return a JSON object
- *
- * @param {string} xmlString
- * @return {object} json
- */
-function toJSON(xmlString) {
-    var doc = getXmlObject(xmlString);
-    return _getChildInfo(doc.childNodes)[0];
-}
-
-/**
- * 传入JSON转为XML对象
- * pass JSON object and will return XML Object
- * @param {object} json
- * @return {object} xmlObject
- */
-function toXML(json) {
-    return _renderXMLTree(json);
-}
-
-/**
- * 你需要传递一个XML字符串到形参上,然后会获取到原生操作XML的对象
- * you should pass a XML string content to the first parameter,and it's will return a Object which can maintain XML info
- *
- * @param {string} xmlString
- * @return {object} xmlObject
- */
-function getXmlObject(xmlString) {
-    var parser = new DOMParser();
-    var xmlDoc = parser.parseFromString(xmlString, "text/xml");
-    return xmlDoc;
-}
-
-
-console.log(toJSON("<root><alpha>a</alpha></root>"))

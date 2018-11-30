@@ -52,4 +52,4 @@ Aperture API:
 ## License
 
 This project is licensed under Commercial License.
-Street Smart Widgte for ArcGIS Online is a product of CycloMedia Technology B.V. This product is protected by copyright (c) 2016.
+Street Smart Widget for ArcGIS Online is a product of CycloMedia Technology B.V. This product is protected by copyright (c) 2016.
