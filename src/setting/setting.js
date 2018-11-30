@@ -99,7 +99,7 @@ define([
                 this.config.uName = this.uNameCyclomedia.value;
                 this.config.uPwd = this.uPwdCyclomedia.value;
                 this.config.agreement = this.agreementCheck.checked;
-                this.config.srs = this.srsCyclomedia.value;
+                this.config.srs = dijit.byId('srsComboBox').value;
                 this.config.navigation = this.navigationEnable.checked;
                 this.config.timetravel = this.timetravelEnable.checked;
                 this.config.buttonVisibility = {

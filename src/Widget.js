@@ -305,11 +305,8 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             query(query) {
-                const timeTravelVisible =
-                    this.config.timetravel !== undefined &&
-                    this.config.navigation === true
-                        ? this.config.timetravel : false;
-
+                const timeTravelVisible = this.config.timetravel !== undefined && this.config.navigation === true ? this.config.timetravel : false;
+                const navbarVisible = this.config.navigation !== undefined ? this.config.navigation : true;
 
                 return StreetSmartApi.open(query, {
                         viewerType: [this._viewerType],
@@ -318,7 +315,7 @@ require(REQUIRE_CONFIG, [], function () {
                             closable: false,
                             maximizable: true,
                             timeTravelVisible,
-                            navbarVisible: this.config.navigation !== undefined ? this.config.navigation : true,
+                            navbarVisible,
                         },
                     }
                 ).then(result => {

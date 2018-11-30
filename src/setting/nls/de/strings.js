@@ -9,7 +9,7 @@
        headAgreement: "Allgemeine Nutzungsbedingungen",
        measure: "Messungen",
        overlay: "Überlagerungen",
-       timetravel: 'Time Travel',
+       timetravel: 'Zeitreise',
 
        navigation: "Navigation",
        navigationButtons: 'Navigation Buttons',
