@@ -23,8 +23,8 @@ define({
       zoomoutButton: 'Zoom-out Button',
 
       typeSrs: "Type or Select SRS",
-      version: "Street Smart Widget for Web AppBuilder @ version 18.2"
-      linkMapMove: '',
+      version: "Street Smart Widget for Web AppBuilder @ version 18.2",
+      linkMapMove: 'Center panorama in map',
   }),
   "de": true,
   "nl": true,
