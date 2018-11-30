@@ -10,8 +10,8 @@ define([
         'dijit/_WidgetsInTemplateMixin',
         'jimu/BaseWidgetSetting',
         './commonmark',
-        './xml2json'
-    ], function(declare, lang,dojoArray, dRequest, dom, on, Memory, FilteringSelect, _WidgetsInTemplateMixin, BaseWidgetSetting, commonmark, xml2js) {
+        './xml2json',
+    ], function(declare, lang, dojoArray, dRequest, dom, on, Memory, FilteringSelect, _WidgetsInTemplateMixin, BaseWidgetSetting, commonmark, xml2json) {
 
         return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
             baseClass: 'jimu-widget-streetsmartwidget-setting',
@@ -19,7 +19,6 @@ define([
             postCreate:function() {
                 this.inherited(arguments);
                 this.getSrsData();
-
                 if(this.config) {
                     this.setConfig(this.config);
                 } else {
@@ -111,7 +110,7 @@ define([
 
                 dRequest(spatialReferences, {headers: {"X-Requested-With": null}})
                     .then(lang.hitch(this, function(srsData){
-                        let srsJson = toJSON(srsData);
+                        let srsJson = xml2json.toJSON(srsData);
                         dojoArray.forEach(srsJson.children, function(spatialreference, i ) {
                             let srsObj = {};
                             srsObj['Name'] = spatialreference.children[0].content;
