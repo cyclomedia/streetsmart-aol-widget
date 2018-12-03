@@ -98,7 +98,7 @@
 .address-bar {
     position: absolute;
     margin: auto;
-    background-color: #006bbd;
+    background-color: rgb(152, 194, 60);
     padding: 2px;
     border-radius: 5px;
     pointer-events: none;
