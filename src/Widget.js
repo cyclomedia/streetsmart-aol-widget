@@ -287,7 +287,7 @@ require(REQUIRE_CONFIG, [], function () {
                 // Set title color for Widget.
                 if (panel.titleNode) {
                     panel.titleNode.style.backgroundColor = this._cmtTitleColor;
-                    panel.titleLabelNode.style.color = 'white';
+                    if (panel.titleLabelNode) panel.titleLabelNode.style.color = 'white';
                 }
 
                 // Remove padding (white 'border') around viewer.

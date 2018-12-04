@@ -71,3 +71,16 @@
     color : white !important;
     border :  none !important;
 }
+
+.jimu-widget-frame.jimu-container .cmt .navbar  .btn.btn-default *{
+    color: #98c23c !important;
+}
+
+.jimu-widget-frame.jimu-container .cmt .modal  .btn.btn-default *,
+.jimu-widget-frame.jimu-container .cmt .navbar  .btn.btn-default:hover *,
+.jimu-widget-frame.jimu-container .cmt .navbar  .btn.btn-default:focus *{
+    color: white !important;
+}
+.jimu-widget-frame.jimu-container .cmt .modal * {
+    color: #005293 !important;
+}
