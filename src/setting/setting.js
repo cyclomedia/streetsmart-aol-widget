@@ -64,6 +64,13 @@ define([
                         this.agreementCheck.checked = true;
                     }
                 }
+                if(this.config.overlays){
+                    this.overlaysEnabled.value = this.config.overlays;
+                    if(this.config.overlays === true){
+                        this.overlaysEnabled.checked = true;
+                    }
+                }
+
                 if(this.config.srs){
                     this.srsCyclomedia.value = this.config.srs;
                 }
@@ -99,6 +106,7 @@ define([
                 this.config.uName = this.uNameCyclomedia.value;
                 this.config.uPwd = this.uPwdCyclomedia.value;
                 this.config.agreement = this.agreementCheck.checked;
+                this.config.overlays = this.overlaysEnabled.checked;
                 this.config.srs = dijit.byId('srsComboBox').value;
                 this.config.navigation = this.navigationEnable.checked;
                 this.config.timetravel = this.timetravelEnable.checked;
