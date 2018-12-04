@@ -72,15 +72,29 @@
     border :  none !important;
 }
 
-.jimu-widget-frame.jimu-container .cmt .navbar  .btn.btn-default *{
+.jimu-widget-frame.jimu-container .cmt .navbar  .btn.btn-default *,
+.jimu-widget-frame.jimu-container .cmt .cmt-navbar.measurement-navbar *,
+.jimu-widget-frame.jimu-container .cmt .windowcontrols button:hover * {
     color: #98c23c !important;
 }
 
+.jimu-widget-frame.jimu-container .cmt *,
 .jimu-widget-frame.jimu-container .cmt .modal  .btn.btn-default *,
 .jimu-widget-frame.jimu-container .cmt .navbar  .btn.btn-default:hover *,
 .jimu-widget-frame.jimu-container .cmt .navbar  .btn.btn-default:focus *{
     color: white !important;
 }
-.jimu-widget-frame.jimu-container .cmt .modal * {
+
+
+.jimu-widget-frame.jimu-container .cmt .measurement-floating-panel *,
+.jimu-widget-frame.jimu-container .cmt .measurement-select-modal.fade.in.modal button > span {
     color: #005293 !important;
+}
+
+.jimu-widget-frame.jimu-container .cmt .measurement-panel-error-message p {
+    color: #9c7f4b !important
+}
+
+.jimu-widget-frame.jimu-container .cmt-navbar.measurement-navbar btn btn-default:disabled * {
+    color: #bcbdbc !important;
 }
