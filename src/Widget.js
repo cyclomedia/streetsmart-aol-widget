@@ -259,7 +259,7 @@ require(REQUIRE_CONFIG, [], function () {
 
             _handleImageChange() {
                 this._handleConeChange();
-                if (this.config.overlay === true) {
+                if (this.config.buttonVisibility.OVERLAYS === true) {
                     this._overlayManager.addOverlaysToViewer();
                 }
             },
