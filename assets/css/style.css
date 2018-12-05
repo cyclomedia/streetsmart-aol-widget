@@ -77,15 +77,20 @@
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt.viewer .cmtNavBarPanel .nav-stacked>li a,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .panel-default .panel-heading,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .modal  .btn.btn-default *,
-.dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar  .btn.btn-default:hover *,
-.dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar  .btn.btn-default:focus *{
+.dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar .btn.btn-default:hover *,
+.dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar.expandable-navbar .btn.btn-default:focus *,
+.dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar .measurement-dropdown .dropdown-menu li:hover a>span,
+.dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar .measurement-dropdown:hover .btn.btn-default,
+.dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar .measurement-dropdown:hover .btn.btn-default *{
     color: white !important;
 }
 
 .dart-panel .jimu-widget-frame.jimu-container .cmt .cmtViewerPanel .panel-body .slider-tick-label,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .dropdown-menu>li>a,
+.dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .cmtImageInformationPanel .tab-content *,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .custom-slider .range-labels li,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .measurement-floating-panel *,
+.dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar .measurement-dropdown .dropdown-menu a>span,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv > div > div > div.measurement-select-modal.fade.in.modal > div > div > div.modal-body > div > div > div > span {
     color: #005293 !important;
 }
@@ -109,6 +114,9 @@
 .dart-panel .jimu-widget-frame.jimu-container .cmt .cmtViewerPanel .panel-body label.control-label,
 .dart-panel .jimu-widget-frame.jimu-container .cmt .layerpanel .checkbox span{
     color: #666 !important;
+}
+.dart-panel .jimu-widget-frame.jimu-container .timetravel .travelDate span {
+    color: #2c3e50 !important;
 }
 
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .measurement-floating-panel .warning span {
