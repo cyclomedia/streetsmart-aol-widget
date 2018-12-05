@@ -2,10 +2,10 @@ const REQUIRE_CONFIG = {
     async: true,
     locale: 'en',
     paths: {
-        'react': 'https://unpkg.com/react@16.2.0/umd/react.production.min',
-        'react-dom': 'https://unpkg.com/react-dom@16.2.0/umd/react-dom.production.min',
-        'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/ol3/4.0.1/ol',
-        'lodash': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min'
+        'react': 'https://unpkg.com/react@16.4.1/umd/react.production.min',
+        'react-dom': 'https://unpkg.com/react-dom@16.4.1/umd/react-dom.production.min',
+        'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.3.3/ol',
+        'lodash': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.min'
     }
 };
 
@@ -17,7 +17,7 @@ require(REQUIRE_CONFIG, [], function () {
         'dijit/Tooltip',
         'jimu/BaseWidget',
         'esri/geometry/ScreenPoint',
-        'https://streetsmart.cyclomedia.com/api/v18.7/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v18.14/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',

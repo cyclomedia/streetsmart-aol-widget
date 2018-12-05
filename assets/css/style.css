@@ -15,6 +15,10 @@
     margin-top: -25px;
 }
 
+.cmt .mosaic-tile{
+    margin: 0px;
+}
+
 .hidden {
     display: none;
 }
