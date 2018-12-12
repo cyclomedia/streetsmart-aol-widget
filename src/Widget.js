@@ -298,8 +298,7 @@ require(REQUIRE_CONFIG, [], function () {
                 }
 
                 if(!this._disableLinkToMap && this.config.linkMapMove === true && !this._panoramaViewer.props.activeMeasurement){
-                    const viewer = this._panoramaViewer._viewer;
-                    const recording = viewer._activeRecording;
+                    const recording = this._panoramaViewer.getRecording();
                     if (!recording || !recording.xyz) {
                         return;
                     }

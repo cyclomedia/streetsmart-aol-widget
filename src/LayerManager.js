@@ -153,8 +153,7 @@ define([
         }
 
         updateViewingCone(panoramaViewer) {
-            const viewer = panoramaViewer._panoramaViewer;
-            const recording = viewer._activeRecording;
+            const recording = panoramaViewer.getRecording();
             if (!recording || !recording.xyz) {
                 return;
             }
@@ -172,8 +171,12 @@ define([
             // Transform local SRS to Web Mercator:
             const coordLocal = utils.transformProj4js(coord, this.map.spatialReference.wkid);
 
-            const yaw = viewer.getYaw();
-            const hFov = viewer.getHFov();
+            // Street Smart API returns orientation in degrees.
+            let { yaw, hFov } = panoramaViewer.getOrientation();
+
+            // we need to use it in radians.
+            yaw = utils.toRadians(yaw);
+            hFov = utils.toRadians(hFov);
 
             const factor = 70;
             const hhFov = hFov * 0.5;

@@ -7,6 +7,17 @@ define([
     return {
         proj4: null,
 
+        DEG_TO_RAD: Math.PI / 180.0,
+        RAD_TO_DEG: 180.0 / Math.PI,
+
+        toRadians: function(deg) {
+            return deg * this.DEG_TO_RAD;
+        },
+
+        toDegrees: function(rad) {
+            return rad * this.RAD_TO_DEG;
+        },
+
         setProj4: function(proj4) {
             this.proj4 = proj4;
         },
