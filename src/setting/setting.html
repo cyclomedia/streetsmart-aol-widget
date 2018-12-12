@@ -23,6 +23,10 @@
             <input id="srsComboBox" data-dojo-attach-point="srsCyclomedia">
         </div>
         <div class="settingsForm">
+            <div class="settingsLabel">${nls.streetName}</div>
+            <input data-dojo-attach-point="enableStreetname" type="checkbox" id="enableStreetname">
+        </div>
+        <div class="settingsForm">
             <div class="settingsLabel">${nls.timetravel}</div>
             <input data-dojo-attach-point="timetravelEnable" type="checkbox" id="TIME_TRAVEL">
         </div>
@@ -69,6 +73,11 @@
         </div>
 
 
+
+        <div class="settingsForm">
+            <div class="settingsLabel">${nls.linkMapMove}</div>
+            <input data-dojo-attach-point="linkMapMove" type="checkbox" id="linkMapMove">
+        </div>
 
         <div class="settingsForm">
             <div class="settingsLabel">${nls.agreement1} <a href="#" id="userAgreementLink" > ${nls.agreement2}</a></div>

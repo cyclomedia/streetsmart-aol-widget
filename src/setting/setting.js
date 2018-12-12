@@ -64,6 +64,14 @@ define([
                         this.agreementCheck.checked = true;
                     }
                 }
+
+                if(this.config.linkMapMove){
+                    this.linkMapMove.value = this.config.linkMapMove;
+                    if(this.config.linkMapMove === true){
+                        this.linkMapMove.checked = true;
+                    }
+                }
+
                 if(this.config.srs){
                     this.srsCyclomedia.value = this.config.srs;
                 }
@@ -78,6 +86,13 @@ define([
                     this.timetravelEnable.value = this.config.timetravel;
                     if(this.config.timetravel === true) {
                         this.timetravelEnable.checked = true;
+                    }
+                }
+
+                if(this.config.showStreetName){
+                    this.enableStreetname.value = this.config.showStreetName;
+                    if(this.config.showStreetName === true) {
+                        this.enableStreetname.checked = true;
                     }
                 }
 
@@ -99,9 +114,11 @@ define([
                 this.config.uName = this.uNameCyclomedia.value;
                 this.config.uPwd = this.uPwdCyclomedia.value;
                 this.config.agreement = this.agreementCheck.checked;
+                this.config.linkMapMove = this.linkMapMove.checked;
                 this.config.srs = dijit.byId('srsComboBox').value;
                 this.config.navigation = this.navigationEnable.checked;
                 this.config.timetravel = this.timetravelEnable.checked;
+                this.config.showStreetName = this.enableStreetname.checked;
                 this.config.buttonVisibility = {
                     OVERLAYS: this.overlaysButtonEnable.checked,
                     ELEVATION: this.elevationButtonEnable.checked,
