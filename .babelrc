@@ -6,7 +6,8 @@
       "targets": {
         "browsers": ["last 5 versions"]
       }
-    }]
+    }],
+    "react"
   ],
   "sourceMaps": true,
   "plugins": [

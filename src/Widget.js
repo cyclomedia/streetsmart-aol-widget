@@ -26,6 +26,7 @@ require(REQUIRE_CONFIG, [], function () {
         './RecordingClient',
         './LayerManager',
         './MeasurementHandler',
+        './SidePanelManager',
         './OverlayManager'
     ], function (
         declare,
@@ -43,6 +44,7 @@ require(REQUIRE_CONFIG, [], function () {
         RecordingClient,
         LayerManager,
         MeasurementHandler,
+        SidePanelManager,
         OverlayManager
     ) {
         //To create a widget, you need to derive from BaseWidget.
@@ -96,6 +98,12 @@ require(REQUIRE_CONFIG, [], function () {
                     map: this.map,
                     layer: this._layerManager.measureLayer,
                     StreetSmartApi: StreetSmartApi
+                });
+
+                this._sidePanelManager = new SidePanelManager({
+                    sidePanel: this.sidePanel,
+                    panoramaViewerDiv: this.panoramaViewerDiv,
+                    widget: this,
                 });
 
                 this._overlayManager = new OverlayManager({
@@ -204,6 +212,7 @@ require(REQUIRE_CONFIG, [], function () {
                 if (newViewer && newViewer !== this._panoramaViewer) {
                     this.removeEventListener(this._viewChangeListener);
                     this.removeEventListener(this._imageChangeListener);
+                    this.removeEventListener(this._measurementButtonOverwride);
                     this._panoramaViewer = newViewer;
                     this._bindViewerDependantEventHandlers({ viewerOnly: true});
                 }
@@ -276,6 +285,27 @@ require(REQUIRE_CONFIG, [], function () {
                 if (!opts.viewerOnly) {
                     this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
                 }
+
+                // if we need to save measurements overwrite the default click behaviour.
+                if(this.config.saveMeasurements && !this._measurementButtonOverwrideTimer) {
+                    const clickHandler = this._handleMeasurementPanelToggle.bind(this);
+                    // only supports one viewer, having multiple viewers will break this.
+                    const replaceMeasurementButton = () => {
+                        const measurementButton = document.getElementsByClassName('glyphicon novaicon-ruler-1')[0];
+                        if (measurementButton && measurementButton.parentNode.onclick !== clickHandler) {
+                            const button = measurementButton.parentNode;
+                            const new_element = button.cloneNode(true);
+                            new_element.onclick = clickHandler;
+                            button.parentNode.replaceChild(new_element, button);
+                        }
+                    };
+
+                    this._measurementButtonOverwrideTimer = setInterval(replaceMeasurementButton, 50);
+                }
+            },
+
+            _handleMeasurementPanelToggle(e) {
+                this._sidePanelManager.toggleMeasurementSidePanel(true);
             },
 
             // We do not use removeEventListener for this,
@@ -383,6 +413,9 @@ require(REQUIRE_CONFIG, [], function () {
                             maximizable: true,
                             timeTravelVisible,
                             navbarVisible,
+                            measureTypeButtonVisible: !this.config.saveMeasurements,
+                            measureTypeButtonStart: !this.config.saveMeasurements,
+                            measureTypeButtonToggle: !this.config.saveMeasurements,
                         },
                     }
                 ).then(result => {
@@ -435,6 +468,7 @@ require(REQUIRE_CONFIG, [], function () {
                 this._removeEventListeners();
                 this._layerManager.removeLayers();
                 this._panoramaViewer = null;
+                clearInterval(this._measurementButtonOverwrideTimer);
             },
 
             _drawDraggableMarker() {
