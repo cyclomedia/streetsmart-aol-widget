@@ -37,6 +37,7 @@ define(['react', './Layer'], function (React, Layer) {
 
         startMeasurement(type){
             const {widget, togglePanel} = this.props;
+            this.props.widget._selectedLayerID = this.state.selectedLayer;
             widget.startMeasurement(type);
             togglePanel(false);
         }

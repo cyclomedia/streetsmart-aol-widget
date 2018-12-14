@@ -27,7 +27,8 @@ require(REQUIRE_CONFIG, [], function () {
         './LayerManager',
         './MeasurementHandler',
         './SidePanelManager',
-        './OverlayManager'
+        './OverlayManager',
+        './FeatureLayerManager',
     ], function (
         declare,
         on,
@@ -45,7 +46,8 @@ require(REQUIRE_CONFIG, [], function () {
         LayerManager,
         MeasurementHandler,
         SidePanelManager,
-        OverlayManager
+        OverlayManager,
+        FeatureLayerManager
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
@@ -113,6 +115,13 @@ require(REQUIRE_CONFIG, [], function () {
                     StreetSmartApi: StreetSmartApi,
                 });
 
+                this._featureLayerManager = new FeatureLayerManager({
+                    widget: this,
+                    map: this.map,
+                    wkid: this.wkid,
+                    StreetSmartApi: StreetSmartApi
+                });
+
                 this._applyWidgetStyle();
                 this._determineZoomThreshold();
             },
@@ -173,11 +182,16 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _handleMeasurementChanged(e) {
-                const newViewer = e.detail.panoramaViewer;
+                const {panoramaViewer, activeMeasurement} = e.detail;
+                const newViewer = panoramaViewer;
                 this._handleViewerChanged(newViewer);
                 this._measurementHandler.draw(e);
+                if (this.config.saveMeasurements) {
+                    this._measurementDetails = activeMeasurement;
+                }
+                this._measurementHandler.draw(e);
                 if(this.config.showStreetName) {
-                    if (e.detail.activeMeasurement) {
+                    if (activeMeasurement) {
                         this.streetIndicatorContainer.classList.add('hidden');
                     } else {
                         this.streetIndicatorContainer.classList.remove('hidden');
@@ -467,7 +481,9 @@ require(REQUIRE_CONFIG, [], function () {
                 this._removeEventListeners();
                 this._layerManager.removeLayers();
                 this._panoramaViewer = null;
-                clearInterval(this._measurementButtonOverwrideTimer);
+                this._measurementButtonOverwrideTimer = clearInterval(this._measurementButtonOverwrideTimer);
+                this._saveButtonOverwrideTimer = clearInterval(this._saveButtonOverwrideTimer);
+                this._sidePanelManager.toggleMeasurementSidePanel(false);
             },
 
             _drawDraggableMarker() {
@@ -530,6 +546,37 @@ require(REQUIRE_CONFIG, [], function () {
                         console.error('API ERROR: unknown measurement geometry type. Could be undefined');
                         break;
                 }
+
+                // if we need to save measurements overwrite the default click behaviour.
+                if(this.config.saveMeasurements && !this._saveButtonOverwrideTimer) {
+                    const clickHandler = this._handleMeasurementPanelToggle.bind(this);
+                    // only supports one viewer, having multiple viewers will break this.
+                    const placeSaveButton = () => {
+                        const panel = document.getElementsByClassName('measurement-floating-panel-controls')[1];
+                        if (panel && panel.children.length !== 2) {
+                            const button = panel.childNodes[0];
+                            const clone = button.cloneNode(true);
+                            clone.childNodes[0].classList.remove('novaicon-navigation-down-3');
+                            clone.childNodes[0].classList.add('novaicon-data-download-2');
+                            panel.insertBefore(clone, button);
+                            clone.onclick = this._saveMeasurement.bind(this);
+                        }
+                    };
+
+                    this._saveButtonOverwrideTimer = setInterval(placeSaveButton, 50);
+                }
+            },
+
+            _rerender(){
+                this._overlayManager.addOverlaysToViewer();
+            },
+
+            _saveMeasurement() {
+                const layer = this.map.getLayer(this._selectedLayerID);
+                if(this._layerUpdateListener) this._layerUpdateListener.remove();
+                this._layerUpdateListener = this.addEventListener(layer, 'update-end', this._rerender.bind(this));
+                this._featureLayerManager._saveMeasurementsToLayer(layer, this._measurementDetails);
+                StreetSmartApi.stopMeasurementMode();
             },
 
             // communication method between widgets
