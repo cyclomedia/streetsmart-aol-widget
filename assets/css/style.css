@@ -19,7 +19,7 @@
     height: 100%;
     background-color: teal;
     transition: width 0.5s linear;
-    z-index: 1050;
+    z-index: 15;
     overflow: hidden;
 }
 
@@ -28,6 +28,7 @@
 }
 
 #measurementPanel{
+    min-width: 330px;
     width: 100%;
     height: 100%;
     background-color: white;
@@ -94,7 +95,7 @@
 
 
 .layer-row{
-    font-size: 18px;
+    font-size: 16px;
     padding: 5px;
     border-bottom: 1px solid #dedede;
     font-family: sans-serif;
@@ -102,6 +103,12 @@
     color: rgba(0,82,147,.8);
     display: flex;
     flex-direction: row;
+    overflow: hidden;
+}
+
+.layer-row > label {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .layer-row.selected {
@@ -116,9 +123,36 @@
 }
 
 .measurement-types-list{
-
+    color: rgba(0,82,147,.8);
+    display: flex;
+    flex-direction: column;
+    margin: 9px;
+}
+.measurement-types-list >h2{
+    padding: 5px;
+    font-size: 16px;
+    text-align: center;
+    min-width: 100%;
+}
+.cmt.measurement-button-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0 15px 0 15px;
+    min-width: 100%;
 }
 
+button.measurement-button.glyphicon {
+    min-width: 70px;
+    width: 70px;
+    height: 70px;
+    font-size: 28px;
+    color: white;
+    background: #98c23c;
+    border: 1px solid #98c23c;
+    border-radius: 50%;
+    margin-right: 10px;
+}
 
 .flex-row {
     width: 100%;

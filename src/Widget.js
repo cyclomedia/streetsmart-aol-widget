@@ -212,7 +212,6 @@ require(REQUIRE_CONFIG, [], function () {
                 if (newViewer && newViewer !== this._panoramaViewer) {
                     this.removeEventListener(this._viewChangeListener);
                     this.removeEventListener(this._imageChangeListener);
-                    this.removeEventListener(this._measurementButtonOverwride);
                     this._panoramaViewer = newViewer;
                     this._bindViewerDependantEventHandlers({ viewerOnly: true});
                 }
@@ -510,6 +509,27 @@ require(REQUIRE_CONFIG, [], function () {
                 const vPoint = utils.transformProj4js(mPoint, this.wkid);
 
                 this.query(`${vPoint.x},${vPoint.y}`);
+            },
+
+            startMeasurement(type){
+                let geometry;
+                switch (type) {
+                    case 'POINT':
+                        geometry = StreetSmartApi.MeasurementGeometryType.POINT;
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        break;
+                    case 'LINE':
+                        geometry = StreetSmartApi.MeasurementGeometryType.LINESTRING;
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        break;
+                    case 'POLYGON':
+                        geometry = StreetSmartApi.MeasurementGeometryType.POLYGON;
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        break;
+                    default:
+                        console.error('API ERROR: unknown measurement geometry type. Could be undefined');
+                        break;
+                }
             },
 
             // communication method between widgets
