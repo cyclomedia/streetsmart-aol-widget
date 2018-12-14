@@ -52,16 +52,26 @@ define([
                 if(this.config.locale){
                     this.selectCyclomediaLocation.set("value", this.config.locale);
                 }
+              
                 if(this.config.uName){
                     this.uNameCyclomedia.value = this.config.uName;
                 }
+              
                 if(this.config.uPwd){
                     this.uPwdCyclomedia.value = this.config.uPwd;
                 }
+              
                 if(this.config.agreement){
                     this.agreementCheck.value = this.config.agreement;
                     if(this.config.agreement === true){
                         this.agreementCheck.checked = true;
+                    }
+                }
+              
+                if(this.config.overlays){
+                    this.overlaysEnabled.value = this.config.overlays;
+                    if(this.config.overlays === true){
+                        this.overlaysEnabled.checked = true;
                     }
                 }
 
@@ -82,6 +92,7 @@ define([
                         this.navigationEnable.checked = true;
                     }
                 }
+              
                 if(this.config.timetravel){
                     this.timetravelEnable.value = this.config.timetravel;
                     if(this.config.timetravel === true) {
@@ -114,6 +125,7 @@ define([
                 this.config.uName = this.uNameCyclomedia.value;
                 this.config.uPwd = this.uPwdCyclomedia.value;
                 this.config.agreement = this.agreementCheck.checked;
+                this.config.overlays = this.overlaysEnabled.checked;
                 this.config.linkMapMove = this.linkMapMove.checked;
                 this.config.srs = dijit.byId('srsComboBox').value;
                 this.config.navigation = this.navigationEnable.checked;

@@ -23,6 +23,10 @@
             <input id="srsComboBox" data-dojo-attach-point="srsCyclomedia">
         </div>
         <div class="settingsForm">
+            <div class="settingsLabel">${nls.overlay}</div>
+            <input data-dojo-attach-point="overlaysEnabled" type="checkbox" id="showOverlays">
+        </div>
+        <div class="settingsForm">
             <div class="settingsLabel">${nls.streetName}</div>
             <input data-dojo-attach-point="enableStreetname" type="checkbox" id="enableStreetname">
         </div>
@@ -33,6 +37,10 @@
         <div class="settingsForm">
             <div class="settingsLabel">${nls.navigation}</div>
             <input data-dojo-attach-point="navigationEnable" type="checkbox" id="enableNavigation">
+        </div>
+        <div class="settingsForm">
+            <div class="settingsLabel">${nls.linkMapMove}</div>
+            <input data-dojo-attach-point="linkMapMove" type="checkbox" id="linkMapMove">
         </div>
 
 
@@ -71,13 +79,7 @@
             <div class="settingsLabel">${nls.zoomoutButton}</div>
             <input data-dojo-attach-point="zoomoutButtonEnable" type="checkbox" id="ZOOM_OUT">
         </div>
-
-
-
-        <div class="settingsForm">
-            <div class="settingsLabel">${nls.linkMapMove}</div>
-            <input data-dojo-attach-point="linkMapMove" type="checkbox" id="linkMapMove">
-        </div>
+      
 
         <div class="settingsForm">
             <div class="settingsLabel">${nls.agreement1} <a href="#" id="userAgreementLink" > ${nls.agreement2}</a></div>
