@@ -52,22 +52,33 @@ define([
                 if(this.config.locale){
                     this.selectCyclomediaLocation.set("value", this.config.locale);
                 }
+              
                 if(this.config.uName){
                     this.uNameCyclomedia.value = this.config.uName;
                 }
+              
                 if(this.config.uPwd){
                     this.uPwdCyclomedia.value = this.config.uPwd;
                 }
+              
                 if(this.config.agreement){
                     this.agreementCheck.value = this.config.agreement;
                     if(this.config.agreement === true){
                         this.agreementCheck.checked = true;
                     }
                 }
+              
                 if(this.config.overlays){
                     this.overlaysEnabled.value = this.config.overlays;
                     if(this.config.overlays === true){
                         this.overlaysEnabled.checked = true;
+                    }
+                }
+
+                if(this.config.linkMapMove){
+                    this.linkMapMove.value = this.config.linkMapMove;
+                    if(this.config.linkMapMove === true){
+                        this.linkMapMove.checked = true;
                     }
                 }
 
@@ -81,10 +92,18 @@ define([
                         this.navigationEnable.checked = true;
                     }
                 }
+              
                 if(this.config.timetravel){
                     this.timetravelEnable.value = this.config.timetravel;
                     if(this.config.timetravel === true) {
                         this.timetravelEnable.checked = true;
+                    }
+                }
+
+                if(this.config.showStreetName){
+                    this.enableStreetname.value = this.config.showStreetName;
+                    if(this.config.showStreetName === true) {
+                        this.enableStreetname.checked = true;
                     }
                 }
 
@@ -107,9 +126,11 @@ define([
                 this.config.uPwd = this.uPwdCyclomedia.value;
                 this.config.agreement = this.agreementCheck.checked;
                 this.config.overlays = this.overlaysEnabled.checked;
+                this.config.linkMapMove = this.linkMapMove.checked;
                 this.config.srs = dijit.byId('srsComboBox').value;
                 this.config.navigation = this.navigationEnable.checked;
                 this.config.timetravel = this.timetravelEnable.checked;
+                this.config.showStreetName = this.enableStreetname.checked;
                 this.config.buttonVisibility = {
                     OVERLAYS: this.overlaysButtonEnable.checked,
                     ELEVATION: this.elevationButtonEnable.checked,
