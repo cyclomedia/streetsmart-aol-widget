@@ -53,7 +53,7 @@ define([
                 }
                 const pointViewer = new Point(coord[0], coord[1], new SpatialReference({ wkid: this.wkid }));
                 const coordMap = utils.transformProj4js(pointViewer, mapWkid);
-                return [coordMap.x, coordMap.y];
+                return [coordMap.x, coordMap.y, coord[2]];
             })
         }
 
@@ -65,8 +65,12 @@ define([
             const zValue = coords[2];
             const transformedCoords = this._transformPoints([coords]);
 
-            const pointJson = [{"geometry":{"x":transformedCoords[0][0],"y":transformedCoords[0][1],
-                    "spatialReference":{"wkid":this.map.spatialReference.wkid}},
+            const pointJson = [{"geometry":
+                    {
+                        "x":transformedCoords[0][0],
+                        "y":transformedCoords[0][1],
+                        "z":zValue,
+                        "spatialReference":{"wkid":this.map.spatialReference.wkid}},
                 "attributes":{}
             }];
 
@@ -78,8 +82,8 @@ define([
                     }
                     options.content.adds = JSON.stringify(zAdd);
 
+                    esriRequest.setRequestPreCallback();
                     return options;
-
                 });
             }
 
@@ -97,7 +101,8 @@ define([
             const transformedCoords = this._transformPoints(coords);
 
             const lineJson = [{"geometry":
-                    {"paths":[transformedCoords],
+                    {   "hasZ": true,
+                        "paths":[transformedCoords],
                         "spatialReference":{"wkid":this.map.spatialReference.wkid}},
                 "attributes":{
                     Measurement: measuredDistance
@@ -120,7 +125,8 @@ define([
             const transformedCoords = this._transformPoints(coords);
 
             const polyJson = [{"geometry":
-                    {"rings":[transformedCoords],
+                    {   "hasZ": true,
+                        "rings":[transformedCoords],
                         "spatialReference":{"wkid":this.map.spatialReference.wkid}},
                 "attributes":{
                     Measurement: polygonArea
