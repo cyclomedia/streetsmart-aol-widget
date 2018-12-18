@@ -68,6 +68,9 @@ define([
         }
 
         addOverlaysToViewer() {
+
+            if(this.widget.config.overlays === false) return;
+
             this.removeOverlays();
 
             const mapLayers = _.values(this.map._layers);

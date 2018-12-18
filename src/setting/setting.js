@@ -134,7 +134,7 @@ define([
                 this.config.saveMeasurements = this.saveMeasurementsEnabled.checked;
                 this.config.overlays = this.overlaysEnabled.checked;
                 this.config.linkMapMove = this.linkMapMove.checked;
-                this.config.srs = dijit.byId('srsComboBox').value;
+                this.config.srs = dijit.byId('srsComboBox') && dijit.byId('srsComboBox').value || document.getElementById('srsComboBox').value;
                 this.config.navigation = this.navigationEnable.checked;
                 this.config.timetravel = this.timetravelEnable.checked;
                 this.config.showStreetName = this.enableStreetname.checked;

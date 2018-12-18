@@ -337,9 +337,8 @@ require(REQUIRE_CONFIG, [], function () {
 
             _handleImageChange() {
                 this._handleConeChange();
-                if (this.config.overlays === true) {
-                    this._overlayManager.addOverlaysToViewer();
-                }
+                this._overlayManager.addOverlaysToViewer();
+
 
                 if(!this._disableLinkToMap && this.config.linkMapMove === true && !this._panoramaViewer.props.activeMeasurement){
                     const recording = this._panoramaViewer.getRecording();
