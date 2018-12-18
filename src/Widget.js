@@ -553,7 +553,7 @@ require(REQUIRE_CONFIG, [], function () {
                     const clickHandler = this._handleMeasurementPanelToggle.bind(this);
                     // only supports one viewer, having multiple viewers will break this.
                     const placeSaveButton = () => {
-                        const panel = document.getElementsByClassName('measurement-floating-panel-controls')[1];
+                        const panel = document.getElementsByClassName('floating-panel-controls')[1];
                         if (panel && panel.children.length !== 2) {
                             const button = panel.childNodes[0];
                             const clone = button.cloneNode(true);
