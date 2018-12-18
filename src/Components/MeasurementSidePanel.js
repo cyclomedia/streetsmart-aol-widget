@@ -70,21 +70,33 @@ define(['react', './Layer'], function (React, Layer) {
                     <div className={'measurement-types-list'}>
                         <h2>{nls.startMeasurement}</h2>
                         <div className={'cmt measurement-button-container'}>
+                            {layerGeometryTypes.includes(geomTypes.POINT) &&
                             <button
                                 className={'measurement-button glyphicon novaicon-custom-dot'}
                                 disabled={!layerGeometryTypes.includes(geomTypes.POINT)}
-                                onClick={() => {this.startMeasurement(geomTypes.POINT)}}
+                                onClick={() => {
+                                    this.startMeasurement(geomTypes.POINT)
+                                }}
                             ></button>
+                            }
+                            {layerGeometryTypes.includes(geomTypes.LINE) &&
                             <button
                                 className={'measurement-button glyphicon novaicon-organization-graph'}
                                 disabled={!layerGeometryTypes.includes(geomTypes.LINE)}
-                                onClick={() => {this.startMeasurement(geomTypes.LINE)}}
+                                onClick={() => {
+                                    this.startMeasurement(geomTypes.LINE)
+                                }}
                             ></button>
+                            }
+                            {layerGeometryTypes.includes(geomTypes.POLYGON) &&
                             <button
                                 className={'measurement-button glyphicon novaicon-organization-flowchart-1'}
                                 disabled={!layerGeometryTypes.includes(geomTypes.POLYGON)}
-                                onClick={() => {this.startMeasurement(geomTypes.POLYGON)}}
+                                onClick={() => {
+                                    this.startMeasurement(geomTypes.POLYGON)
+                                }}
                             ></button>
+                            }
                         </div>
                     </div>
                 }

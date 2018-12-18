@@ -110,18 +110,23 @@ define([
                 this.isQueueLoading = true;
                 const item = this.requestQueue.pop();
 
-                for(const request of item.req){
-                    const url = `${request.mapLayer.url}/query?` +
-                    'f=json&returnGeometry=true&returnZ=true&' +
-                    `geometry=${encodeURI(JSON.stringify(item.extent))}&token=${request.mapLayer.credential.token}`;
+                // if no item is present it is probably already being loaded, its just that multiple requestBundles triggered the loading of the most recent.
+                if (item) {
+                    for (const request of item.req) {
+                        const url = `${request.mapLayer.url}/query?` +
+                            'f=json&returnGeometry=true&returnZ=true&' +
+                            `geometry=${encodeURI(JSON.stringify(item.extent))}&token=${request.mapLayer.credential.token}`;
 
-                    const options = {
-                        url: url,
-                    };
-                    esriRequest(options).then((r) => {this._handleRequest(r, item, request)});
+                        const options = {
+                            url: url,
+                        };
+                        esriRequest(options).then((r) => {
+                            this._handleRequest(r, item, request)
+                        });
+                    }
+
+                    this.requestQueue = [];
                 }
-
-                this.requestQueue = [];
             }
         }
 
@@ -133,17 +138,28 @@ define([
                 this._loadQueue();
             }else if (this.reloadQueueOnFinish === false){
                 const {mapLayer, sld} = request;
-                const info = this.createGeoJsonForFeature({mapLayer, sld, featureSet: result});
-                const overlay = this.api.addOverlay({
-                    // sourceSrs: 'EPSG:3857',  // Broken in API
-                    name: mapLayer.name,
-                    sldXMLtext: sld.xml,
-                    info
-                });
+                const wkid = result.spatialReference && result.spatialReference.wkid;
 
-                request.overlayID = overlay;
-                this.overlays.push(overlay.id);
+                if(wkid) {
+                    const info = this.createGeoJsonForFeature({
+                        mapLayer,
+                        sld,
+                        wkid,
+                        featureSet: result,
+                    });
 
+                    const overlay = this.api.addOverlay({
+                        // sourceSrs: 'EPSG:3857',  // Broken in API
+                        name: mapLayer.name,
+                        sldXMLtext: sld.xml,
+                        geojson: info
+                    });
+
+                    request.overlayID = overlay;
+                    this.overlays.push(overlay.id);
+                } else {
+                    request.overlayID = 'No wkid or features found.';
+                }
                 let isBundleComplete = true;
                 for(const reg of requestBundle.req){
                     if(!reg.overlayID){
@@ -208,7 +224,7 @@ define([
             return newFeature;
         }
 
-        createGeoJsonForFeature({ mapLayer, sld, featureSet }) {
+        createGeoJsonForFeature({ mapLayer, sld, featureSet, wkid }) {
             const arcgisFeatureSet = featureSet || mapLayer.toJson().featureSet;
             const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet);
 
@@ -224,13 +240,13 @@ define([
             }
 
             // Make sure the panoramaviewer knows which srs this is in.
-            let wkid = _.get(arcgisFeatureSet, 'features[0].geometry.spatialReference.wkid', null);
-            if (wkid) {
-                wkid = wkid === 102100 ? 3857 : wkid;
+            let wkidToUse = _.get(arcgisFeatureSet, 'features[0].geometry.spatialReference.wkid', null) || wkid;
+            if (wkidToUse) {
+                wkidToUse = wkidToUse === 102100 ? 3857 : wkidToUse;
                 const crs = {
                     type: 'EPSG',
                     properties: {
-                        code: wkid,
+                        code: wkidToUse,
                     }
                 };
                 geojson.crs = crs;
