@@ -9,7 +9,7 @@ gulp.task('babel', function() {
     return gulp.src([
         'src/**/*.js', '!**/*___jb_old___'
     ])
-        .pipe(babel({sourceMap: true}))
+        .pipe(babel())
         .pipe(gulp.dest('dist'))
         .pipe(gulp.dest(process.env.WIDGET_DIR))
         .pipe(livereload());

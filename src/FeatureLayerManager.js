@@ -74,19 +74,6 @@ define([
                 "attributes":{}
             }];
 
-            if(zValue !== null){
-                esriRequest.setRequestPreCallback(function(options){
-                    let zAdd = JSON.parse(options.content.adds);
-                    if(zAdd[0] && zAdd[0].geometry) {
-                        zAdd[0].geometry.z =  zValue;
-                    }
-                    options.content.adds = JSON.stringify(zAdd);
-
-                    esriRequest.setRequestPreCallback();
-                    return options;
-                });
-            }
-
             this._saveToFeatureLayer(layer, pointJson);
 
         }

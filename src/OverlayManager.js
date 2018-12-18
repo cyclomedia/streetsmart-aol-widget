@@ -15,8 +15,6 @@ define([
     'esri/renderers/SimpleRenderer',
     'esri/layers/GraphicsLayer',
     'esri/SpatialReference',
-    'esri/tasks/query',
-    'esri/tasks/QueryTask',
     './arcgisToGeojson',
     './utils',
     './SldFactory',
@@ -37,8 +35,6 @@ define([
     SimpleRenderer,
     GraphicsLayer,
     SpatialReference,
-    Query,
-    QueryTask,
     geoJsonUtils,
     utils,
     SLD,
@@ -176,9 +172,10 @@ define([
 
         _calcRecordingExtent() {
             const recording = this.widget._panoramaViewer.getRecording();
+            const featureRadius = 30;
             const {xyz, srs} = recording;
             // needs support for feet.
-            const ext = new Extent(xyz[0] - 30, xyz[1] - 30, xyz[0] + 30, xyz[1] + 30, new SpatialReference(srs.split(':')[1]) )
+            const ext = new Extent(xyz[0] - featureRadius, xyz[1] - featureRadius, xyz[0] + featureRadius, xyz[1] + featureRadius, new SpatialReference(srs.split(':')[1]) )
             return ext
         }
 
