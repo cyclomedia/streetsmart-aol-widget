@@ -2,10 +2,12 @@ define([
     'dojo/_base/Color',
     'dojo/on',
     'dojo/_base/array',
+    'esri/request',
     'esri/geometry/Point',
     'esri/geometry/Multipoint',
     'esri/geometry/Polygon',
     'esri/geometry/ScreenPoint',
+    'esri/geometry/Extent',
     'esri/graphic',
     'esri/symbols/SimpleMarkerSymbol',
     'esri/symbols/SimpleLineSymbol',
@@ -13,6 +15,8 @@ define([
     'esri/renderers/SimpleRenderer',
     'esri/layers/GraphicsLayer',
     'esri/SpatialReference',
+    'esri/tasks/query',
+    'esri/tasks/QueryTask',
     './arcgisToGeojson',
     './utils',
     './SldFactory',
@@ -20,10 +24,12 @@ define([
     Color,
     on,
     dojoArray,
+    esriRequest,
     Point,
     Multipoint,
     Polygon,
     ScreenPoint,
+    Extent,
     Graphic,
     SimpleMarkerSymbol,
     SimpleLineSymbol,
@@ -31,13 +37,16 @@ define([
     SimpleRenderer,
     GraphicsLayer,
     SpatialReference,
+    Query,
+    QueryTask,
     geoJsonUtils,
     utils,
     SLD,
 ) {
     return class LayerManager {
-        constructor({ map, wkid, config, StreetSmartApi }) {
+        constructor({ map, wkid, config, StreetSmartApi, widget }) {
             this.map = map;
+            this.widget = widget;
             this.wkid = wkid;
             this.config = config;
             this.api = StreetSmartApi;
@@ -56,6 +65,10 @@ define([
                 },
             };
             this.overlays = [];
+            this.requestQueue = [];
+            this.requestID = 0;
+            this.isQueueLoading = false;
+            this.reloadQueueOnFinish = false;
         }
 
         addOverlaysToViewer() {
@@ -63,22 +76,94 @@ define([
 
             const mapLayers = _.values(this.map._layers);
             const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
+            const ID = ++this.requestID;
+            const extent = this._calcRecordingExtent();
+            const requestBundle = {ID, extent, req: []};
             _.each(featureLayers, (mapLayer) => {
                 const sld = new SLD(mapLayer);
                 if(sld.xml === undefined){
                     return;
                 }
-                const geojson = this.createGeoJsonForFeature({ mapLayer, sld });
+                if(mapLayer.hasZ) {
+                    const requestObj = {mapLayer, sld, overlayID: null};
+                    requestBundle.req.push(requestObj);
+                } else {
+                    const geojson = this.createGeoJsonForFeature({mapLayer, sld});
+                    const overlay = this.api.addOverlay({
+                        // sourceSrs: 'EPSG:3857',  // Broken in API
+                        name: mapLayer.name,
+                        sldXMLtext: sld.xml,
+                        geojson
+                    });
 
+                    this.overlays.push(overlay.id);
+                }
+            });
+            this.requestQueue.push(requestBundle);
+            this._loadQueue();
+        }
+
+        _loadQueue() {
+            if(this.isQueueLoading){
+                this.reloadQueueOnFinish = true;
+            } else {
+                this.isQueueLoading = true;
+                const item = this.requestQueue.pop();
+
+                for(const request of item.req){
+                    const url = `${request.mapLayer.url}/query?` +
+                    'f=json&returnGeometry=true&returnZ=true&' +
+                    `geometry=${encodeURI(JSON.stringify(item.extent))}&token=${request.mapLayer.credential.token}`;
+
+                    const options = {
+                        url: url,
+                    };
+                    esriRequest(options).then((r) => {this._handleRequest(r, item, request)});
+                }
+
+                this.requestQueue = [];
+            }
+        }
+
+        _handleRequest(result, requestBundle, request) {
+
+            if(this.reloadQueueOnFinish && !requestBundle.isComplete) {
+                this.isQueueLoading = false;
+                requestBundle.isComplete = true;
+                this._loadQueue();
+            }else if (this.reloadQueueOnFinish === false){
+                const {mapLayer, sld} = request;
+                const info = this.createGeoJsonForFeature({mapLayer, sld, featureSet: result});
                 const overlay = this.api.addOverlay({
                     // sourceSrs: 'EPSG:3857',  // Broken in API
                     name: mapLayer.name,
                     sldXMLtext: sld.xml,
-                    geojson
+                    info
                 });
 
+                request.overlayID = overlay;
                 this.overlays.push(overlay.id);
-            });
+
+                let isBundleComplete = true;
+                for(const reg of requestBundle.req){
+                    if(!reg.overlayID){
+                        isBundleComplete = false;
+                        break
+                    }
+                }
+                if(isBundleComplete){
+                    this.isQueueLoading = false;
+                }
+            }
+
+        }
+
+        _calcRecordingExtent() {
+            const recording = this.widget._panoramaViewer.getRecording();
+            const {xyz, srs} = recording;
+            // needs support for feet.
+            const ext = new Extent(xyz[0] - 30, xyz[1] - 30, xyz[0] + 30, xyz[1] + 30, new SpatialReference(srs.split(':')[1]) )
+            return ext
         }
 
         removeOverlays() {
@@ -123,8 +208,8 @@ define([
             return newFeature;
         }
 
-        createGeoJsonForFeature({ mapLayer, sld }) {
-            const arcgisFeatureSet = mapLayer.toJson().featureSet;
+        createGeoJsonForFeature({ mapLayer, sld, featureSet }) {
+            const arcgisFeatureSet = featureSet || mapLayer.toJson().featureSet;
             const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet);
 
             // We can't just create geoJson from the features of the maplayer.

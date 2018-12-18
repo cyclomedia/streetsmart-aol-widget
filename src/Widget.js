@@ -109,6 +109,7 @@ require(REQUIRE_CONFIG, [], function () {
                 });
 
                 this._overlayManager = new OverlayManager({
+                    widget: this,
                     wkid: this.wkid,
                     map: this.map,
                     config: this.config,
