@@ -13,6 +13,7 @@ define([
     'esri/renderers/SimpleRenderer',
     'esri/layers/GraphicsLayer',
     'esri/SpatialReference',
+    'esri/request',
     './arcgisToGeojson',
     './utils',
     './SldFactory',
@@ -31,6 +32,7 @@ define([
     SimpleRenderer,
     GraphicsLayer,
     SpatialReference,
+    esriRequest,
     geoJsonUtils,
     utils,
     SLD,
@@ -58,7 +60,7 @@ define([
             this.overlays = [];
         }
 
-        addOverlaysToViewer() {
+        getOverlaysForViewer() {
             this.removeOverlays();
 
             const mapLayers = _.values(this.map._layers);
@@ -68,16 +70,8 @@ define([
                 if(sld.xml === undefined){
                     return;
                 }
-                const geojson = this.createGeoJsonForFeature({ mapLayer, sld });
+                this.featuresFromJson({ mapLayer, sld });
 
-                const overlay = this.api.addOverlay({
-                    // sourceSrs: 'EPSG:3857',  // Broken in API
-                    name: mapLayer.name,
-                    sldXMLtext: sld.xml,
-                    geojson
-                });
-
-                this.overlays.push(overlay.id);
             });
         }
 
@@ -123,9 +117,13 @@ define([
             return newFeature;
         }
 
-        createGeoJsonForFeature({ mapLayer, sld }) {
-            const arcgisFeatureSet = mapLayer.toJson().featureSet;
-            const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet);
+        createGeoJsonForFeature({ mapLayer, sld, result }) {
+
+            const arcGisFeatures = result;
+            const jsonFeatureSet = {};
+            jsonFeatureSet.features = arcGisFeatures.features;
+            jsonFeatureSet.geometryType = arcGisFeatures.geometryType;
+            const geojson = geoJsonUtils.arcgisToGeoJSON(jsonFeatureSet);
 
             // We can't just create geoJson from the features of the maplayer.
             // To correctly apply the default case in the Unique Value Renderer,
@@ -139,7 +137,7 @@ define([
             }
 
             // Make sure the panoramaviewer knows which srs this is in.
-            let wkid = _.get(arcgisFeatureSet, 'features[0].geometry.spatialReference.wkid', null);
+            let wkid = _.get(jsonFeatureSet, 'features[0].geometry.spatialReference.wkid', null);
             if (wkid) {
                 wkid = wkid === 102100 ? 3857 : wkid;
                 const crs = {
@@ -150,7 +148,37 @@ define([
                 };
                 geojson.crs = crs;
             }
-            return geojson;
+
+            const overlay = this.api.addOverlay({
+                // sourceSrs: 'EPSG:3857',  // Broken in API
+                name: mapLayer.name,
+                sldXMLtext: sld.xml,
+                geojson
+            });
+
+            this.addOverlaysToViewer(overlay);
+        }
+
+        addOverlaysToViewer(overlay){
+            this.overlays.push(overlay.id);
+        }
+
+        featuresFromJson({ mapLayer, sld }){
+
+            let mapSrs = new SpatialReference({ wkid: mapLayer.spatialReference.wkid });
+            let featureRequestHandle = esriRequest({
+                url: mapLayer.url + "/query",
+                content: {
+                    "where": "1=1",
+                    "geometry": JSON.stringify(this.map.extent),
+                    "outSpatialReference": mapSrs.wkid,
+                    "f": "json",
+                    "returnZ": true,
+                }
+            });
+            featureRequestHandle.then((result) => {
+                this.createGeoJsonForFeature({ mapLayer, sld, result});
+            });
         }
     }
 });

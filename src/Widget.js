@@ -294,7 +294,7 @@ require(REQUIRE_CONFIG, [], function () {
             _handleImageChange() {
                 this._handleConeChange();
                 if (this.config.overlays === true) {
-                    this._overlayManager.addOverlaysToViewer();
+                    this._overlayManager.getOverlaysForViewer();
                 }
 
                 if(!this._disableLinkToMap && this.config.linkMapMove === true && !this._panoramaViewer.props.activeMeasurement){
