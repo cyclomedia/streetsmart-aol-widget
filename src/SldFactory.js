@@ -174,7 +174,7 @@ define([
                        <OnlineResource xlink:type="simple" xlink:href="${symbol.url}" />
                        <Format>${symbol.contentType}</Format>
                     </ExternalGraphic>
-                    <Size>100</Size>
+                    <Size>${symbol.size}</Size>
                 `;
             } else {
                 const wellKnownName = this._createWellKnownName(symbol);
