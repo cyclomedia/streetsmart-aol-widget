@@ -112,12 +112,17 @@ define([
                 // if no item is present it is probably already being loaded, its just that multiple requestBundles triggered the loading of the most recent.
                 if (item) {
                     for (const request of item.req) {
-                        const url = `${request.mapLayer.url}/query?` +
-                            'f=json&returnGeometry=true&returnZ=true&' +
-                            `geometry=${encodeURI(JSON.stringify(item.extent))}&token=${request.mapLayer.credential.token}`;
 
                         const options = {
-                            url: url,
+                            url: `${request.mapLayer.url}/query?`,
+                            content: {
+                                f: 'json',
+                                returnGeometry: true,
+                                returnZ: true,
+                                geometry: JSON.stringify(item.extent),
+                                outSpatialReference: this.wkid,
+                                token: request.mapLayer.credential.token,
+                            }
                         };
                         esriRequest(options).then((r) => {
                             this._handleRequest(r, item, request)
