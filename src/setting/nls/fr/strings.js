@@ -11,7 +11,7 @@
        overlay: "Superpositions",
        timetravel: 'Temps de parcours',
        streetName: 'Visualiser les noms de rues',
-       linkMapMove: '',
+       linkMapMove: 'Centrer la carte sur le cyclorama',
 
 
        navigation: "Navigation",
