@@ -564,7 +564,7 @@ require(REQUIRE_CONFIG, [], function () {
                     };
 
                     this._saveButtonOverwrideTimer = setInterval(placeSaveButton, 50);
-                } else if(this._saveButtonOverwrideTimer) {
+                } else if(this._saveButtonOverwrideTimer && !this._selectedLayerID ) {
                     this._saveButtonOverwrideTimer = clearInterval(this._saveButtonOverwrideTimer);
                 }
             },
