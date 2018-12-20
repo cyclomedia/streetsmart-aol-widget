@@ -189,7 +189,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this._bindViewerDependantEventHandlers();
                     this._setButtonVisibilityInApi();
                     this._handleImageChange();
-                    this._drawDraggableMarker();
+                    // this._drawDraggableMarker();
 
                     if(this.config.navigation === false){
                         this._hideNavigation();
