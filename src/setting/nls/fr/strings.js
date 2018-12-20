@@ -10,7 +10,8 @@
        measure: "Mesures",
        overlay: "Superpositions",
        timetravel: 'Temps de parcours',
-       streetName: 'Show street name',
+       streetName: '',
+       linkMapMove: '',
 
 
        navigation: "Navigation",
@@ -26,6 +27,5 @@
 
        typeSrs: "Tapez ou sélectionnez SRS",
        version: "Street Smart Widget pour Web AppBuilder @ version 18.2",
-       linkMapMove: 'Center panorama in map',
    })
 );
