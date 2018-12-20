@@ -142,37 +142,54 @@ define([
                 this._loadQueue();
             }else if (this.reloadQueueOnFinish === false){
                 const {mapLayer, sld} = request;
-                const wkid = result.spatialReference && result.spatialReference.wkid;
+                try {
+                    const wkid = result.spatialReference && result.spatialReference.wkid;
 
-                if(wkid) {
-                    const info = this.createGeoJsonForFeature({
-                        mapLayer,
-                        sld,
-                        wkid,
-                        featureSet: result,
-                    });
+                    if (wkid && result.features.length) {
+                        const info = this.createGeoJsonForFeature({
+                            mapLayer,
+                            sld,
+                            wkid,
+                            featureSet: result,
+                        });
 
-                    const overlay = this.api.addOverlay({
-                        // sourceSrs: 'EPSG:3857',  // Broken in API
-                        name: mapLayer.name,
-                        sldXMLtext: sld.xml,
-                        geojson: info
-                    });
+                        const overlay = this.api.addOverlay({
+                            // sourceSrs: 'EPSG:3857',  // Broken in API
+                            name: mapLayer.name,
+                            sldXMLtext: sld.xml,
+                            geojson: info
+                        });
 
-                    request.overlayID = overlay;
-                    this.overlays.push(overlay.id);
-                } else {
-                    request.overlayID = 'No wkid or features found.';
-                }
-                let isBundleComplete = true;
-                for(const reg of requestBundle.req){
-                    if(!reg.overlayID){
-                        isBundleComplete = false;
-                        break
+                        request.overlayID = overlay;
+                        this.overlays.push(overlay.id);
+                    } else {
+                        request.overlayID = 'No wkid or features found.';
                     }
-                }
-                if(isBundleComplete){
-                    this.isQueueLoading = false;
+                    let isBundleComplete = true;
+                    for (const reg of requestBundle.req) {
+                        if (!reg.overlayID) {
+                            isBundleComplete = false;
+                            break
+                        }
+                    }
+                    if (isBundleComplete) {
+                        this.isQueueLoading = false;
+                    }
+                } catch (e) {
+                    request.overlayID = 'An error occured';
+
+                    let isBundleComplete = true;
+                    for (const reg of requestBundle.req) {
+                        if (!reg.overlayID) {
+                            isBundleComplete = false;
+                            break
+                        }
+                    }
+                    if (isBundleComplete) {
+                        this.isQueueLoading = false;
+                    }
+
+                    throw e;
                 }
             }
 
