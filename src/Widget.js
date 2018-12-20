@@ -548,7 +548,7 @@ require(REQUIRE_CONFIG, [], function () {
                 }
 
                 // if we need to save measurements overwrite the default click behaviour.
-                if(this.config.saveMeasurements && !this._saveButtonOverwrideTimer) {
+                if(this.config.saveMeasurements && !this._saveButtonOverwrideTimer && this._selectedLayerID) {
                     const clickHandler = this._handleMeasurementPanelToggle.bind(this);
                     // only supports one viewer, having multiple viewers will break this.
                     const placeSaveButton = () => {
@@ -564,6 +564,8 @@ require(REQUIRE_CONFIG, [], function () {
                     };
 
                     this._saveButtonOverwrideTimer = setInterval(placeSaveButton, 50);
+                } else if(this._saveButtonOverwrideTimer) {
+                    this._saveButtonOverwrideTimer = clearInterval(this._saveButtonOverwrideTimer);
                 }
             },
 
@@ -573,10 +575,12 @@ require(REQUIRE_CONFIG, [], function () {
 
             _saveMeasurement() {
                 const layer = this.map.getLayer(this._selectedLayerID);
-                if(this._layerUpdateListener) this._layerUpdateListener.remove();
-                this._layerUpdateListener = this.addEventListener(layer, 'update-end', this._rerender.bind(this));
-                this._featureLayerManager._saveMeasurementsToLayer(layer, this._measurementDetails);
-                StreetSmartApi.stopMeasurementMode();
+                if(layer) {
+                    if (this._layerUpdateListener) this._layerUpdateListener.remove();
+                    this._layerUpdateListener = this.addEventListener(layer, 'update-end', this._rerender.bind(this));
+                    this._featureLayerManager._saveMeasurementsToLayer(layer, this._measurementDetails);
+                    StreetSmartApi.stopMeasurementMode();
+                }
             },
 
             // communication method between widgets

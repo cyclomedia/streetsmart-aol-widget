@@ -32,12 +32,16 @@ define(['react', './Layer'], function (React, Layer) {
         }
 
         selectLayer(id) {
-          this.setState({selectedLayer: id});
+            if(id === this.state.selectedLayer){
+                this.setState({selectedLayer: null})
+            }else{
+                this.setState({selectedLayer: id});
+            }
         };
 
         startMeasurement(type){
             const {widget, togglePanel} = this.props;
-            this.props.widget._selectedLayerID = this.state.selectedLayer;
+            widget._selectedLayerID = this.state.selectedLayer;
             widget.startMeasurement(type);
             togglePanel(false);
         }
@@ -45,20 +49,21 @@ define(['react', './Layer'], function (React, Layer) {
         render(){
             const layerList = this.constructLayerList();
             const { widget, togglePanel } = this.props;
-            const { nls } = widget;
+            const { nls, map } = widget;
             const { selectedLayer } = this.state;
 
-            let layerGeometryTypes = []
+            let layerGeometryTypes = [];
             if(selectedLayer){
-                const map = this.props.widget.map;
                 const layer = map.getLayer(selectedLayer);
                 layerGeometryTypes = EsriGeomTypes[layer.geometryType];
+            }else{
+                layerGeometryTypes = [geomTypes.POINT, geomTypes.LINE, geomTypes.POLYGON];
             }
 
             return(
             <div id={'measurementPanel'}>
                 <div className={'cmt close-button'}>
-                    <button id={'side-panel-close-button'} className={'close-button glyphicon novaicon-navigation-down-3'} onClick={() => this.props.togglePanel(false)}></button>
+                    <button id={'side-panel-close-button'} className={'close-button glyphicon novaicon-navigation-down-3'} onClick={() => togglePanel(false)}></button>
                 </div>
                 <div className={'layers-list'}>
                     {layerList.map((l) => {
@@ -66,11 +71,9 @@ define(['react', './Layer'], function (React, Layer) {
                         return (<Layer layer={l} isSelected={isSelected} selectLayer={() => {this.selectLayer(l.id)}} />)
                     })}
                 </div>
-                {   selectedLayer &&
                     <div className={'measurement-types-list'}>
                         <h2>{nls.startMeasurement}</h2>
                         <div className={'cmt measurement-button-container'}>
-                            {layerGeometryTypes.includes(geomTypes.POINT) &&
                             <button
                                 className={'measurement-button glyphicon novaicon-custom-dot'}
                                 disabled={!layerGeometryTypes.includes(geomTypes.POINT)}
@@ -78,8 +81,6 @@ define(['react', './Layer'], function (React, Layer) {
                                     this.startMeasurement(geomTypes.POINT)
                                 }}
                             ></button>
-                            }
-                            {layerGeometryTypes.includes(geomTypes.LINE) &&
                             <button
                                 className={'measurement-button glyphicon novaicon-organization-graph'}
                                 disabled={!layerGeometryTypes.includes(geomTypes.LINE)}
@@ -87,8 +88,6 @@ define(['react', './Layer'], function (React, Layer) {
                                     this.startMeasurement(geomTypes.LINE)
                                 }}
                             ></button>
-                            }
-                            {layerGeometryTypes.includes(geomTypes.POLYGON) &&
                             <button
                                 className={'measurement-button glyphicon novaicon-organization-flowchart-1'}
                                 disabled={!layerGeometryTypes.includes(geomTypes.POLYGON)}
@@ -96,10 +95,8 @@ define(['react', './Layer'], function (React, Layer) {
                                     this.startMeasurement(geomTypes.POLYGON)
                                 }}
                             ></button>
-                            }
                         </div>
                     </div>
-                }
             </div>
             )
         }
