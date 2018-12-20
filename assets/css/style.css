@@ -26,6 +26,7 @@
 
 #sidePanel.slide-out-panel{
     width: 0px;
+    overflow: hidden;
 }
 
 #measurementPanel{
