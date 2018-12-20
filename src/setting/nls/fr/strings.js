@@ -10,7 +10,7 @@
        measure: "Mesures",
        overlay: "Superpositions",
        timetravel: 'Temps de parcours',
-       streetName: '',
+       streetName: 'Visualiser les noms de rues',
        linkMapMove: '',
 
 

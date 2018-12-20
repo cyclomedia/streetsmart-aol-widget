@@ -11,6 +11,7 @@ define({
       overlay: "Overlays",
       timetravel: 'Time Travel',
       streetName: 'Show street name',
+      linkMapMove: 'Center panorama in map',
 
       navigation: "Navigation",
       navigationButtons: 'Navigation Buttons',
@@ -25,7 +26,6 @@ define({
 
       typeSrs: "Type or Select SRS",
       version: "Street Smart Widget for Web AppBuilder @ version 18.2",
-      linkMapMove: 'Center panorama in map',
   }),
   "de": true,
   "nl": true,
