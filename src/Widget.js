@@ -26,7 +26,9 @@ require(REQUIRE_CONFIG, [], function () {
         './RecordingClient',
         './LayerManager',
         './MeasurementHandler',
-        './OverlayManager'
+        './SidePanelManager',
+        './OverlayManager',
+        './FeatureLayerManager',
     ], function (
         declare,
         on,
@@ -43,7 +45,9 @@ require(REQUIRE_CONFIG, [], function () {
         RecordingClient,
         LayerManager,
         MeasurementHandler,
-        OverlayManager
+        SidePanelManager,
+        OverlayManager,
+        FeatureLayerManager
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
@@ -98,11 +102,25 @@ require(REQUIRE_CONFIG, [], function () {
                     StreetSmartApi: StreetSmartApi
                 });
 
+                this._sidePanelManager = new SidePanelManager({
+                    sidePanel: this.sidePanel,
+                    panoramaViewerDiv: this.panoramaViewerDiv,
+                    widget: this,
+                });
+
                 this._overlayManager = new OverlayManager({
+                    widget: this,
                     wkid: this.wkid,
                     map: this.map,
                     config: this.config,
                     StreetSmartApi: StreetSmartApi,
+                });
+
+                this._featureLayerManager = new FeatureLayerManager({
+                    widget: this,
+                    map: this.map,
+                    wkid: this.wkid,
+                    StreetSmartApi: StreetSmartApi
                 });
 
                 this._applyWidgetStyle();
@@ -165,11 +183,16 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _handleMeasurementChanged(e) {
-                const newViewer = e.detail.panoramaViewer;
+                const {panoramaViewer, activeMeasurement} = e.detail;
+                const newViewer = panoramaViewer;
                 this._handleViewerChanged(newViewer);
                 this._measurementHandler.draw(e);
+                if (this.config.saveMeasurements) {
+                    this._measurementDetails = activeMeasurement;
+                }
+                this._measurementHandler.draw(e);
                 if(this.config.showStreetName) {
-                    if (e.detail.activeMeasurement) {
+                    if (activeMeasurement) {
                         this.streetIndicatorContainer.classList.add('hidden');
                     } else {
                         this.streetIndicatorContainer.classList.remove('hidden');
@@ -276,6 +299,27 @@ require(REQUIRE_CONFIG, [], function () {
                 if (!opts.viewerOnly) {
                     this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
                 }
+
+                // if we need to save measurements overwrite the default click behaviour.
+                if(this.config.saveMeasurements && !this._measurementButtonOverwrideTimer) {
+                    const clickHandler = this._handleMeasurementPanelToggle.bind(this);
+                    // only supports one viewer, having multiple viewers will break this.
+                    const replaceMeasurementButton = () => {
+                        const measurementButton = document.getElementsByClassName('glyphicon novaicon-ruler-1')[0];
+                        if (measurementButton && measurementButton.parentNode.onclick !== clickHandler) {
+                            const button = measurementButton.parentNode;
+                            const new_element = button.cloneNode(true);
+                            new_element.onclick = clickHandler;
+                            button.parentNode.replaceChild(new_element, button);
+                        }
+                    };
+
+                    this._measurementButtonOverwrideTimer = setInterval(replaceMeasurementButton, 50);
+                }
+            },
+
+            _handleMeasurementPanelToggle(e) {
+                this._sidePanelManager.toggleMeasurementSidePanel(true);
             },
 
             // We do not use removeEventListener for this,
@@ -293,9 +337,8 @@ require(REQUIRE_CONFIG, [], function () {
 
             _handleImageChange() {
                 this._handleConeChange();
-                if (this.config.overlays === true) {
-                    this._overlayManager.addOverlaysToViewer();
-                }
+                this._overlayManager.addOverlaysToViewer();
+
 
                 if(!this._disableLinkToMap && this.config.linkMapMove === true && !this._panoramaViewer.props.activeMeasurement){
                     const recording = this._panoramaViewer.getRecording();
@@ -383,6 +426,9 @@ require(REQUIRE_CONFIG, [], function () {
                             maximizable: true,
                             timeTravelVisible,
                             navbarVisible,
+                            measureTypeButtonVisible: !this.config.saveMeasurements,
+                            measureTypeButtonStart: !this.config.saveMeasurements,
+                            measureTypeButtonToggle: !this.config.saveMeasurements,
                         },
                     }
                 ).then(result => {
@@ -435,6 +481,9 @@ require(REQUIRE_CONFIG, [], function () {
                 this._removeEventListeners();
                 this._layerManager.removeLayers();
                 this._panoramaViewer = null;
+                this._measurementButtonOverwrideTimer = clearInterval(this._measurementButtonOverwrideTimer);
+                this._saveButtonOverwrideTimer = clearInterval(this._saveButtonOverwrideTimer);
+                this._sidePanelManager.toggleMeasurementSidePanel(false);
             },
 
             _drawDraggableMarker() {
@@ -476,6 +525,62 @@ require(REQUIRE_CONFIG, [], function () {
                 const vPoint = utils.transformProj4js(mPoint, this.wkid);
 
                 this.query(`${vPoint.x},${vPoint.y}`);
+            },
+
+            startMeasurement(type){
+                let geometry;
+                switch (type) {
+                    case 'POINT':
+                        geometry = StreetSmartApi.MeasurementGeometryType.POINT;
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        break;
+                    case 'LINE':
+                        geometry = StreetSmartApi.MeasurementGeometryType.LINESTRING;
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        break;
+                    case 'POLYGON':
+                        geometry = StreetSmartApi.MeasurementGeometryType.POLYGON;
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        break;
+                    default:
+                        console.error('API ERROR: unknown measurement geometry type. Could be undefined');
+                        break;
+                }
+
+                // if we need to save measurements overwrite the default click behaviour.
+                if(this.config.saveMeasurements && !this._saveButtonOverwrideTimer && this._selectedLayerID) {
+                    const clickHandler = this._handleMeasurementPanelToggle.bind(this);
+                    // only supports one viewer, having multiple viewers will break this.
+                    const placeSaveButton = () => {
+                        const panel = document.getElementsByClassName('floating-panel-controls')[1];
+                        if (panel && panel.children.length !== 2) {
+                            const button = panel.childNodes[0];
+                            const clone = button.cloneNode(true);
+                            clone.childNodes[0].classList.remove('novaicon-navigation-down-3');
+                            clone.childNodes[0].classList.add('novaicon-data-download-2');
+                            panel.insertBefore(clone, button);
+                            clone.onclick = this._saveMeasurement.bind(this);
+                        }
+                    };
+
+                    this._saveButtonOverwrideTimer = setInterval(placeSaveButton, 50);
+                } else if(this._saveButtonOverwrideTimer && !this._selectedLayerID ) {
+                    this._saveButtonOverwrideTimer = clearInterval(this._saveButtonOverwrideTimer);
+                }
+            },
+
+            _rerender(){
+                this._overlayManager.addOverlaysToViewer();
+            },
+
+            _saveMeasurement() {
+                const layer = this.map.getLayer(this._selectedLayerID);
+                if(layer) {
+                    if (this._layerUpdateListener) this._layerUpdateListener.remove();
+                    this._layerUpdateListener = this.addEventListener(layer, 'update-end', this._rerender.bind(this));
+                    this._featureLayerManager._saveMeasurementsToLayer(layer, this._measurementDetails);
+                    StreetSmartApi.stopMeasurementMode();
+                }
             },
 
             // communication method between widgets
