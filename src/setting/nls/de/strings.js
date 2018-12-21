@@ -10,8 +10,8 @@
        measure: "Messungen",
        overlay: "Überlagerungen",
        timetravel: 'Zeitreise',
-       streetName: '',
-       linkMapMove: '',
+       streetName: 'Straßenname',
+       linkMapMove: 'Karte und Panorama binden',
 
 
        navigation: "Navigation",
