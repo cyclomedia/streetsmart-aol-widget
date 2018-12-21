@@ -21,7 +21,7 @@ require(REQUIRE_CONFIG, [], function () {
         'esri/geometry/ScreenPoint',
         'esri/tasks/locator',
         "esri/geometry/webMercatorUtils",
-        'https://streetsmart.cyclomedia.com/api/v18.14/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v18.15/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -414,9 +414,7 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             query(query) {
-                const timeTravelVisible = this.config.timetravel !== undefined && this.config.navigation === true ? this.config.timetravel : false;
-                const navbarVisible = this.config.navigation !== undefined ? this.config.navigation : true;
-
+                const timeTravelVisible = this.config.timetravel !== undefined ? this.config.timetravel : false;
 
                 return StreetSmartApi.open(query, {
                         viewerType: [this._viewerType],
@@ -425,7 +423,6 @@ require(REQUIRE_CONFIG, [], function () {
                             closable: false,
                             maximizable: true,
                             timeTravelVisible,
-                            navbarVisible,
                             measureTypeButtonVisible: !this.config.saveMeasurements,
                             measureTypeButtonStart: !this.config.saveMeasurements,
                             measureTypeButtonToggle: !this.config.saveMeasurements,
@@ -455,8 +452,6 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _hideNavigation() {
-                this._panoramaViewer.toggleNavbarVisible(false);
-                this._panoramaViewer.toggleTimeTravelVisible(false);
                 setTimeout(() => {
                     this._panoramaViewer.toggleRecordingsVisible(false);
                 });

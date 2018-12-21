@@ -12,6 +12,7 @@
        timetravel: 'Zeitreise',
        streetName: 'Straßenname',
        linkMapMove: 'Karte und Panorama binden',
+       saveMeasurements: 'Messungen speichern',
 
 
        navigation: "Navigation",

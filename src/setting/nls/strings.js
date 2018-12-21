@@ -10,9 +10,9 @@ define({
       measure: "Measurements",
       overlay: "Overlays",
       timetravel: 'Time Travel',
-      saveMeasurements: 'Save Measurements',
       streetName: 'Show street name',
       linkMapMove: 'Center panorama in map',
+      saveMeasurements: 'Save Measurements',
 
       navigation: "Navigation",
       navigationButtons: 'Navigation Buttons',
