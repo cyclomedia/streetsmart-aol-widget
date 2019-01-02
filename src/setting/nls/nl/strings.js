@@ -12,6 +12,7 @@
        timetravel: 'Time Travel',
        streetName: 'Toon straatnaam',
        linkMapMove: 'Centreer cyclorama in kaart',
+       saveMeasurements: 'Bewaar metingen',
 
        navigation: "Navigatie",
        navigationButtons: 'Navigatie Knoppen',

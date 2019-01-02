@@ -12,6 +12,7 @@
        timetravel: 'Temps de parcours',
        streetName: 'Visualiser les noms de rues',
        linkMapMove: 'Centrer la carte sur le cyclorama',
+       saveMeasurements: 'Sauvegarder les mesures',
 
 
        navigation: "Navigation",
