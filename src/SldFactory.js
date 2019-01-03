@@ -70,6 +70,16 @@ define([
 
                 return specialCases;
             }
+            if(renderer instanceof ClassBreaksRenderer){
+                const symbol = _.cloneDeep(renderer.infos[0].symbol);
+                if(symbol.color) symbol.color.a *= mapLayer.opacity;
+                if(symbol.outline && symbol.outline.color) symbol.outline.color.a *= mapLayer.opacity;
+                return [{
+                    filter: null, // Every symbol is the same, so no filtering needed
+                    symbol,
+                    geometryType: mapLayer.geometryType,
+                }];
+            }
             console.warn('Unsupported renderer found', mapLayer.name);
             return [{
                 filter: null,
