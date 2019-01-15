@@ -400,7 +400,10 @@ require(REQUIRE_CONFIG, [], function () {
                 }
 
                 // Remove padding (white 'border') around viewer.
-                panel.containerNode.children[0].style.padding = '0px';
+                const container = panel.containerNode.children[0];
+                if(container){
+                    container.style.padding = '0px';
+                }
             },
 
             _centerViewerToMap(center) {
