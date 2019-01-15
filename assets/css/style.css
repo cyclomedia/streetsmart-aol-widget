@@ -156,6 +156,10 @@ button.measurement-button.glyphicon {
     border-radius: 50%;
     margin-right: 10px;
 }
+button.measurement-button.glyphicon:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
 
 .flex-row {
     width: 100%;
