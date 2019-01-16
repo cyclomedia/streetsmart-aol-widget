@@ -71,29 +71,62 @@ define([
             }
             if(renderer instanceof ClassBreaksRenderer){
                 const baseSymbol = _.cloneDeep(renderer.infos[0].symbol);
-                let result = [];
-                renderer.authoringInfo.visualVariables.forEach((e, i) => {
-                        const info = renderer.visualVariables[i];
-                        const {type} = e;
-                        if(renderer.valueExpression) {
+                let cases = [];
+                const features = this.geojson.features;
+                for(let i = 0; i < features.length; i++) {
+                    const feature = features[i];
+                    const result = {};
+                    renderer.authoringInfo.visualVariables.forEach((meta) => {
+                        const info = renderer.visualVariables.find((item) => {
+                            return item.type === meta.type
+                        });
+                        const {type} = meta;
+                        if (renderer.valueExpression) {
                             console.warn('We cannot render this, it is too advanced');
-                            result = result.concat([{
+                            result[type] = {
                                 filter: null,
                                 symbol: baseSymbol,
                                 geometryType: mapLayer.geometryType,
-                            }]);
+                            };
                             return;
                         }
-                        if(type === 'colorInfo'){
-                            result = result.concat(this.colorInfoToCases(baseSymbol, info, e, mapLayer));
-                        }else if(type === 'sizeInfo'){
-                            result = result.concat(this.sizeInfoToCases(baseSymbol, info, mapLayer));
-                        }
-                        else {
+                        if (type === 'colorInfo') {
+                            const style = this.colorInfoToCases(feature, baseSymbol, renderer.defaultSymbol, info, meta, mapLayer);
+                            // set colorInfo to null, so we know it hsa been processed but is not present.
+                            result[type] = style ? style : null;
+                        } else if (type === 'sizeInfo') {
+                            result[type] = this.sizeInfoToCases(feature, baseSymbol, renderer.defaultSymbol, info, mapLayer);
+                        } else {
                             console.warn('Unsupported ClassBreak Attributes')
                         }
-                });
-                return result
+                    });
+                    let resultSymbol = null;
+                    const colorInfo = result['colorInfo'];
+                    const sizeInfo = result['sizeInfo'];
+                    if (colorInfo) {
+                        resultSymbol = colorInfo.symbol;
+                    }
+                    if (sizeInfo) {
+                        if(resultSymbol) {
+                            resultSymbol.size = sizeInfo.symbol.size;
+                        }else if(colorInfo !== null){
+                            resultSymbol = sizeInfo.symbol;
+                        }
+                    }
+                    if(resultSymbol){
+                        feature.properties['CMT_UNIQUE_STYLING_ID'] = i;
+                        cases.push({
+                            filter: {
+                                value: i,
+                                attribute: 'CMT_UNIQUE_STYLING_ID',
+                            },
+                            symbol: resultSymbol,
+                            geometryType: mapLayer.geometryType,
+                        })
+                    }
+
+                }
+                return cases
             }
             console.warn('Unsupported renderer found', mapLayer.name);
             return [{
@@ -107,128 +140,108 @@ define([
             if(symbol.outline && symbol.outline.color) symbol.outline.color.a *= layer.opacity;
         }
 
-        sizeInfoToCases(base, info, layer) {
+        sizeInfoToCases(feature, base, defaultSymbol, info, layer) {
             const {maxDataValue, minDataValue, maxSize, minSize, valueExpression, field} = info;
-            const geo = this.geojson;
-            const result = [];
-            const resultForValue = {};
 
             if(valueExpression){
                 console.warn('We cant do this yet');
                 return;
             }
 
-            for(const feature of geo.features){
-                const value = feature.properties[field];
-                const newsymbol = _.cloneDeep(base);
-                this.applyLayerAlpha(newsymbol, layer);
-                if (resultForValue[value || 'SLD_DEFAULT_CASE']) continue;
-                if(value){
-                    const percentage = (value - minDataValue) / (maxDataValue - minDataValue);
-                    let size = minSize + (percentage * (maxSize - minSize));
-                    // clamp size
-                    size = size <= minSize ? minSize : size >= maxSize ? maxSize : size;
-                    newsymbol.size = size;
-                    result.push({
-                        filter: {
-                            value: value,
-                            attribute: field,
-                        },
-                        symbol: newsymbol,
-                        geometryType: layer.geometryType,
-                    });
-                    resultForValue[value] = true;
-                    continue;
-                }else{
+            const value = feature.properties[field];
+            const newsymbol = _.cloneDeep(base);
+            this.applyLayerAlpha(newsymbol, layer);
+            if(value || value === 0){
+                const percentage = (value - minDataValue) / (maxDataValue - minDataValue);
+                let size = minSize + (percentage * (maxSize - minSize));
+                // clamp size
+                size = size <= minSize ? minSize : size >= maxSize ? maxSize : size;
+                newsymbol.size = size;
+                return {
+                    filter: {
+                        value: value,
+                        attribute: field,
+                    },
+                    symbol: newsymbol,
+                    geometryType: layer.geometryType,
+                };
+            }else{
+                if(!defaultSymbol) return;
+                this.containsDefaultCase = true;
+                const defaultToUse = _.cloneDeep(defaultSymbol);
+                this.applyLayerAlpha(defaultToUse, layer);
+                return {
+                    filter: {
+                        value: 1,
+                        attribute: 'SLD_DEFAULT_CASE',
+                    },
+                    symbol: defaultSymbol,
+                    geometryType: layer.geometryType,
+                };
+            }
+        }
+
+        colorInfoToCases(feature, base, defaultSymbol, info, meta, layer){
+            const {stops, field} = info;
+            const {maxSliderValue, minSliderValue} = meta;
+
+            const value = feature.properties[field];
+            for (let i = 0; i < stops.length; i++) {
+                const stop = stops[i];
+                const nextStop = stops[i + 1];
+                const symbol = _.cloneDeep(base);
+                let symbolChanged = false;
+
+
+
+                if(!value && value !== 0){
+                    if(!defaultSymbol) return;
                     this.containsDefaultCase = true;
-                    result.push({
+                    const defaultToUse = _.cloneDeep(defaultSymbol);
+                    this.applyLayerAlpha(defaultToUse, layer);
+                    return {
                         filter: {
                             value: 1,
                             attribute: 'SLD_DEFAULT_CASE',
                         },
-                        symbol: newsymbol,
+                        symbol: defaultToUse,
                         geometryType: layer.geometryType,
-                    });
-                    resultForValue['SLD_DEFAULT_CASE'] = true;
-                    continue;
+                    };
                 }
-            }
 
-            return result;
-        }
+                if (!nextStop || value <= stop.value) {
+                    symbol.color = _.cloneDeep(stop.color);
+                    this.applyLayerAlpha(symbol, layer);
+                    symbolChanged = true;
+                }
 
-        colorInfoToCases(base, info, meta, layer){
-            const {stops, field} = info;
-            const {maxSliderValue, minSliderValue} = meta;
-            const geo = this.geojson;
-            const result = [];
-            const resultForValue = {};
+                if (!symbolChanged && value > stop.value && value < nextStop.value) {
+                    // calculate linear transition between two stops
+                    const percentage = (value - stop.value) / (nextStop.value - stop.value);
+                    const r = stop.color.r + (percentage * (nextStop.color.r - stop.color.r));
+                    const g = stop.color.g + (percentage * (nextStop.color.g - stop.color.g));
+                    const b = stop.color.b + (percentage * (nextStop.color.b - stop.color.b));
+                    const a = stop.color.a + (percentage * (nextStop.color.a - stop.color.a));
+                    symbol.color.r = Math.round(r);
+                    symbol.color.g = Math.round(g);
+                    symbol.color.b = Math.round(b);
+                    symbol.color.a = Math.round(a);
+                    this.applyLayerAlpha(symbol, layer);
+                    symbolChanged = true;
+                }
 
-            for(const feature of geo.features){
-                const value = feature.properties[field];
-                if(value >= minSliderValue){
-                    for (let i = 0; i < stops.length; i++) {
-                        const stop = stops[i];
-                        const nextStop = stops[i + 1];
-                        const symbol = _.cloneDeep(base);
-                        let symbolChanged = false;
-
-
-                        if (resultForValue[value || 'SLD_DEFAULT_CASE']) break;
-
-                        if(!value){
-                            this.containsDefaultCase = true;
-                            this.applyLayerAlpha(symbol, layer);
-                            result.push({
-                                filter: {
-                                    value: 1,
-                                    attribute: 'SLD_DEFAULT_CASE',
-                                },
-                                symbol: symbol,
-                                geometryType: layer.geometryType,
-                            });
-                            resultForValue['SLD_DEFAULT_CASE'] = true;
-                            break;
-                        }
-
-                        if (!nextStop || value <= stop.value) {
-                            symbol.color = _.cloneDeep(stop.color);
-                            this.applyLayerAlpha(symbol, layer);
-                            symbolChanged = true;
-                        }
-
-                        if (!symbolChanged && value > stop.value && value < nextStop.value) {
-                            // calculate linear transition between two stops
-                            const percentage = (value - minSliderValue) / (maxSliderValue - minSliderValue);
-                            const r = stop.color.r + (percentage * (nextStop.color.r - stop.color.r));
-                            const g = stop.color.g + (percentage * (nextStop.color.g - stop.color.g));
-                            const b = stop.color.b + (percentage * (nextStop.color.b - stop.color.b));
-                            const a = stop.color.a + (percentage * (nextStop.color.a - stop.color.a));
-                            symbol.color.r = Math.round(r);
-                            symbol.color.g = Math.round(g);
-                            symbol.color.b = Math.round(b);
-                            symbol.color.a = Math.round(a);
-                            this.applyLayerAlpha(symbol, layer);
-                            symbolChanged = true;
-                        }
-
-                        if (symbolChanged) {
-                            result.push({
-                                filter: {
-                                    value: value,
-                                    attribute: field,
-                                },
-                                symbol: symbol,
-                                geometryType: layer.geometryType,
-                            });
-                            resultForValue[value] = true;
-                            break;
-                        }
+                if (symbolChanged) {
+                   return{
+                        filter: {
+                            value: value,
+                            attribute: field,
+                        },
+                        symbol: symbol,
+                        geometryType: layer.geometryType,
                     }
                 }
             }
-
-            return result;
+            throw 'No style found, this shouldnt happen';
         }
 
         createRuleForSymbolCase({ filter, symbol, geometryType }) {
