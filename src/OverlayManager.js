@@ -79,15 +79,16 @@ define([
             const extent = this._calcRecordingExtent();
             const requestBundle = {ID, extent, req: []};
             _.each(featureLayers, (mapLayer) => {
-                const sld = new SLD(mapLayer);
-                if(sld.xml === undefined){
-                    return;
-                }
                 if(mapLayer.hasZ) {
-                    const requestObj = {mapLayer, sld, overlayID: null};
+                    const requestObj = {mapLayer, overlayID: null};
                     requestBundle.req.push(requestObj);
                 } else {
-                    const geojson = this.createGeoJsonForFeature({mapLayer, sld});
+                    let geojson = this.createGeoJsonForFeature({mapLayer});
+                    const sld = new SLD(mapLayer, geojson);
+                    geojson = this.applyDefaultCaseIfNeeded(geojson, sld);
+                    if(sld.xml === undefined){
+                        return;
+                    }
                     const overlay = this.api.addOverlay({
                         // sourceSrs: 'EPSG:3857',  // Broken in API
                         name: mapLayer.name,
@@ -142,18 +143,21 @@ define([
                 requestBundle.isComplete = true;
                 this._loadQueue();
             }else if (this.reloadQueueOnFinish === false){
-                const {mapLayer, sld} = request;
+                const {mapLayer} = request;
                 try {
                     const wkid = result.spatialReference && result.spatialReference.wkid;
 
                     if (wkid && result.features.length) {
-                        const info = this.createGeoJsonForFeature({
+                        let info = this.createGeoJsonForFeature({
                             mapLayer,
-                            sld,
                             wkid,
                             featureSet: result,
                         });
-
+                        const sld = new SLD(mapLayer, info);
+                        info = this.applyDefaultCaseIfNeeded(info, sld);
+                        if(sld.xml === undefined){
+                            return;
+                        }
                         const overlay = this.api.addOverlay({
                             // sourceSrs: 'EPSG:3857',  // Broken in API
                             name: mapLayer.name,
@@ -227,40 +231,36 @@ define([
 
         // Adds the SLD_DEFAULT_CASE when a feature
         // matchs none if the special cases of the SLD
-        applyDefaultCaseIfNeeded(feature, sld) {
-            const newFeature = _.cloneDeep(feature);
-            let needsDefaultCase = true;
+        applyDefaultCaseIfNeeded(geojson, sld) {
+            if (geojson.type === 'FeatureCollection' && sld.containsDefaultCase) {
+                    const newFeatures = geojson.features.map((feature) => {
+                        const newFeature = _.cloneDeep(feature);
+                        let needsDefaultCase = true;
 
-            for (let i=0; i < sld.cases.length ; i++) {
-                const sldCase = sld.cases[i];
-                const match = this.doesFeatureMatchCase(feature, sldCase);
-                if (match) {
-                    needsDefaultCase = false;
-                    break;
+                        for (let i=0; i < sld.cases.length ; i++) {
+                            const sldCase = sld.cases[i];
+                            const match = this.doesFeatureMatchCase(feature, sldCase);
+                            if (match) {
+                                needsDefaultCase = false;
+                                break;
+                            }
+                        }
+
+                        if (needsDefaultCase) {
+                            newFeature.properties['SLD_DEFAULT_CASE'] = 1;
+                        }
+
+                        return newFeature;
+                    });
+                    geojson.features = newFeatures;
                 }
-            }
 
-            if (needsDefaultCase) {
-                newFeature.properties['SLD_DEFAULT_CASE'] = 1;
-            }
-
-            return newFeature;
+            return geojson;
         }
 
         createGeoJsonForFeature({ mapLayer, sld, featureSet, wkid }) {
             const arcgisFeatureSet = featureSet || mapLayer.toJson().featureSet;
             const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet);
-
-            // We can't just create geoJson from the features of the maplayer.
-            // To correctly apply the default case in the Unique Value Renderer,
-            // we make the defaultCase a filter, and make the "other" features in the geoJSON
-            // match by adding a SLD_DEFAULT_CASE:1 property.
-            if (geojson.type === 'FeatureCollection' && sld.containsDefaultCase) {
-                const newFeatures = geojson.features.map((feature) => {
-                    return this.applyDefaultCaseIfNeeded(feature, sld);
-                });
-                geojson.features = newFeatures;
-            }
 
             // Make sure the panoramaviewer knows which srs this is in.
             let wkidToUse = _.get(arcgisFeatureSet, 'features[0].geometry.spatialReference.wkid', null) || wkid;
