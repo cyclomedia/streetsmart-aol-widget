@@ -53,6 +53,6 @@ CycloMedia shall make the Image Material available by providing a ‘demo accoun
 
 These Terms and Conditions for Use are governed by Dutch law. Any and all disputes between the parties arising from or in connection with these Terms of Use or the use of the API and/or the Image Material shall be exclusively referred to the competent court in ‘s-Hertogenbosch, the Netherlands, in so far as no other court is appointed under mandatory laws.
 
-By clicking ‘Accept’ you agree to these Street Smart User Terms and Conditions.
+By clicking ‘Accept’ you agree to these Street Smart API Terms and Conditions.
 
 © Copyright 2019 [CycloMedia Technology B.V.](https://www.cyclomedia.com/nl)
