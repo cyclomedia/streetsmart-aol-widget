@@ -9,7 +9,7 @@
        headAgreement: "Accord de l'utilisateur",
        measure: "Mesures",
        overlay: "Superpositions",
-       timetravel: 'Temps de parcours',
+       timetravel: 'Historique',
        streetName: 'Visualiser les noms de rues',
        linkMapMove: 'Centrer la carte sur le cyclorama',
        saveMeasurements: 'Sauvegarder les mesures',
