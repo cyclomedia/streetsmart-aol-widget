@@ -61,10 +61,39 @@ define([
                 },
             };
             this.overlays = [];
+            this.overlaysByName = {};
             this.requestQueue = [];
             this.requestID = 0;
             this.isQueueLoading = false;
             this.reloadQueueOnFinish = false;
+            this._bindLayerChangeListeners();
+        }
+
+        _bindLayerChangeListeners(){
+            const onChange = () => this.addOverlaysToViewer();
+            const nonLoadedLayers = []
+            const mapLayers = _.values(this.map._layers);
+            const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
+            for (const layer of featureLayers) {
+                layer.on('visibility-change', (info) => {
+                    if(layer.graphics.length === 0 && !layer.hasZ){
+                        nonLoadedLayers.push(layer.id);
+                    } else {
+                        this.widget._panoramaViewer.toggleOverlay({
+                            id: this.overlaysByName[layer.name],
+                            visible: !info.visible,
+                            name: layer.name
+                        })
+                    }
+                })
+
+                layer.on('update-end', () => {
+                    if(nonLoadedLayers.includes(layer.id)){
+                        onChange();
+                        nonLoadedLayers.splice(nonLoadedLayers.indexOf(layer.id), 1)
+                    }
+                })
+            }
         }
 
         addOverlaysToViewer() {
@@ -93,9 +122,11 @@ define([
                         // sourceSrs: 'EPSG:3857',  // Broken in API
                         name: mapLayer.name,
                         sldXMLtext: sld.xml,
+
                         geojson
                     });
-
+                    this.widget._panoramaViewer.toggleOverlay({ id: overlay.id, visible: !mapLayer.visible, name: mapLayer.name})
+                    this.overlaysByName[mapLayer.name] = overlay.id;
                     this.overlays.push(overlay.id);
                 }
             });
@@ -166,6 +197,8 @@ define([
                         });
 
                         request.overlayID = overlay;
+                        this.widget._panoramaViewer.toggleOverlay({ id: overlay.id, visible: !mapLayer.visible, name: mapLayer.name})
+                        this.overlaysByName[mapLayer.name] = overlay.id;
                         this.overlays.push(overlay.id);
                     } else {
                         request.overlayID = 'No wkid or features found.';
@@ -214,12 +247,14 @@ define([
                 this.api.removeOverlay(overlayId);
             });
             this.overlays = [];
+            this.overlaysByName = {}
         }
 
         // Doesn't need to remove the overlays from the viewer,
         // as this is used when we destroy the viewer.
         reset() {
             this.overlays = [];
+            this.overlaysByName = {}
         }
 
         doesFeatureMatchCase(feature, sldCase) {
