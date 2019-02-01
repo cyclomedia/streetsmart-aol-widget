@@ -66,7 +66,9 @@ define([
             this.requestID = 0;
             this.isQueueLoading = false;
             this.reloadQueueOnFinish = false;
-            this._bindLayerChangeListeners();
+
+            //  Can be used to listen to visibility changes in the layer list.
+            // this._bindLayerChangeListeners();
         }
 
         _bindLayerChangeListeners(){
@@ -109,6 +111,9 @@ define([
             const requestBundle = {ID, extent, req: []};
             _.each(featureLayers, (mapLayer) => {
                 if(mapLayer.hasZ) {
+                    const requestObj = {mapLayer, overlayID: null};
+                    requestBundle.req.push(requestObj);
+                } else if (!mapLayer.hasZ && mapLayer.graphics.length === 0 && mapLayer.visible === false){
                     const requestObj = {mapLayer, overlayID: null};
                     requestBundle.req.push(requestObj);
                 } else {
