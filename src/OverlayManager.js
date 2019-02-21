@@ -73,7 +73,7 @@ define([
 
         _bindLayerChangeListeners(){
             const onChange = () => this.addOverlaysToViewer();
-            const nonLoadedLayers = []
+            const nonLoadedLayers = [];
             const mapLayers = _.values(this.map._layers);
             const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
             for (const layer of featureLayers) {
@@ -87,7 +87,7 @@ define([
                             name: layer.name
                         })
                     }
-                })
+                });
 
                 layer.on('update-end', () => {
                     if(nonLoadedLayers.includes(layer.id)){
@@ -107,7 +107,8 @@ define([
             const mapLayers = _.values(this.map._layers);
             const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
             const ID = ++this.requestID;
-            const extent = this._calcRecordingExtent();
+            //const extent = this._calcRecordingExtent();
+            const extent = this.map.extent;
             const requestBundle = {ID, extent, req: []};
             _.each(featureLayers, (mapLayer) => {
                 if(mapLayer.hasZ) {
@@ -124,7 +125,7 @@ define([
                         return;
                     }
                     const overlay = this.api.addOverlay({
-                        // sourceSrs: 'EPSG:3857',  // Broken in API
+                        //sourceSrs: 'EPSG:3857',  // Broken in API
                         name: mapLayer.name,
                         sldXMLtext: sld.xml,
 
@@ -157,7 +158,8 @@ define([
                                 returnGeometry: true,
                                 returnZ: true,
                                 geometry: JSON.stringify(item.extent),
-                                outSpatialReference: this.wkid,
+                                outFields: '*',
+                                outSR: this.wkid,
                             }
                         };
                         if(token) options.content.token = token;
@@ -273,27 +275,27 @@ define([
         // matchs none if the special cases of the SLD
         applyDefaultCaseIfNeeded(geojson, sld) {
             if (geojson.type === 'FeatureCollection' && sld.containsDefaultCase) {
-                    const newFeatures = geojson.features.map((feature) => {
-                        const newFeature = _.cloneDeep(feature);
-                        let needsDefaultCase = true;
+                const newFeatures = geojson.features.map((feature) => {
+                    const newFeature = _.cloneDeep(feature);
+                    let needsDefaultCase = true;
 
-                        for (let i=0; i < sld.cases.length ; i++) {
-                            const sldCase = sld.cases[i];
-                            const match = this.doesFeatureMatchCase(feature, sldCase);
-                            if (match) {
-                                needsDefaultCase = false;
-                                break;
-                            }
+                    for (let i=0; i < sld.cases.length ; i++) {
+                        const sldCase = sld.cases[i];
+                        const match = this.doesFeatureMatchCase(feature, sldCase);
+                        if (match) {
+                            needsDefaultCase = false;
+                            break;
                         }
+                    }
 
-                        if (needsDefaultCase) {
-                            newFeature.properties['SLD_DEFAULT_CASE'] = 1;
-                        }
+                    if (needsDefaultCase) {
+                        newFeature.properties['SLD_DEFAULT_CASE'] = 1;
+                    }
 
-                        return newFeature;
-                    });
-                    geojson.features = newFeatures;
-                }
+                    return newFeature;
+                });
+                geojson.features = newFeatures;
+            }
 
             return geojson;
         }
