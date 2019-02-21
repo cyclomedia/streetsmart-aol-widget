@@ -107,7 +107,6 @@ define([
             const mapLayers = _.values(this.map._layers);
             const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
             const ID = ++this.requestID;
-            //const extent = this._calcRecordingExtent();
             const extent = this.map.extent;
             const requestBundle = {ID, extent, req: []};
             _.each(featureLayers, (mapLayer) => {
