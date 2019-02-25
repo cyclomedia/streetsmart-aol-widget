@@ -264,6 +264,7 @@ define([
 
         _createStrokeAndFill(symbol) {
             let stroke = '';
+            let fill = '';
             if (symbol.outline) {
                 stroke = `<Stroke>
                     <SvgParameter name="stroke">${symbol.outline.color.toHex()}</SvgParameter>
@@ -271,10 +272,17 @@ define([
                     <SvgParameter name="stroke-width">${symbol.outline.width}</SvgParameter>
                   </Stroke>`
             }
-            const fill = `<Fill>
-                <SvgParameter name="fill">${symbol.color.toHex()}</SvgParameter>
-                <SvgParameter name="fill-opacity">${symbol.color.a}</SvgParameter>
-              </Fill>`;
+            if(symbol.color) {
+                fill =  `<Fill>
+                            <SvgParameter name="fill">${symbol.color.toHex()}</SvgParameter>
+                            <SvgParameter name="fill-opacity">${symbol.color.a}</SvgParameter>
+                        </Fill>`;
+            }else{
+                fill = `<Fill>
+                            <SvgParameter name="fill">#ffffff</SvgParameter>
+                            <SvgParameter name="fill-opacity">0.01</SvgParameter>
+                        </Fill>`;
+            }
             return { stroke, fill };
         }
 
