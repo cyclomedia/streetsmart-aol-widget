@@ -24,6 +24,7 @@ define(['react', './Layer'], function (React, Layer) {
             for (const id of ids){
                 const layer = map.getLayer(id);
                 layer.type === 'Feature Layer' &&
+                layer.spatialReference.latestWkid !== 3857 &&
                 layer.isEditable() === true &&
                 list.push(layer);
             }
