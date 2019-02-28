@@ -124,7 +124,7 @@ define([
                         return;
                     }
                     const overlay = this.api.addOverlay({
-                        //sourceSrs: 'EPSG:3857',  // Broken in API
+                        // sourceSrs: 'EPSG:3857',  // Broken in API
                         name: mapLayer.name,
                         sldXMLtext: sld.xml,
 
