@@ -69,7 +69,7 @@ define([
                         "x":transformedCoords[0][0],
                         "y":transformedCoords[0][1],
                         "z":zValue,
-                        "spatialReference":{"wkid":layer.spatialReference.wkid}},
+                        "spatialReference":{"wkid":layerWkid}},
                 "attributes":{}
             }];
 
@@ -90,7 +90,7 @@ define([
             const lineJson = [{"geometry":
                     {   "hasZ": true,
                         "paths":[transformedCoords],
-                        "spatialReference":{"wkid":layer.spatialReference.wkid}},
+                        "spatialReference":{"wkid":layerWkid}},
                 "attributes":{
                     Measurement: measuredDistance
                 }
@@ -115,7 +115,7 @@ define([
             const polyJson = [{"geometry":
                     {   "hasZ": true,
                         "rings":[transformedCoords],
-                        "spatialReference":{"wkid":layer.spatialReference.wkid}},
+                        "spatialReference":{"wkid":layerWkid}},
                 "attributes":{
                     Measurement: polygonArea
                 }
