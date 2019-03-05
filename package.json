@@ -42,6 +42,7 @@
     }
   ],
   "dependencies": {
+    "eslint": "^5.14.1",
     "natives": "^1.1.6"
   }
 }

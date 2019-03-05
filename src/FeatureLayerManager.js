@@ -43,16 +43,14 @@ define([
 
         }
 
-        _transformPoints(coords) {
-            const mapWkid = this.map.spatialReference.wkid;
-
+        _transformPoints(coords, layerWkid) {
             return coords.map(coord => {
                 // Ignore incomplete forward intersection:
                 if (_.includes(coord, null)) {
                     return null;
                 }
                 const pointViewer = new Point(coord[0], coord[1], new SpatialReference({ wkid: this.wkid }));
-                const coordMap = utils.transformProj4js(pointViewer, mapWkid);
+                const coordMap = utils.transformProj4js(pointViewer, layerWkid);
                 return [coordMap.x, coordMap.y, coord[2]];
             })
         }
@@ -63,14 +61,15 @@ define([
                 return;
             }
             const zValue = coords[2];
-            const transformedCoords = this._transformPoints([coords]);
+            const layerWkid = layer.spatialReference.latestWkid;
+            const transformedCoords = this._transformPoints([coords], layerWkid);
 
             const pointJson = [{"geometry":
                     {
                         "x":transformedCoords[0][0],
                         "y":transformedCoords[0][1],
                         "z":zValue,
-                        "spatialReference":{"wkid":this.map.spatialReference.wkid}},
+                        "spatialReference":{"wkid":layerWkid}},
                 "attributes":{}
             }];
 
@@ -85,12 +84,13 @@ define([
             if (coords === null) {
                 return;
             }
-            const transformedCoords = this._transformPoints(coords);
+            const layerWkid = layer.spatialReference.latestWkid;
+            const transformedCoords = this._transformPoints(coords, layerWkid);
 
             const lineJson = [{"geometry":
                     {   "hasZ": true,
                         "paths":[transformedCoords],
-                        "spatialReference":{"wkid":this.map.spatialReference.wkid}},
+                        "spatialReference":{"wkid":layerWkid}},
                 "attributes":{
                     Measurement: measuredDistance
                 }
@@ -109,12 +109,13 @@ define([
                 return;
             }
 
-            const transformedCoords = this._transformPoints(coords);
+            const layerWkid = layer.spatialReference.latestWkid;
+            const transformedCoords = this._transformPoints(coords, layerWkid);
 
             const polyJson = [{"geometry":
                     {   "hasZ": true,
                         "rings":[transformedCoords],
-                        "spatialReference":{"wkid":this.map.spatialReference.wkid}},
+                        "spatialReference":{"wkid":layerWkid}},
                 "attributes":{
                     Measurement: polygonArea
                 }
