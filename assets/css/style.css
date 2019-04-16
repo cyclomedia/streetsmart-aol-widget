@@ -180,6 +180,10 @@ button.measurement-button.glyphicon:disabled {
   right: 0px;
 }
 
+#panoramaViewerDiv .cmt .mosaic-tile{
+    margin: 0px;
+}
+
 .cmt {
     background: none !important;
 }

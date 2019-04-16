@@ -21,10 +21,10 @@ require(REQUIRE_CONFIG, [], function () {
         'esri/geometry/ScreenPoint',
         'esri/tasks/locator',
         "esri/geometry/webMercatorUtils",
-        'http://localhost:8081/StreetSmartApi.js',
-        // 'https://streetsmart.cyclomedia.com/api/v18.15/StreetSmartApi.js',
+        // 'http://localhost:8081/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v19.5/StreetSmartApi.js',
         './utils',
-        './RecordingClient', 
+        './RecordingClient',
         './LayerManager',
         './MeasurementHandler',
         './SidePanelManager',
@@ -228,6 +228,7 @@ require(REQUIRE_CONFIG, [], function () {
                 if (newViewer && newViewer !== this._panoramaViewer) {
                     this.removeEventListener(this._viewChangeListener);
                     this.removeEventListener(this._imageChangeListener);
+                    this.removeEventListener(this._featureClickListener);
                     this._panoramaViewer = newViewer;
                     this._bindViewerDependantEventHandlers({ viewerOnly: true});
                 }
@@ -293,10 +294,30 @@ require(REQUIRE_CONFIG, [], function () {
                 });
             },
 
+            _handleFeatureClick (event) {
+                const { detail } = event;
+                const mapLayers = _.values(this.map._layers);
+                const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
+                const clickedLayer = featureLayers.find((l) => l.name === detail.layerName);
+                if (clickedLayer) {
+                    const field = clickedLayer.objectIdField
+                    const feature = clickedLayer.graphics.find((g) => g.attributes[field] === detail.featureProperties[field])
+                    if(feature){
+                        this.map.infoWindow.setFeatures([feature]);
+                        const extent = feature.geometry.getExtent && feature.geometry.getExtent();
+                        const centroid = (extent && extent.getCenter()) || feature.geometry;
+                        this.map.infoWindow.show(new Point (centroid));
+                        this.map.centerAt(centroid)
+                    }
+                }
+            },
+
             _bindViewerDependantEventHandlers(options) {
                 const opts = Object.assign({}, options, { viewerOnly: false });
                 this._viewChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.VIEW_CHANGE, this._handleConeChange.bind(this));
                 this._imageChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this._handleImageChange.bind(this));
+                this._featureClickListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.FEATURE_CLICK, this._handleFeatureClick.bind(this));
+                this._panoramaViewer.showAttributePanelOnFeatureClick(false);
                 if (!opts.viewerOnly) {
                     this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
                 }
