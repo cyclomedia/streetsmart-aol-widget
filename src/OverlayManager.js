@@ -156,6 +156,7 @@ define([
                                 f: 'json',
                                 returnGeometry: true,
                                 returnZ: true,
+                                outFields: '*',
                                 geometry: JSON.stringify(item.extent),
                                 outSpatialReference: this.wkid,
                             }
@@ -189,6 +190,7 @@ define([
                             wkid,
                             featureSet: result,
                         });
+
                         const sld = new SLD(mapLayer, info);
                         info = this.applyDefaultCaseIfNeeded(info, sld);
                         if(sld.xml === undefined){
