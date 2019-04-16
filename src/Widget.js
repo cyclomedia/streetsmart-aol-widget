@@ -304,7 +304,8 @@ require(REQUIRE_CONFIG, [], function () {
                     const feature = clickedLayer.graphics.find((g) => g.attributes[field] === detail.featureProperties[field])
                     if(feature){
                         this.map.infoWindow.setFeatures([feature]);
-                        const centroid = (feature.geometry.getCentroid && feature.geometry.getCentroid()) || feature.geometry
+                        const extent = feature.geometry.getExtent && feature.geometry.getExtent();
+                        const centroid = (extent && extent.getCenter()) || feature.geometry;
                         this.map.infoWindow.show(new Point (centroid));
                         this.map.centerAt(centroid)
                     }
