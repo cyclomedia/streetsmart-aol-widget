@@ -394,11 +394,11 @@ define([
                      xmlns:xlink="http://www.w3.org/1999/xlink" 
                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                     <sld:NamedLayer>
-                        <Name>${mapLayer.name}</Name>
+                        <Name>${_.escape(mapLayer.name)}</Name>
                         <sld:UserStyle>
-                            <Title>${mapLayer.id}</Title>
+                            <Title>${_.escape(mapLayer.id)}</Title>
                             <FeatureTypeStyle>
-                                 ${rules.join('')}
+                                 ${rules.join('')} 
                             </FeatureTypeStyle>
                         </sld:UserStyle>
                     </sld:NamedLayer>
