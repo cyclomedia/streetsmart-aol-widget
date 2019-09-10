@@ -1,4 +1,4 @@
-#panoramaViewerDiv {
+.cmt-widget #panoramaViewerDiv {
     overflow: hidden;
     padding: 0;
     margin: 0;
@@ -7,12 +7,12 @@
     transition: transform 0.5s;
 }
 
-.cmt.close-button{
+.cmt-widget .cmt.close-button{
     width: 37px;
     height: 37px;
 }
 
-#sidePanel {
+.cmt-widget #sidePanel {
     position: absolute;
     right: 0px;
     width: 330px;
@@ -24,12 +24,12 @@
     overflow-y: auto;
 }
 
-#sidePanel.slide-out-panel{
+.cmt-widget #sidePanel.slide-out-panel{
     width: 0px;
     overflow: hidden;
 }
 
-#measurementPanel{
+.cmt-widget #measurementPanel{
     min-width: 330px;
     width: 100%;
     background-color: white;
@@ -39,7 +39,7 @@
     overflow: visible;
 }
 
-#side-panel-close-button{
+.cmt-widget #side-panel-close-button{
     width: 28px;
     height: 28px;
     background-color: unset;
@@ -50,7 +50,7 @@
     font-size: 24px;
 }
 
-#zoom-warning {
+.cmt-widget #zoom-warning {
     position: absolute;
     top: 50%;
     width: 100%;
@@ -59,11 +59,11 @@
     margin-top: -25px;
 }
 
-.cmt .mosaic-tile{
+.cmt-widget .cmt .mosaic-tile{
     margin: 0px;
 }
 
-.checkbox-span{
+.cmt-widget .checkbox-span{
     width: 20px;
     min-width: 20px;
     height: 20px;
@@ -76,13 +76,13 @@
     position: relative;
 }
 
-.checkbox-span.selected:after{
+.cmt-widget .checkbox-span.selected:after{
     content: "";
     position: absolute;
     display: block;
 }
 
-.checkbox-span:after{
+.cmt-widget .checkbox-span:after{
     left: 6px;
     top: 1px;
     width: 7px;
@@ -96,7 +96,7 @@
 
 
 
-.layer-row{
+.cmt-widget .layer-row{
     font-size: 16px;
     padding: 5px;
     border-bottom: 1px solid #dedede;
@@ -108,36 +108,36 @@
     overflow: hidden;
 }
 
-.layer-row > label {
+.cmt-widget .layer-row > label {
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.layer-row.selected {
+.cmt-widget .layer-row.selected {
     background-color: rgba(0,82,147,.8);
     color: white ;
 }
 
-.layers-list{
+.cmt-widget .layers-list{
     display: flex;
     flex-direction: column;
     margin: 9px;
 }
 
-.measurement-types-list{
+.cmt-widget .measurement-types-list{
     color: rgba(0,82,147,.8);
     display: flex;
     flex-direction: column;
     margin: 9px;
 }
-.measurement-types-list >h2{
+.cmt-widget.measurement-types-list >h2{
     padding: 5px;
     font-size: 16px;
     text-align: center;
     min-width: 100%;
     margin-top: 5px;
 }
-.cmt.measurement-button-container{
+.cmt-widget.cmt.measurement-button-container{
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -145,7 +145,7 @@
     min-width: 100%;
 }
 
-button.measurement-button.glyphicon {
+.cmt-widget button.measurement-button.glyphicon {
     min-width: 70px;
     width: 70px;
     height: 70px;
@@ -156,19 +156,19 @@ button.measurement-button.glyphicon {
     border-radius: 50%;
     margin-right: 10px;
 }
-button.measurement-button.glyphicon:disabled {
+.cmt-widget button.measurement-button.glyphicon:disabled {
     opacity: 0.3;
     cursor: default;
 }
 
-.flex-row {
+.cmt-widget .flex-row {
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: row;
 }
 
-.hidden {
+.cmt-widget .hidden {
     display: none !important;
 }
 
@@ -180,45 +180,45 @@ button.measurement-button.glyphicon:disabled {
   right: 0px;
 }
 
-#panoramaViewerDiv .cmt .mosaic-tile{
+.cmt-widget #panoramaViewerDiv .cmt .mosaic-tile{
     margin: 0px;
 }
 
-.cmt {
+.cmt-widget .cmt {
     background: none !important;
 }
 
-.cmt .window-manager-container .window{
+.cmt-widget .cmt .window-manager-container .window{
     margin : 0px !important;
 }
 
-.cmt .window-manager-container {
+.cmt-widget .cmt .window-manager-container {
     padding : 0px !important;
 }
 
-#addGeoJsonBtn{
+.cmt-widget #addGeoJsonBtn{
     background-image: url('../images/addJson.png');
     background-repeat: no-repeat;
     background-position: center;
 }
 
-#addGeoJsonBtn:hover{
+.cmt-widget #addGeoJsonBtn:hover{
     background-image: url('../images/addHoverJson.png') !important;
     background-repeat: no-repeat;
 }
 
-#addMapDropBtn{
+.cmt-widget #addMapDropBtn{
     background-image: url('../images/mapDrop.png');
     background-repeat: no-repeat;
     background-position: center;
 }
 
-#addMapDropBtn:hover{
+.cmt-widget #addMapDropBtn:hover{
     background-image: url('../images/mapDropHover.png') !important;
     background-repeat: no-repeat;
 }
 
-#uploadJsonBtn{
+.cmt-widget #uploadJsonBtn{
     display: none;
 }
 
@@ -229,7 +229,7 @@ button.measurement-button.glyphicon:disabled {
     border :  none !important;
 }
 
-.street-indicator{
+.cmt-widget .street-indicator{
     right: 0;
     position: absolute;
     top: 10px;
@@ -242,7 +242,7 @@ button.measurement-button.glyphicon:disabled {
     justify-content: center;
 }
 
-.street-indicator span {
+.cmt-widget.street-indicator span {
     color: #fff;
     text-align: center;
     font-size: 15px;
@@ -251,7 +251,7 @@ button.measurement-button.glyphicon:disabled {
     margin: 0;
 }
 
-.address-bar {
+.cmt-widget .address-bar {
     position: absolute;
     margin: auto;
     background-color: rgb(152, 194, 60);
@@ -262,7 +262,7 @@ button.measurement-button.glyphicon:disabled {
     justify-content: center;
 }
 
-.inner-address-bar {
+.cmt-widget .inner-address-bar {
     padding: 3px;
     border: 1px solid #fff;
     border-radius: 3px;
