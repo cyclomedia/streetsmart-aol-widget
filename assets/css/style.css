@@ -18,13 +18,14 @@
     width: 330px;
     height: 100%;
     background-color: white;
-    transition: width 0.5s linear;
+    transition: width 0.5s ease-out;
     z-index: 15;
     overflow: hidden;
     overflow-y: auto;
 }
 
 .cmt-widget #sidePanel.slide-out-panel{
+    transition: width 0.5s ease-in;
     width: 0px;
     overflow: hidden;
 }
@@ -83,10 +84,10 @@
 }
 
 .cmt-widget .checkbox-span:after{
-    left: 6px;
+    left: 5px;
     top: 1px;
-    width: 7px;
-    height: 14px;
+    width: 5px;
+    height: 11px;
     border: solid rgba(0,82,147,.8);
     border-width: 0 3px 3px 0;
     -webkit-transform: rotate(45deg);
