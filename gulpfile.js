@@ -26,12 +26,10 @@ const copy = done => gulp.parallel(copySource, copyAssets)(done);
 
 const main = done => gulp.series(babelify, copy)(done);
 
-const livereloading = done => {
+const watch = () => {
     livereload.listen();
-    done();
-};
-
-const watch = () => gulp.watch(['src/**/*.*', 'assets/**/*.*'], gulp.series(main, livereloading));
+    gulp.watch(['src/**/*.*', 'assets/**/*.*'], main);
+}
 
 exports.default = main;
 exports.babel = babelify;
