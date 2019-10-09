@@ -9,6 +9,7 @@ define([
     'esri/symbols/SimpleLineSymbol',
     'esri/symbols/SimpleFillSymbol',
     'esri/renderers/SimpleRenderer',
+    'esri/renderers/UniqueValueRenderer',
     'esri/layers/FeatureLayer',
     'esri/layers/GraphicsLayer',
     'esri/SpatialReference',
@@ -24,6 +25,7 @@ define([
     SimpleLineSymbol,
     SimpleFillSymbol,
     SimpleRenderer,
+    UniqueValueRenderer,
     FeatureLayer,
     GraphicsLayer,
     SpatialReference,
@@ -32,6 +34,7 @@ define([
     return class LayerManager {
         constructor({ map, wkid, onRecordingLayerClick, addEventListener, removeEventListener, setPanoramaViewerOrientation }) {
             this._recordingColor = new Color.fromString('#80B0FF');
+            this._recordingColorDepth = new Color.fromString('#98C23C');
 
             this.map = map;
             this.wkid = wkid;
@@ -69,6 +72,7 @@ define([
 
                 const graphic = new Graphic(coord, null, {
                     recordingId: data.id,
+                    hasDepthMap: data.hasDepthMap,
                 });
                 this.recordingLayer.add(graphic);
             });
@@ -103,21 +107,25 @@ define([
             return 90 - angle;
         };
 
-        _createRecordingLayer({ onClick }) {
+        _createRecordingSymbol(color, outlinecolor = [255,255,255]) {
             const outline = new SimpleLineSymbol(
                 SimpleLineSymbol.STYLE_SOLID,
-                new Color([255, 255, 255]),
+                new Color(outlinecolor),
                 1
             );
 
-            const symbol = new SimpleMarkerSymbol({
+            return new SimpleMarkerSymbol({
                 style: 'circle',
-                color: this._recordingColor,
+                color,
                 size: 11,
                 outline,
             });
+        }
 
-            const renderer = new SimpleRenderer(symbol);
+        _createRecordingLayer({ onClick }) {
+            const renderer = new UniqueValueRenderer(this._createRecordingSymbol(this._recordingColor), 'hasDepthMap');
+            renderer.addValue('true', this._createRecordingSymbol(this._recordingColorDepth));
+
             const layer = new GraphicsLayer({ id: 'cmt_recordingLayer' });
             layer.setRenderer(renderer);
 
