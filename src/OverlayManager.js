@@ -66,9 +66,34 @@ define([
             this.requestID = 0;
             this.isQueueLoading = false;
             this.reloadQueueOnFinish = false;
-
             //  Can be used to listen to visibility changes in the layer list.
             // this._bindLayerChangeListeners();
+        }
+
+        addStreetNameLayer() {
+            const streetNameByLocale = {
+                'fr': 'Noms de rue',
+                'de': 'Straßennamen',
+                'nl': 'Straatnamen',
+                'en-US': 'Street names' ,
+                'en-EN': 'Street names'
+            }
+
+            if(this.config.showStreetName){
+                const overlay = this.api.addOverlay({
+                    name: streetNameByLocale[this.config.locale],
+                    geojson: {
+                        type: "FeatureCollection",
+                        features: [],
+                        crs: {
+                            type: 'EPSG',
+                            properties: {code: 3857}
+                        }
+                    }
+                });
+               return overlay.id
+            }
+            return null
         }
 
         _bindLayerChangeListeners(){

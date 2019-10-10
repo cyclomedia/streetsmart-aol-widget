@@ -72,6 +72,7 @@ require(REQUIRE_CONFIG, [], function () {
                 this.inherited(arguments);
 
                 this.wkid = parseInt(this.config.srs.split(':')[1]);
+                this.streetIndicatorShouldBeVisible = true
 
                 utils.setProj4(CM.Proj4.getProj4());
 
@@ -162,6 +163,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this._bindInitialMapHandlers();
                     this._loadRecordings();
                     this._centerViewerToMap();
+                    this.streetNameLayerID = this._overlayManager.addStreetNameLayer()
                 });
             },
 
@@ -195,8 +197,12 @@ require(REQUIRE_CONFIG, [], function () {
                 if(this.config.showStreetName) {
                     if (activeMeasurement) {
                         this.streetIndicatorContainer.classList.add('hidden');
+                        this.streetIndicatorHiddenDuringMeasurement = true
                     } else {
-                        this.streetIndicatorContainer.classList.remove('hidden');
+                        if(this.streetIndicatorShouldBeVisible) {
+                            this.streetIndicatorContainer.classList.remove('hidden');
+                        }
+                        this.streetIndicatorHiddenDuringMeasurement = false
                     }
                 }
             },
@@ -229,6 +235,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this.removeEventListener(this._viewChangeListener);
                     this.removeEventListener(this._imageChangeListener);
                     this.removeEventListener(this._featureClickListener);
+                    this.removeEventListener(this._layerTogleListener);
                     this._panoramaViewer = newViewer;
                     this._bindViewerDependantEventHandlers({ viewerOnly: true});
                 }
@@ -312,11 +319,27 @@ require(REQUIRE_CONFIG, [], function () {
                 }
             },
 
+            _handleLayerVisibilityChange(info) {
+                const {layerId, visibility} = info.detail;
+
+                if(layerId=== this.streetNameLayerID && this.config.showStreetName && !this.streetIndicatorHiddenDuringMeasurement ) {
+                    this.streetIndicatorShouldBeVisible = visibility
+                    if(visibility){
+                        this.streetIndicatorContainer.classList.remove('hidden');
+                    }else{
+                        this.streetIndicatorContainer.classList.add('hidden');
+                    }
+                }
+            },
+
             _bindViewerDependantEventHandlers(options) {
                 const opts = Object.assign({}, options, { viewerOnly: false });
-                this._viewChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.VIEW_CHANGE, this._handleConeChange.bind(this));
-                this._imageChangeListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.IMAGE_CHANGE, this._handleImageChange.bind(this));
-                this._featureClickListener = this.addEventListener(this._panoramaViewer, StreetSmartApi.Events.panoramaViewer.FEATURE_CLICK, this._handleFeatureClick.bind(this));
+                const panoramaEvents = StreetSmartApi.Events.panoramaViewer;
+                const viewerEvents = StreetSmartApi.Events.viewer;
+                this._viewChangeListener = this.addEventListener(this._panoramaViewer, panoramaEvents.VIEW_CHANGE, this._handleConeChange.bind(this));
+                this._imageChangeListener = this.addEventListener(this._panoramaViewer, panoramaEvents.IMAGE_CHANGE, this._handleImageChange.bind(this));
+                this._featureClickListener = this.addEventListener(this._panoramaViewer, panoramaEvents.FEATURE_CLICK, this._handleFeatureClick.bind(this));
+                this._layerTogleListener = this.addEventListener(this._panoramaViewer, viewerEvents.LAYER_VISIBILITY_CHANGE, this._handleLayerVisibilityChange.bind(this));
                 this._panoramaViewer.showAttributePanelOnFeatureClick(false);
                 if (!opts.viewerOnly) {
                     this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
