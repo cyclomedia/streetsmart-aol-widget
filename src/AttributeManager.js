@@ -5,12 +5,13 @@ define([
     "dojo/dom-construct",
     "dijit/form/Button",
     'esri/request',
-], function (AttributeInspector, Point, InfoWindow, domConstruct, Button , esriRequest) {
+], function (AttributeInspector, Point, InfoWindow, domConstruct, Button, esriRequest) {
     return class AttributeManager {
-        constructor({ map, widget, wkid}) {
+        constructor({ map, widget, wkid, config}) {
             this.map = map;
             this.wkid = wkid;
             this.widget = widget;
+            this.config = config;
         }
 
         _constructLayerInfo(layer) {
@@ -81,13 +82,25 @@ define([
 
             return this.inspector
         }
+        _showInfoWindowWithFeature(feature){
+            this._showInfoWindow(feature)
+            this.map.infoWindow.setFeatures([feature])
+        }
 
-        showInfoOfFeature(feature){
+        _showInfoWindow(feature){
             const extent = feature.geometry.getExtent && feature.geometry.getExtent();
             const centroid = (extent && extent.getCenter()) || feature.geometry;
+            this.map.infoWindow.resize(350, 240);
             this.map.infoWindow.show(new Point (centroid));
             this.map.infoWindow.setTitle('');
             this.map.centerAt(centroid)
+        }
+
+        showInfoOfFeature(feature){
+            if(!this.config.allowEditing) return
+            const insp = this._constructNewInspector(feature.getLayer())
+            this.map.infoWindow.setContent(insp.domNode);
+            this._showInfoWindow(feature)
             this.inspector.showFeature(feature);
             this.selectedFeature = feature
         }
@@ -95,13 +108,9 @@ define([
         showInfoById(layer, featureID){
             const field = layer.objectIdField
             const feature = layer.graphics.find((g) => g.attributes[field] === featureID)
-            if(feature){
-                const insp = this._constructNewInspector(layer)
-                this.map.infoWindow.setContent(insp.domNode);
-                this.map.infoWindow.resize(350, 240);
-
-                this.showInfoOfFeature(feature)
-            }
+            if(!feature) return;
+            if(!this.config.allowEditing) return this._showInfoWindowWithFeature(feature)
+            this.showInfoOfFeature(feature)
         }
     }
 });

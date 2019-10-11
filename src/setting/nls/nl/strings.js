@@ -13,6 +13,7 @@
        streetName: 'Toon straatnaam',
        linkMapMove: 'Centreer cyclorama in kaart',
        saveMeasurements: 'Bewaar metingen',
+       allowEditing: 'Attributen aanpassen',
 
        navigation: "Navigatie",
        navigationButtons: 'Navigatie Knoppen',

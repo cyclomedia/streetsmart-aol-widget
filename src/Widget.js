@@ -131,7 +131,8 @@ require(REQUIRE_CONFIG, [], function () {
                 this._attributeManager = new Attributemanager({
                     widget: this,
                     map: this.map,
-                    wkid: this.wkid
+                    wkid: this.wkid,
+                    config: this.config
                 })
 
                 this._applyWidgetStyle();
@@ -180,6 +181,15 @@ require(REQUIRE_CONFIG, [], function () {
                 this.addEventListener(StreetSmartApi, measurementChanged, this._handleMeasurementChanged.bind(this));
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
                 this.addEventListener(this.map, 'pan-end', this._handleMapMovement.bind(this));
+                this.addEventListener(this.map, 'click', this._handleMapClick.bind(this));
+            },
+
+            _handleMapClick(e) {
+                if(e.graphic){
+                    this._attributeManager.showInfoOfFeature(e.graphic)
+                } else {
+                    this.map.infoWindow.hide()
+                }
             },
 
             _handleMapMovement(e){
