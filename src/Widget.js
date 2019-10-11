@@ -20,6 +20,7 @@ require(REQUIRE_CONFIG, [], function () {
         'esri/geometry/Point',
         'esri/geometry/ScreenPoint',
         'esri/tasks/locator',
+        "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         // 'http://localhost:8081/StreetSmartApi.js',
         'https://streetsmart.cyclomedia.com/api/v19.5/StreetSmartApi.js',
@@ -30,6 +31,7 @@ require(REQUIRE_CONFIG, [], function () {
         './SidePanelManager',
         './OverlayManager',
         './FeatureLayerManager',
+        './Attributemanager',
     ], function (
         declare,
         on,
@@ -40,6 +42,7 @@ require(REQUIRE_CONFIG, [], function () {
         Point,
         ScreenPoint,
         Locator,
+        Query,
         webMercatorUtils,
         StreetSmartApi,
         utils,
@@ -48,7 +51,8 @@ require(REQUIRE_CONFIG, [], function () {
         MeasurementHandler,
         SidePanelManager,
         OverlayManager,
-        FeatureLayerManager
+        FeatureLayerManager,
+        Attributemanager
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
@@ -123,6 +127,12 @@ require(REQUIRE_CONFIG, [], function () {
                     wkid: this.wkid,
                     StreetSmartApi: StreetSmartApi
                 });
+
+                this._attributeManager = new Attributemanager({
+                    widget: this,
+                    map: this.map,
+                    wkid: this.wkid
+                })
 
                 this._applyWidgetStyle();
                 this._determineZoomThreshold();
@@ -299,16 +309,11 @@ require(REQUIRE_CONFIG, [], function () {
                 const mapLayers = _.values(this.map._layers);
                 const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
                 const clickedLayer = featureLayers.find((l) => l.name === detail.layerName);
+
                 if (clickedLayer) {
                     const field = clickedLayer.objectIdField
-                    const feature = clickedLayer.graphics.find((g) => g.attributes[field] === detail.featureProperties[field])
-                    if(feature){
-                        this.map.infoWindow.setFeatures([feature]);
-                        const extent = feature.geometry.getExtent && feature.geometry.getExtent();
-                        const centroid = (extent && extent.getCenter()) || feature.geometry;
-                        this.map.infoWindow.show(new Point (centroid));
-                        this.map.centerAt(centroid)
-                    }
+                    const clickedFeatureID = detail.featureProperties[field]
+                    this._attributeManager.showInfoById(clickedLayer, clickedFeatureID)
                 }
             },
 
@@ -596,9 +601,18 @@ require(REQUIRE_CONFIG, [], function () {
             _saveMeasurement() {
                 const layer = this.map.getLayer(this._selectedLayerID);
                 if(layer) {
-                    if (this._layerUpdateListener) this._layerUpdateListener.remove();
-                    this._layerUpdateListener = this.addEventListener(layer, 'update-end', this._rerender.bind(this));
-                    this._featureLayerManager._saveMeasurementsToLayer(layer, this._measurementDetails);
+                    this._featureLayerManager._saveMeasurementsToLayer(layer, this._measurementDetails).then((r) => {
+                        if(r && r.addResults && r.addResults.length) {
+                            const featureId = r.addResults[0].objectId
+                            if (this._layerUpdateListener) this._layerUpdateListener.remove();
+                            this._layerUpdateListener = this.addEventListener(layer, 'update-end', () => {
+                                this._rerender.bind(this)()
+                                this._attributeManager.showInfoById(layer, featureId)
+                                if (this._layerUpdateListener) this._layerUpdateListener.remove();
+                            });
+                        }
+                    });
+
                     StreetSmartApi.stopMeasurementMode();
                 }
             },
