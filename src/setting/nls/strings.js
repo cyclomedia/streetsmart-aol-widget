@@ -13,6 +13,7 @@ define({
       streetName: 'Show street name',
       linkMapMove: 'Center panorama in map',
       saveMeasurements: 'Save Measurements',
+      allowEditing: 'Attribute editing',
 
       navigation: "Navigation",
       navigationButtons: 'Navigation Buttons',

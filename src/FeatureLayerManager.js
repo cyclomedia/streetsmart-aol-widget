@@ -41,6 +41,7 @@ define([
                     return this.polygonLayer(layer, measurementEvent);
             }
 
+            return Promise.resolve(null)
         }
 
         _transformPoints(coords, layerWkid) {
@@ -73,7 +74,7 @@ define([
                 "attributes":{}
             }];
 
-            this._saveToFeatureLayer(layer, pointJson);
+            return this._saveToFeatureLayer(layer, pointJson);
 
         }
 
@@ -96,7 +97,7 @@ define([
                 }
             }];
 
-            this._saveToFeatureLayer(layer, lineJson);
+            return this._saveToFeatureLayer(layer, lineJson);
 
 
         }
@@ -121,12 +122,11 @@ define([
                 }
             }];
 
-            this._saveToFeatureLayer(layer, polyJson);
+            return this._saveToFeatureLayer(layer, polyJson);
 
         }
 
         _saveToFeatureLayer(layer, geomJson){
-
             const options = {
                 url: layer.url + "/applyEdits",
                 content: {
@@ -138,13 +138,13 @@ define([
 
             let layerSaveRequest = esriRequest(options, { usePost: true });
 
-            layerSaveRequest.then(
+            return layerSaveRequest.then(
                 (response) => {
                     layer.refresh();
                     console.log("success" + JSON.stringify(response));
+                    return response
                 }, function(error){
                     console.log("error" + error);
-
                 });
         }
     }

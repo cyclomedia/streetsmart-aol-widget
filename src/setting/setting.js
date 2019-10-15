@@ -88,6 +88,13 @@ define([
                     }
                 }
 
+                if(this.config.allowEditing){
+                    this.allowEditing.value = this.config.allowEditing;
+                    if(this.config.allowEditing === true){
+                        this.allowEditing.checked = true;
+                    }
+                }
+
                 if(this.config.srs){
                     this.srsCyclomedia.value = this.config.srs;
                 }
@@ -134,6 +141,7 @@ define([
                 this.config.saveMeasurements = this.saveMeasurementsEnabled.checked;
                 this.config.overlays = this.overlaysEnabled.checked;
                 this.config.linkMapMove = this.linkMapMove.checked;
+                this.config.allowEditing = this.allowEditing.checked;
                 this.config.srs = dijit.byId('srsComboBox') && dijit.byId('srsComboBox').value || document.getElementById('srsComboBox').value;
                 this.config.navigation = this.navigationEnable.checked;
                 this.config.timetravel = this.timetravelEnable.checked;

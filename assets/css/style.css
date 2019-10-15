@@ -269,6 +269,15 @@
     border-radius: 3px;
 }
 
+.esriAttributeInspector .atiButtons .atiDeleteButton {
+    width: auto;
+    height: auto;
+    margin: 0 5px 0 0 ;
+}
+.esriAttributeInspector .atiButtons .saveButton {
+    margin: 0 5px 0 0 ;
+}
+
 .dart-panel .jimu-widget-frame.jimu-container .cmt *,
 .dart-panel .jimu-widget-frame.jimu-container .cmt .cmtViewerPanel .panel-body .btn-secondary-right:hover span,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt.viewer .cmtNavBarPanel .nav-stacked>li a,

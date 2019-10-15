@@ -13,7 +13,7 @@
        streetName: 'Straßenname',
        linkMapMove: 'Karte und Panorama binden',
        saveMeasurements: 'Messungen speichern',
-
+       allowEditing: 'Attributbearbeitung',
 
        navigation: "Navigation",
        navigationButtons: 'Navigations-Schaltflächen',
