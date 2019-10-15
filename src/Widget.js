@@ -132,7 +132,8 @@ require(REQUIRE_CONFIG, [], function () {
                     widget: this,
                     map: this.map,
                     wkid: this.wkid,
-                    config: this.config
+                    config: this.config,
+                    nls: this.nls
                 })
 
                 this._applyWidgetStyle();

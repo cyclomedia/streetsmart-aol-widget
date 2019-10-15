@@ -7,11 +7,12 @@ define([
     'esri/request',
 ], function (AttributeInspector, Point, InfoWindow, domConstruct, Button, esriRequest) {
     return class AttributeManager {
-        constructor({ map, widget, wkid, config}) {
+        constructor({ map, widget, wkid, config, nls}) {
             this.map = map;
             this.wkid = wkid;
             this.widget = widget;
             this.config = config;
+            this.nls = nls;
         }
 
         _constructLayerInfo(layer) {
@@ -19,7 +20,7 @@ define([
                 {
                     'featureLayer': layer,
                     'showAttachments': false,
-                    'isEditable': layer.isEditable() && layer.capabilities.split(',').includes('Editing'),
+                    'isEditable': layer.isEditable() && layer.getEditCapabilities().canUpdate,
                     'fieldInfos': layer.infoTemplate.info.fieldInfos
                 }
             ];
@@ -59,7 +60,8 @@ define([
                 this.widget._overlayManager.addOverlaysToViewer()
             });
 
-            const saveButton = new Button({ label: "Save", "class": "saveButton"},domConstruct.create("div"));
+            const saveButton = new Button({ label: this.nls.save, "class": "saveButton"},domConstruct.create("div"));
+            this.inspector.deleteBtn.label = this.nls.delete
             domConstruct.place(saveButton.domNode, this.inspector.deleteBtn.domNode, "after");
 
             saveButton.on("click", () => {
@@ -76,12 +78,12 @@ define([
 
             this.inspector.on("next", (evt)  => {
                 this.selectedFeature = evt.feature;
-                console.log("Next " + this.selectedFeature.attributes[layer.objectIdField]);
             });
 
 
             return this.inspector
         }
+
         _showInfoWindowWithFeature(feature){
             this._showInfoWindow(feature)
             this.map.infoWindow.setFeatures([feature])
