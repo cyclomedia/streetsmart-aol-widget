@@ -24,7 +24,7 @@ define(['react', './Layer'], function (React, Layer) {
             for (const id of ids){
                 const layer = map.getLayer(id);
 
-                if( layer.type === 'Feature Layer' && layer.isEditable() === true && layer.capabilities.split(',').includes('Create')) {
+                if( layer.type === 'Feature Layer' && layer.isEditable() === true && layer.getEditCapabilities().canCreate) {
                     list.push(layer);
                 }
             }
