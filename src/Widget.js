@@ -23,7 +23,7 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v19.5/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v19.14/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -605,6 +605,10 @@ require(REQUIRE_CONFIG, [], function () {
                         console.error('API ERROR: unknown measurement geometry type. Could be undefined');
                         break;
                 }
+
+                // collapse the sidebar after a 10 frame delay,
+                // doing it directly throws an exception as the measurement mode hasn't started yet.
+                window.setTimeout(() => this._panoramaViewer.toggleSidebarExpanded(false), 160)
 
                 // if we need to save measurements overwrite the default click behaviour.
                 if(this.config.saveMeasurements && !this._saveButtonOverwrideTimer && this._selectedLayerID) {
