@@ -20,7 +20,7 @@ define([
                 {
                     'featureLayer': layer,
                     'showAttachments': false,
-                    'isEditable': layer.isEditable() && layer.getEditCapabilities().canUpdate,
+                    'isEditable': layer.isEditable && layer.isEditable() && layer.getEditCapabilities().canUpdate,
                     'fieldInfos': layer.infoTemplate.info.fieldInfos
                 }
             ];

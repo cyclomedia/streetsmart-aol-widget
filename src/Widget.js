@@ -23,7 +23,7 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v19.5/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v19.14/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -606,12 +606,16 @@ require(REQUIRE_CONFIG, [], function () {
                         break;
                 }
 
+                // collapse the sidebar after a 10 frame delay,
+                // doing it directly throws an exception as the measurement mode hasn't started yet.
+                window.setTimeout(() => this._panoramaViewer.toggleSidebarExpanded(false), 160)
+
                 // if we need to save measurements overwrite the default click behaviour.
                 if(this.config.saveMeasurements && !this._saveButtonOverwrideTimer && this._selectedLayerID) {
                     const clickHandler = this._handleMeasurementPanelToggle.bind(this);
                     // only supports one viewer, having multiple viewers will break this.
                     const placeSaveButton = () => {
-                        const panel = document.getElementsByClassName('floating-panel-controls')[1];
+                        const panel = document.getElementsByClassName('floating-panel-controls')[0];
                         if (panel && panel.children.length !== 2) {
                             const button = panel.childNodes[0];
                             const clone = button.cloneNode(true);
