@@ -16,6 +16,7 @@ require(REQUIRE_CONFIG, [], function () {
         'dojo/dom',
         'dijit/Tooltip',
         'jimu/BaseWidget',
+        'esri/request',
         'esri/SpatialReference',
         'esri/geometry/Point',
         'esri/geometry/ScreenPoint',
@@ -32,12 +33,14 @@ require(REQUIRE_CONFIG, [], function () {
         './OverlayManager',
         './FeatureLayerManager',
         './Attributemanager',
+        './arcgisToGeojson',
     ], function (
         declare,
         on,
         dom,
         Tooltip,
         BaseWidget,
+        esriRequest,
         SpatialReference,
         Point,
         ScreenPoint,
@@ -52,7 +55,8 @@ require(REQUIRE_CONFIG, [], function () {
         SidePanelManager,
         OverlayManager,
         FeatureLayerManager,
-        Attributemanager
+        Attributemanager,
+        geojsonUtils
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
@@ -188,11 +192,29 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _handleMapClick(e) {
-                if(e.graphic){
-                    this._attributeManager.showInfoOfFeature(e.graphic)
-                } else {
+                const mapFeature = e.graphic
+                const layer = e.graphic.getLayer();
+
+
+                if(!mapFeature) {
                     this.map.infoWindow.hide()
+                    return
                 }
+                if(layer.type !== 'Feature Layer' || !layer.getEditCapabilities().canUpdate) return;
+
+                const idField = layer.objectIdField;
+                const wkid = layer.spatialReference.wkid
+
+                const meaurementType = geojsonUtils.EsriGeomTypes[layer.geometryType]
+                const typeToUse = meaurementType && meaurementType[0]
+
+                if(typeToUse && this.config.allowEditing) {
+                    this._selectedLayerID = layer.id;
+                    this._get3DFeatures(layer, [mapFeature.attributes[idField]], wkid)
+                        .then(this._create3DRequestToStartMeasurementHandler(mapFeature, idField, wkid, typeToUse))
+                }
+
+                this._attributeManager.showInfoOfFeature(mapFeature)
             },
 
             _handleMapMovement(e){
@@ -213,8 +235,16 @@ require(REQUIRE_CONFIG, [], function () {
                 this._measurementHandler.draw(e);
                 if (this.config.saveMeasurements) {
                     this._measurementDetails = activeMeasurement;
+                    if(!activeMeasurement){
+                        this._selectedFeatureID = null;
+                    }
                 }
                 this._measurementHandler.draw(e);
+
+                if(!activeMeasurement && this.config.allowEditing){
+                    this.map.infoWindow.hide()
+                }
+
                 if(this.config.showStreetName) {
                     if (activeMeasurement) {
                         this.streetIndicatorContainer.classList.add('hidden');
@@ -260,6 +290,41 @@ require(REQUIRE_CONFIG, [], function () {
                     this._panoramaViewer = newViewer;
                     this._bindViewerDependantEventHandlers({ viewerOnly: true});
                 }
+            },
+
+            _create3DRequestToStartMeasurementHandler(mapFeature, idField, wkid, typeToUse) {
+                return (res) => {
+                    const feature  = (!!res && res.features) ? geojsonUtils.arcgisToGeoJSON(res.features[0], idField)
+                        :  geojsonUtils.arcgisToGeoJSON(mapFeature, idField);
+                    if(!feature) return
+                    if(wkid != this.config.srs.split(':')[1]) return;
+
+
+                    this._selectedFeatureID = feature.properties[idField];
+                    const measurementInfo = geojsonUtils.createFeatureCollection([feature], wkid);
+                    this.startMeasurement(typeToUse, measurementInfo)
+                }
+            },
+
+            _get3DFeatures(layer, featureIds, wkid) {
+                if(layer.type !== 'Feature Layer') return Promise.resolve();
+                if(!layer.hasZ) return Promise.resolve();
+
+                const token = layer.credential &&  layer.credential.token;
+                const options = {
+                    url: `${layer.url}/query?`,
+                    content: {
+                        f: 'json',
+                        returnGeometry: true,
+                        returnZ: true,
+                        outFields: '*',
+                        objectIds: [...featureIds],
+                        outSpatialReference: wkid,
+                    }
+                };
+                if(token) options.content.token = token;
+
+                return esriRequest(options)
             },
 
             _setButtonVisibilityInApi() {
@@ -328,9 +393,26 @@ require(REQUIRE_CONFIG, [], function () {
                 const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
                 const clickedLayer = featureLayers.find((l) => l.name === detail.layerName);
 
+
+                if(clickedLayer.type !== 'Feature Layer' || !clickedLayer.getEditCapabilities().canUpdate) return;
+
                 if (clickedLayer) {
                     const field = clickedLayer.objectIdField
                     const clickedFeatureID = detail.featureProperties[field]
+                    const feature = clickedLayer.graphics.find((g) => g.attributes[field] === clickedFeatureID)
+                    const wkid = clickedLayer.spatialReference.wkid
+
+                    if(!feature) return
+
+                    const meaurementType = geojsonUtils.EsriGeomTypes[clickedLayer.geometryType]
+                    const typeToUse = meaurementType && meaurementType[0]
+
+                    if(typeToUse && this.config.allowEditing) {
+                        this._selectedLayerID = clickedLayer.id;
+                        this._get3DFeatures(clickedLayer, [clickedFeatureID], wkid)
+                            .then(this._create3DRequestToStartMeasurementHandler(feature, field, wkid, typeToUse))
+                    }
+
                     this._attributeManager.showInfoById(clickedLayer, clickedFeatureID)
                 }
             },
@@ -540,6 +622,7 @@ require(REQUIRE_CONFIG, [], function () {
                 this._removeEventListeners();
                 this._layerManager.removeLayers();
                 this._panoramaViewer = null;
+                this._selectedFeatureID = null;
                 this._measurementButtonOverwrideTimer = clearInterval(this._measurementButtonOverwrideTimer);
                 this._saveButtonOverwrideTimer = clearInterval(this._saveButtonOverwrideTimer);
                 this._sidePanelManager.toggleMeasurementSidePanel(false);
@@ -586,7 +669,7 @@ require(REQUIRE_CONFIG, [], function () {
                 this.query(`${vPoint.x},${vPoint.y}`);
             },
 
-            startMeasurement(type){
+            startMeasurement(type, geojson){
                 let geometry;
                 switch (type) {
                     case 'POINT':
@@ -605,10 +688,14 @@ require(REQUIRE_CONFIG, [], function () {
                         console.error('API ERROR: unknown measurement geometry type. Could be undefined');
                         break;
                 }
-
                 // collapse the sidebar after a 10 frame delay,
                 // doing it directly throws an exception as the measurement mode hasn't started yet.
-                window.setTimeout(() => this._panoramaViewer.toggleSidebarExpanded(false), 160)
+                window.setTimeout(() => {
+                    this._panoramaViewer.toggleSidebarExpanded(false)
+                    if(geojson){
+                        StreetSmartApi.setActiveMeasurement(geojson)
+                    }
+                }, 160)
 
                 // if we need to save measurements overwrite the default click behaviour.
                 if(this.config.saveMeasurements && !this._saveButtonOverwrideTimer && this._selectedLayerID) {
@@ -639,7 +726,8 @@ require(REQUIRE_CONFIG, [], function () {
             _saveMeasurement() {
                 const layer = this.map.getLayer(this._selectedLayerID);
                 if(layer) {
-                    this._featureLayerManager._saveMeasurementsToLayer(layer, this._measurementDetails).then((r) => {
+                    const editID = this._selectedFeatureID
+                    this._featureLayerManager._saveMeasurementsToLayer(layer, this._measurementDetails, editID).then((r) => {
                         if(r && r.addResults && r.addResults.length) {
                             const featureId = r.addResults[0].objectId
                             if (this._layerUpdateListener) this._layerUpdateListener.remove();

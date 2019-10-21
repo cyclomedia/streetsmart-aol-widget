@@ -28,17 +28,17 @@ define([
             this.StreetSmartApi = StreetSmartApi;
         }
 
-        _saveMeasurementsToLayer(layer, measurementEvent){
+        _saveMeasurementsToLayer(layer, measurementEvent, editID){
             console.log(layer, measurementEvent);
             //this.layerUrl = layer.url;
             const geometryType = measurementEvent.features[0].geometry.type;
             switch (geometryType) {
                 case 'Point':
-                    return this.pointLayer(layer, measurementEvent);
+                    return this.pointLayer(layer, measurementEvent, editID);
                 case 'LineString':
-                    return this.lineLayer(layer, measurementEvent);
+                    return this.lineLayer(layer, measurementEvent, editID);
                 case 'Polygon':
-                    return this.polygonLayer(layer, measurementEvent);
+                    return this.polygonLayer(layer, measurementEvent, editID);
             }
 
             return Promise.resolve(null)
@@ -56,7 +56,7 @@ define([
             })
         }
 
-        pointLayer(layer, measurement){
+        pointLayer(layer, measurement, editID){
             const coords = measurement.features[0].geometry.coordinates;
             if (coords === null) {
                 return;
@@ -71,14 +71,20 @@ define([
                         "y":transformedCoords[0][1],
                         "z":zValue,
                         "spatialReference":{"wkid":layerWkid}},
-                "attributes":{}
+                "attributes":{
+                [layer.objectIdField] : editID
+                }
             }];
 
-            return this._saveToFeatureLayer(layer, pointJson);
+            if(editID){
+                pointJson[0].attributes[layer.objectIdField]  = editID
+            }
+
+            return this._saveToFeatureLayer(layer, pointJson, editID);
 
         }
 
-        lineLayer(layer, measurement){
+        lineLayer(layer, measurement, editID){
             const coords = measurement.features[0].geometry.coordinates;
             const derivedData = measurement.features[0].properties.derivedData;
             const measuredDistance = derivedData.segmentLengths.value[0].toFixed(2) + derivedData.unit;
@@ -97,12 +103,14 @@ define([
                 }
             }];
 
-            return this._saveToFeatureLayer(layer, lineJson);
+            if(editID){
+                lineJson[0].attributes[layer.objectIdField]  = editID
+            }
 
-
+            return this._saveToFeatureLayer(layer, lineJson, editID);
         }
 
-        polygonLayer(layer, measurement){
+        polygonLayer(layer, measurement, editID){
             const coords = measurement.features[0].geometry.coordinates[0];
             const derivedData = measurement.features[0].properties.derivedData;
             const polygonArea = derivedData.area.value.toFixed(2) + derivedData.unit;
@@ -122,11 +130,15 @@ define([
                 }
             }];
 
-            return this._saveToFeatureLayer(layer, polyJson);
+            if(editID){
+                polyJson[0].attributes[layer.objectIdField]  = editID
+            }
+
+            return this._saveToFeatureLayer(layer, polyJson, editID);
 
         }
 
-        _saveToFeatureLayer(layer, geomJson){
+        _saveToFeatureLayer(layer, geomJson, editID){
             const options = {
                 url: layer.url + "/applyEdits",
                 content: {
@@ -134,7 +146,11 @@ define([
                 },
                 handleAs: "json"
             };
-            options.content.adds = JSON.stringify(geomJson);
+            if(!editID){
+                options.content.adds = JSON.stringify(geomJson);
+            } else {
+                options.content.updates = JSON.stringify(geomJson);
+            }
 
             let layerSaveRequest = esriRequest(options, { usePost: true });
 

@@ -99,7 +99,7 @@ define([
         }
 
         showInfoOfFeature(feature){
-            if(!this.config.allowEditing) return
+            if(!this.config.allowEditing) return this._showInfoWindowWithFeature(feature)
             const insp = this._constructNewInspector(feature.getLayer())
             this.map.infoWindow.setContent(insp.domNode);
             this._showInfoWindow(feature)
@@ -111,7 +111,6 @@ define([
             const field = layer.objectIdField
             const feature = layer.graphics.find((g) => g.attributes[field] === featureID)
             if(!feature) return;
-            if(!this.config.allowEditing) return this._showInfoWindowWithFeature(feature)
             this.showInfoOfFeature(feature)
         }
     }

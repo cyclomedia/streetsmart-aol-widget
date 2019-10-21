@@ -385,5 +385,39 @@ define([], function () {
 
         return result;
     }
-    return { arcgisToGeoJSON: arcgisToGeoJSON, geojsonToArcGIS: geojsonToArcGIS };
+
+    function createCrs(wkid){
+        const wkidToUse = wkid === 102100 ? 3857 : wkid;
+        const crs = {
+            type: 'EPSG',
+            properties: {
+                code: wkidToUse,
+            }
+        };
+        return crs
+    }
+
+    function createFeatureCollection(features, wkid) {
+        const geojson = {};
+        geojson.type = 'FeatureCollection';
+        geojson.features = [...features]
+        if(wkid){
+            geojson.crs = createCrs(wkid)
+        }
+        return geojson
+    }
+
+    const geomTypes = {
+        POINT: 'POINT',
+        LINE: 'LINE',
+        POLYGON: 'POLYGON',
+    };
+    const EsriGeomTypes = {
+        "esriGeometryPoint": [geomTypes.POINT],
+        "esriGeometryPolyline": [geomTypes.LINE],
+        "esriGeometryPolygon": [geomTypes.POLYGON]
+    };
+
+
+    return { arcgisToGeoJSON: arcgisToGeoJSON, geojsonToArcGIS: geojsonToArcGIS, createFeatureCollection, EsriGeomTypes, geomTypes };
 });
