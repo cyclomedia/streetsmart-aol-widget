@@ -193,13 +193,14 @@ require(REQUIRE_CONFIG, [], function () {
 
             _handleMapClick(e) {
                 const mapFeature = e.graphic
-                const layer = e.graphic.getLayer();
-
-
                 if(!mapFeature) {
                     this.map.infoWindow.hide()
                     return
                 }
+
+                this._attributeManager.showInfoOfFeature(mapFeature)
+
+                const layer = mapFeature.getLayer();
                 if(layer.type !== 'Feature Layer' || !layer.getEditCapabilities().canUpdate) return;
 
                 const idField = layer.objectIdField;
@@ -213,8 +214,6 @@ require(REQUIRE_CONFIG, [], function () {
                     this._get3DFeatures(layer, [mapFeature.attributes[idField]], wkid)
                         .then(this._create3DRequestToStartMeasurementHandler(mapFeature, idField, wkid, typeToUse))
                 }
-
-                this._attributeManager.showInfoOfFeature(mapFeature)
             },
 
             _handleMapMovement(e){
@@ -298,6 +297,9 @@ require(REQUIRE_CONFIG, [], function () {
                         :  geojsonUtils.arcgisToGeoJSON(mapFeature, idField);
                     if(!feature) return
                     if(wkid != this.config.srs.split(':')[1]) return;
+
+                    // don't start polygon measurements as the api can not handle those.
+                    if(typeToUse === geojsonUtils.geomTypes.POLYGON) return;
 
 
                     this._selectedFeatureID = feature.properties[idField];
@@ -394,15 +396,16 @@ require(REQUIRE_CONFIG, [], function () {
                 const clickedLayer = featureLayers.find((l) => l.name === detail.layerName);
 
 
-                if(clickedLayer.type !== 'Feature Layer' || !clickedLayer.getEditCapabilities().canUpdate) return;
 
                 if (clickedLayer) {
                     const field = clickedLayer.objectIdField
                     const clickedFeatureID = detail.featureProperties[field]
                     const feature = clickedLayer.graphics.find((g) => g.attributes[field] === clickedFeatureID)
                     const wkid = clickedLayer.spatialReference.wkid
+                    this._attributeManager.showInfoById(clickedLayer, clickedFeatureID)
 
                     if(!feature) return
+                    if(clickedLayer.type !== 'Feature Layer' || !clickedLayer.getEditCapabilities().canUpdate) return;
 
                     const meaurementType = geojsonUtils.EsriGeomTypes[clickedLayer.geometryType]
                     const typeToUse = meaurementType && meaurementType[0]
@@ -413,7 +416,6 @@ require(REQUIRE_CONFIG, [], function () {
                             .then(this._create3DRequestToStartMeasurementHandler(feature, field, wkid, typeToUse))
                     }
 
-                    this._attributeManager.showInfoById(clickedLayer, clickedFeatureID)
                 }
             },
 
