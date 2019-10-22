@@ -98,6 +98,7 @@ require(REQUIRE_CONFIG, [], function () {
                     setPanoramaViewerOrientation: this.setPanoramaViewerOrientation.bind(this),
                     addEventListener: this.addEventListener.bind(this),
                     config: this.config,
+                    nls: this.nls,
                     removeEventListener: this.removeEventListener.bind(this),
                 });
 

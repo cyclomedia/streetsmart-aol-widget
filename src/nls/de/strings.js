@@ -5,6 +5,7 @@
        tipDragDrop: "Ziehen und Ablegen auf der Karte, um Panorama zu öffnen",
        startMeasurement: "Messung starten",
        save: "Speichern",
-       delete: "Löschen"
+       delete: "Löschen",
+       measurementLayerName: "Messungen",
   })
 );
