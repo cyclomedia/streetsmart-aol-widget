@@ -24,7 +24,7 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v19.14/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v19.15/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -198,10 +198,11 @@ require(REQUIRE_CONFIG, [], function () {
                     return
                 }
 
+                const layer = mapFeature.getLayer();
+                if(layer.type !== 'Feature Layer') return
                 this._attributeManager.showInfoOfFeature(mapFeature)
 
-                const layer = mapFeature.getLayer();
-                if(layer.type !== 'Feature Layer' || !layer.getEditCapabilities().canUpdate) return;
+                if (!layer.getEditCapabilities().canUpdate) return;
 
                 const idField = layer.objectIdField;
                 const wkid = layer.spatialReference.wkid
