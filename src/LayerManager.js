@@ -32,12 +32,14 @@ define([
     utils
 ) {
     return class LayerManager {
-        constructor({ map, wkid, onRecordingLayerClick, addEventListener, removeEventListener, setPanoramaViewerOrientation }) {
+        constructor({ map, wkid, onRecordingLayerClick, addEventListener, removeEventListener, setPanoramaViewerOrientation, config, nls}) {
             this._recordingColor = new Color.fromString('#80B0FF');
             this._recordingColorDepth = new Color.fromString('#98C23C');
 
             this.map = map;
             this.wkid = wkid;
+            this.nls = nls;
+            this.config = config;
             this.addEventListener = addEventListener;
             this.removeEventListener = removeEventListener;
             this.setPanoramaViewerOrientation = setPanoramaViewerOrientation;
@@ -45,7 +47,6 @@ define([
             this.viewingConeLayer = this._createViewingConeLayer();
             this.measureLayer = this._createMeasureLayer();
             this.srs = new SpatialReference({ wkid });
-
         }
 
         addLayers() {
@@ -138,6 +139,19 @@ define([
             return layer;
         }
 
+        _getMeasureLayerId(){
+            const nameByLocale = {
+                'fr': 'Mesures',
+                'de': 'Messungen',
+                'nl': 'Metingen',
+                'en-US': 'Measurements' ,
+                'en-EN': 'Measurements'
+            }
+            const id = nameByLocale[this.config.locale]
+            const fromNls = this.nls.measurementLayerName
+            return fromNls || id || nameByLocale['en-US']
+        }
+
         _createMeasureLayer(){
             const measureCollection = {
                 layerDefinition: {
@@ -155,7 +169,7 @@ define([
             measureSymbol.setStyle(SimpleMarkerSymbol.STYLE_CROSS);
             measureSymbol.setAngle(47);
             const renderer = new SimpleRenderer(measureSymbol);
-            const layer = new FeatureLayer(measureCollection, {id: 'cmt_measure'});
+            const layer = new FeatureLayer(measureCollection, {id: this._getMeasureLayerId()});
             layer.setRenderer(renderer);
             return layer;
         }

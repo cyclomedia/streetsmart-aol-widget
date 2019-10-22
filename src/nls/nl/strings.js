@@ -5,6 +5,8 @@
        tipDragDrop: "Versleep op de kaart om Panorama te openen",
        startMeasurement: "Beginnen met meten",
        save: "Opslaan",
-       delete: "Verwijderen"
-  })
+       delete: "Verwijderen",
+       measurementLayerName: "Metingen",
+
+   })
 );

@@ -5,7 +5,8 @@
         tipDragDrop: "Drag and Drop on map to Open Panorama",
         startMeasurement: "Start Measurement",
         save: "Save",
-        delete: "Delete"
+        delete: "Delete",
+        measurementLayerName: "Measurements"
     }) ,
     "de": true,
     "nl": true,
