@@ -8,14 +8,20 @@ define(['react', './Layer', '../arcgisToGeojson'], function (React, Layer, geoUt
         }
 
         constructLayerList() {
-            const map = this.props.widget.map;
+            const widget = this.props.widget
+            const map = widget.map;
             const ids = map.graphicsLayerIds;
             const list = [];
 
             for (const id of ids){
                 const layer = map.getLayer(id);
+                const layerWkid = layer.spatialReference.latestWkid  || layer.spatialReference.wkid
 
-                if( layer.type === 'Feature Layer' && layer.isEditable() === true && layer.getEditCapabilities().canCreate) {
+                if(
+                    layer.type === 'Feature Layer' &&
+                    layer.isEditable() === true &&
+                    layer.getEditCapabilities().canCreate &&
+                    layerWkid == widget.config.srs.split(':')[1]) {
                     list.push(layer);
                 }
             }

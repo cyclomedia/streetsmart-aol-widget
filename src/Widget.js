@@ -23,8 +23,8 @@ require(REQUIRE_CONFIG, [], function () {
         'esri/tasks/locator',
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
-        // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v19.15/StreetSmartApi.js',
+        'http://localhost:8081/StreetSmartApi.js',
+        // 'https://streetsmart.cyclomedia.com/api/v19.15/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -205,7 +205,7 @@ require(REQUIRE_CONFIG, [], function () {
                 if (!layer.getEditCapabilities().canUpdate) return;
 
                 const idField = layer.objectIdField;
-                const wkid = layer.spatialReference.wkid
+                const wkid = layer.spatialReference.latestWkid  || layer.spatialReference.wkid
 
                 const meaurementType = geojsonUtils.EsriGeomTypes[layer.geometryType]
                 const typeToUse = meaurementType && meaurementType[0]
@@ -402,7 +402,7 @@ require(REQUIRE_CONFIG, [], function () {
                     const field = clickedLayer.objectIdField
                     const clickedFeatureID = detail.featureProperties[field]
                     const feature = clickedLayer.graphics.find((g) => g.attributes[field] === clickedFeatureID)
-                    const wkid = clickedLayer.spatialReference.wkid
+                    const wkid = clickedLayer.spatialReference.latestWkid  || clickedLayer.spatialReference.wkid
                     this._attributeManager.showInfoById(clickedLayer, clickedFeatureID)
 
                     if(!feature) return
