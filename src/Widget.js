@@ -23,8 +23,8 @@ require(REQUIRE_CONFIG, [], function () {
         'esri/tasks/locator',
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
-        'http://localhost:8081/StreetSmartApi.js',
-        // 'https://streetsmart.cyclomedia.com/api/v19.15/StreetSmartApi.js',
+        // 'http://localhost:8081/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v19.15/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -731,8 +731,11 @@ require(REQUIRE_CONFIG, [], function () {
                 if(layer) {
                     const editID = this._selectedFeatureID
                     this._featureLayerManager._saveMeasurementsToLayer(layer, this._measurementDetails, editID).then((r) => {
-                        if(r && r.addResults && r.addResults.length) {
-                            const featureId = r.addResults[0].objectId
+
+                        const changes = _.get(r, 'addResults[0]') || _.get(r, 'updateResults[0]')
+
+                        if(changes) {
+                            const featureId = changes.objectId
                             if (this._layerUpdateListener) this._layerUpdateListener.remove();
                             this._layerUpdateListener = this.addEventListener(layer, 'update-end', () => {
                                 this._rerender.bind(this)()
