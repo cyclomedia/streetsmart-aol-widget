@@ -138,7 +138,8 @@ require(REQUIRE_CONFIG, [], function () {
                     map: this.map,
                     wkid: this.wkid,
                     config: this.config,
-                    nls: this.nls
+                    nls: this.nls,
+                    api: StreetSmartApi
                 })
 
                 this._applyWidgetStyle();

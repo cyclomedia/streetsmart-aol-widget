@@ -7,12 +7,13 @@ define([
     'esri/request',
 ], function (AttributeInspector, Point, InfoWindow, domConstruct, Button, esriRequest) {
     return class AttributeManager {
-        constructor({ map, widget, wkid, config, nls}) {
+        constructor({ map, widget, wkid, config, nls, api}) {
             this.map = map;
             this.wkid = wkid;
             this.widget = widget;
             this.config = config;
             this.nls = nls;
+            this.api = api
         }
 
         _constructLayerInfo(layer) {
@@ -58,6 +59,7 @@ define([
                 evt.feature.getLayer().applyEdits(null, null, [evt.feature]);
                 this.map.infoWindow.hide();
                 this.widget._overlayManager.addOverlaysToViewer()
+                this.api.stopMeasurementMode()
             });
 
             const saveButton = new Button({ label: this.nls.save, "class": "saveButton"},domConstruct.create("div"));
