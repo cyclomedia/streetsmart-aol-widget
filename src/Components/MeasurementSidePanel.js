@@ -1,30 +1,27 @@
-const geomTypes = {
-    POINT: 'POINT',
-    LINE: 'LINE',
-    POLYGON: 'POLYGON',
-};
-const EsriGeomTypes = {
-    "esriGeometryPoint": [geomTypes.POINT],
-    "esriGeometryPolyline": [geomTypes.LINE],
-    "esriGeometryPolygon": [geomTypes.POLYGON]
-};
-
-define(['react', './Layer'], function (React, Layer) {
+define(['react', './Layer', '../arcgisToGeojson'], function (React, Layer, geoUtils) {
     return class MeasurementSidePanel extends React.Component {
         constructor() {
             super();
-            this.state = {};
+            this.state = {
+                selectedLayer: null
+            };
         }
 
         constructLayerList() {
-            const map = this.props.widget.map;
+            const widget = this.props.widget
+            const map = widget.map;
             const ids = map.graphicsLayerIds;
             const list = [];
 
             for (const id of ids){
                 const layer = map.getLayer(id);
+                const layerWkid = layer.spatialReference.latestWkid  || layer.spatialReference.wkid
 
-                if( layer.type === 'Feature Layer' && layer.isEditable() === true && layer.getEditCapabilities().canCreate) {
+                if(
+                    layer.type === 'Feature Layer' &&
+                    layer.isEditable() === true &&
+                    layer.getEditCapabilities().canCreate &&
+                    layerWkid == widget.config.srs.split(':')[1]) {
                     list.push(layer);
                 }
             }
@@ -47,6 +44,11 @@ define(['react', './Layer'], function (React, Layer) {
             togglePanel(false);
         }
 
+        esriGeomToGeoJson(info) {
+            const type = (info && info.geometryType) ? info.geometryType : info
+            return geoUtils.EsriGeomTypes[type]
+        }
+
         render(){
             const layerList = this.constructLayerList();
             const { widget, togglePanel } = this.props;
@@ -56,9 +58,9 @@ define(['react', './Layer'], function (React, Layer) {
             let layerGeometryTypes = [];
             if(selectedLayer){
                 const layer = map.getLayer(selectedLayer);
-                layerGeometryTypes = EsriGeomTypes[layer.geometryType];
+                layerGeometryTypes = this.esriGeomToGeoJson(layer)
             }else{
-                layerGeometryTypes = [geomTypes.POINT, geomTypes.LINE, geomTypes.POLYGON];
+                layerGeometryTypes = [geoUtils.geomTypes.POINT, geoUtils.geomTypes.LINE, geoUtils.geomTypes.POLYGON];
             }
 
             return(
@@ -77,23 +79,23 @@ define(['react', './Layer'], function (React, Layer) {
                         <div className={'cmt measurement-button-container'}>
                             <button
                                 className={'measurement-button glyphicon novaicon-custom-dot'}
-                                disabled={!layerGeometryTypes.includes(geomTypes.POINT)}
+                                disabled={!layerGeometryTypes.includes(geoUtils.geomTypes.POINT)}
                                 onClick={() => {
-                                    this.startMeasurement(geomTypes.POINT)
+                                    this.startMeasurement(geoUtils.geomTypes.POINT)
                                 }}
                             ></button>
                             <button
                                 className={'measurement-button glyphicon novaicon-organization-graph'}
-                                disabled={!layerGeometryTypes.includes(geomTypes.LINE)}
+                                disabled={!layerGeometryTypes.includes(geoUtils.geomTypes.LINE)}
                                 onClick={() => {
-                                    this.startMeasurement(geomTypes.LINE)
+                                    this.startMeasurement(geoUtils.geomTypes.LINE)
                                 }}
                             ></button>
                             <button
                                 className={'measurement-button glyphicon novaicon-organization-flowchart-1'}
-                                disabled={!layerGeometryTypes.includes(geomTypes.POLYGON)}
+                                disabled={!layerGeometryTypes.includes(geoUtils.geomTypes.POLYGON)}
                                 onClick={() => {
-                                    this.startMeasurement(geomTypes.POLYGON)
+                                    this.startMeasurement(geoUtils.geomTypes.POLYGON)
                                 }}
                             ></button>
                         </div>
