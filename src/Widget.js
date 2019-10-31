@@ -24,7 +24,7 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v19.15/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v19.16/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -300,10 +300,6 @@ require(REQUIRE_CONFIG, [], function () {
                         :  geojsonUtils.arcgisToGeoJSON(mapFeature, idField);
                     if(!feature) return
                     if(wkid != this.config.srs.split(':')[1]) return;
-
-                    // don't start polygon measurements as the api can not handle those.
-                    if(typeToUse === geojsonUtils.geomTypes.POLYGON) return;
-
 
                     this._selectedFeatureID = feature.properties[idField];
                     const measurementInfo = geojsonUtils.createFeatureCollection([feature], wkid);
