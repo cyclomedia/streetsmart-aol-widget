@@ -103,6 +103,7 @@ define([
         showInfoOfFeature(feature){
             if(!this.config.allowEditing) return this._showInfoWindowWithFeature(feature)
             const insp = this._constructNewInspector(feature.getLayer())
+            this.map.infoWindow.clearFeatures();
             this.map.infoWindow.setContent(insp.domNode);
             this._showInfoWindow(feature)
             this.inspector.showFeature(feature);
