@@ -209,7 +209,8 @@ require(REQUIRE_CONFIG, [], function () {
                 // rotate towards clicked feature
                 const extent = mapFeature.geometry.getExtent && mapFeature.geometry.getExtent();
                 const centroid = (extent && extent.getCenter()) || mapFeature.geometry;
-                this._panoramaViewer.lookAtCoordinate([centroid.x, centroid.y], "EPSG:" + mapFeature.geometry.spatialReference.wkid);
+                const featureWkid = centroid.spatialReference.latestWkid || centroid.spatialReference.wkid
+                this._panoramaViewer.lookAtCoordinate([centroid.x, centroid.y], `EPSG:${featureWkid}`);
 
                 const idField = layer.objectIdField;
                 const wkid = layer.spatialReference.latestWkid  || layer.spatialReference.wkid
