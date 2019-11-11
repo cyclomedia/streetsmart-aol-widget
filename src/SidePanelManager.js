@@ -44,14 +44,13 @@ define(['react', 'react-dom', './Components/sidePanel'], function (react, reactD
             if(inMeasurement && saveMeasurements && _measurementDetails){
 +               _widget._saveMeasurement();
             }else if(!inMeasurement) {
-                if(!_lastSelectedLayer || !_lastSelectedGeometryType) {
-                    this.toggleMeasurementSidePanel(true)
-                } else {
+                if(_lastSelectedLayer && _lastSelectedGeometryType ) {
                     _widget._selectedLayerID = _lastSelectedLayer
                     _widget.startMeasurement(_lastSelectedGeometryType);
                     this.toggleMeasurementSidePanel(false);
+                } else if(saveMeasurements) {
+                    this.toggleMeasurementSidePanel(true)
                 }
-
             }
         }
 
