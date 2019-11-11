@@ -191,6 +191,7 @@ require(REQUIRE_CONFIG, [], function () {
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
                 this.addEventListener(this.map, 'pan-end', this._handleMapMovement.bind(this));
                 this.addEventListener(this.map, 'click', this._handleMapClick.bind(this));
+                this._sidePanelManager.bindEventListeners()
             },
 
             _handleMapClick(e) {
@@ -235,6 +236,8 @@ require(REQUIRE_CONFIG, [], function () {
                 const newViewer = panoramaViewer;
                 this._handleViewerChanged(newViewer);
                 this._measurementHandler.draw(e);
+                this.inMeasurement = !!activeMeasurement
+
                 if (this.config.saveMeasurements) {
                     this._measurementDetails = activeMeasurement;
                     if(!activeMeasurement){
@@ -393,8 +396,6 @@ require(REQUIRE_CONFIG, [], function () {
                 const mapLayers = _.values(this.map._layers);
                 const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
                 const clickedLayer = featureLayers.find((l) => l.name === detail.layerName);
-
-
 
                 if (clickedLayer) {
                     const field = clickedLayer.objectIdField
@@ -626,6 +627,7 @@ require(REQUIRE_CONFIG, [], function () {
                 this._selectedFeatureID = null;
                 this._measurementButtonOverwrideTimer = clearInterval(this._measurementButtonOverwrideTimer);
                 this._saveButtonOverwrideTimer = clearInterval(this._saveButtonOverwrideTimer);
+                this._sidePanelManager.removeEventListener()
                 this._sidePanelManager.toggleMeasurementSidePanel(false);
             },
 
