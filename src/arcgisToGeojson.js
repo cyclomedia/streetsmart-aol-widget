@@ -261,14 +261,14 @@ define([], function () {
         throw Error('No valid id attribute found');
     }
 
-    function arcgisToGeoJSON(arcgis, idAttribute) {
+    function arcgisToGeoJSON(arcgis, idAttribute, dates) {
         var geojson = {};
 
         if (arcgis.features) {
             geojson.type = 'FeatureCollection';
             geojson.features = [];
             for (var i = 0; i < arcgis.features.length; i++) {
-                geojson.features.push(arcgisToGeoJSON(arcgis.features[i], idAttribute));
+                geojson.features.push(arcgisToGeoJSON(arcgis.features[i], idAttribute, dates));
             }
         }
 
@@ -301,10 +301,15 @@ define([], function () {
 
         if (arcgis.geometry || arcgis.attributes) {
             geojson.type = 'Feature';
-            geojson.geometry = (arcgis.geometry) ? arcgisToGeoJSON(arcgis.geometry) : null;
+            geojson.geometry = (arcgis.geometry) ? arcgisToGeoJSON(arcgis.geometry, undefined, dates) : null;
             geojson.properties = (arcgis.attributes) ? shallowClone(arcgis.attributes) : null;
             if (arcgis.attributes) {
                 try {
+                    for(const key in arcgis.attributes) {
+                        if(dates && dates.includes(key)){
+                            geojson.properties[key] = new Date(arcgis.attributes[key]).toDateString()
+                        }
+                    }
                     geojson.id = getId(arcgis.attributes, idAttribute);
                 } catch (err) {
                     // don't set an id
