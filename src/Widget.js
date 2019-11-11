@@ -206,6 +206,12 @@ require(REQUIRE_CONFIG, [], function () {
 
                 if (!layer.getEditCapabilities().canUpdate) return;
 
+                // rotate towards clicked feature
+                const extent = mapFeature.geometry.getExtent && mapFeature.geometry.getExtent();
+                const centroid = (extent && extent.getCenter()) || mapFeature.geometry;
+                const featureWkid = centroid.spatialReference.latestWkid || centroid.spatialReference.wkid
+                this._panoramaViewer.lookAtCoordinate([centroid.x, centroid.y], `EPSG:${featureWkid}`);
+
                 const idField = layer.objectIdField;
                 const wkid = layer.spatialReference.latestWkid  || layer.spatialReference.wkid
 
@@ -394,8 +400,6 @@ require(REQUIRE_CONFIG, [], function () {
                 const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
                 const clickedLayer = featureLayers.find((l) => l.name === detail.layerName);
 
-
-
                 if (clickedLayer) {
                     const field = clickedLayer.objectIdField
                     const clickedFeatureID = detail.featureProperties[field]
@@ -404,6 +408,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this._attributeManager.showInfoById(clickedLayer, clickedFeatureID)
 
                     if(!feature) return
+
                     if(clickedLayer.type !== 'Feature Layer' || !clickedLayer.getEditCapabilities().canUpdate) return;
 
                     const meaurementType = geojsonUtils.EsriGeomTypes[clickedLayer.geometryType]
