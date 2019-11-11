@@ -327,7 +327,18 @@ define([
 
         createGeoJsonForFeature({ mapLayer, sld, featureSet, wkid }) {
             const arcgisFeatureSet = featureSet || mapLayer.toJson().featureSet;
-            const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet);
+            let dates = []
+            if(mapLayer){
+                dates = mapLayer.fields.reduce((acc, field) => {
+                    if(field.type === "esriFieldTypeDate") {
+                        acc.push(field.name)
+                    }
+                    return acc
+                }, dates)
+            }
+            const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet, undefined, dates );
+
+
 
             // Make sure the panoramaviewer knows which srs this is in.
             let wkidToUse = _.get(arcgisFeatureSet, 'features[0].geometry.spatialReference.wkid', null) || wkid;
