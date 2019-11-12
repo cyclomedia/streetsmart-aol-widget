@@ -30,15 +30,20 @@ define(['react', './Layer', '../arcgisToGeojson'], function (React, Layer, geoUt
         }
 
         selectLayer(id) {
+            const { selectLayer} = this.props;
+
             if(id === this.state.selectedLayer){
                 this.setState({selectedLayer: null})
+                selectLayer(null)
             }else{
                 this.setState({selectedLayer: id});
+                selectLayer(id)
             }
         };
 
         startMeasurement(type){
-            const {widget, togglePanel} = this.props;
+            const {widget, togglePanel, selectGeometryType} = this.props;
+            selectGeometryType(type);
             widget._selectedLayerID = this.state.selectedLayer;
             widget.startMeasurement(type);
             togglePanel(false);

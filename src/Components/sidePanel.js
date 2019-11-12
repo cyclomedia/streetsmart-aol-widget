@@ -5,7 +5,12 @@ define(['react', './MeasurementSidePanel'], function (React, MeasPanel) {
         }
 
         render(){
-            return <MeasPanel widget={this.props.widget} togglePanel={this.props.togglePanel}/>
+            return <MeasPanel
+                widget={this.props.widget}
+                togglePanel={this.props.togglePanel}
+                selectLayer={ this.props.selectLayer}
+                selectGeometryType= {this.props.selectGeometryType}
+            />
         }
     }
 });

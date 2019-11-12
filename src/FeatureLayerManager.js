@@ -113,7 +113,7 @@ define([
         polygonLayer(layer, measurement, editID){
             const coords = measurement.features[0].geometry.coordinates[0];
             const derivedData = measurement.features[0].properties.derivedData;
-            const polygonArea = derivedData.area.value.toFixed(2) + derivedData.unit;
+            const polygonArea = _.get(derivedData, 'area.value', 0).toFixed(2) + derivedData.unit;
             if (coords === null) {
                 return;
             }
