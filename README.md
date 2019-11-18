@@ -48,6 +48,7 @@ Aperture API:
 
 * **Sarath Chandra Kalluri** - *Initial work* - [Sarath Chandra Kalluri](mailto:skalluri@cyclomedia.com).
 * **Jasper Stam** - https://github.com/stam 
+* **Jasper Roosenmaallen** - https://github.com/blazery 
 
 ## License
 
