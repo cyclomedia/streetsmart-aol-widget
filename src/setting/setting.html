@@ -23,6 +23,14 @@
             <input id="srsComboBox" data-dojo-attach-point="srsCyclomedia">
         </div>
         <div class="settingsForm">
+            <div class="settingsLabel">${nls.units}</div>
+            <select class="settingSelect" data-dojo-attach-point="selectUnitToggle" data-dojo-type="dijit/form/Select">
+                <option value="default" selected="selected">${nls.unitsDefault}</option>
+                <option value="m">${nls.unitsMeter}</option>
+                <option value="ft">${nls.unitsFeet}</option>
+            </select>
+        </div>
+        <div class="settingsForm">
             <div class="settingsLabel">${nls.overlay}</div>
             <input data-dojo-attach-point="overlaysEnabled" type="checkbox" id="showOverlays">
         </div>

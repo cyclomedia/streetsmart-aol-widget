@@ -53,6 +53,10 @@ define([
                     this.selectCyclomediaLocation.set("value", this.config.locale);
                 }
 
+                if(this.config.units){
+                    this.selectUnitToggle.set("value", this.config.units);
+                }
+
                 if(this.config.uName){
                     this.uNameCyclomedia.value = this.config.uName;
                 }
@@ -135,6 +139,7 @@ define([
 
             getConfig: function () {
                 this.config.locale = this.selectCyclomediaLocation.value;
+                this.config.units = this.selectUnitToggle.value;
                 this.config.uName = this.uNameCyclomedia.value;
                 this.config.uPwd = this.uPwdCyclomedia.value;
                 this.config.agreement = this.agreementCheck.checked;
