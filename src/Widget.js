@@ -24,7 +24,7 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v19.16/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v19.18/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -181,7 +181,16 @@ require(REQUIRE_CONFIG, [], function () {
                     this._bindInitialMapHandlers();
                     this._loadRecordings();
                     this._centerViewerToMap();
-                    this.streetNameLayerID = this._overlayManager.addStreetNameLayer()
+                    this.streetNameLayerID = this._overlayManager.addStreetNameLayer();
+
+                    const unitPrefs = _.get(StreetSmartApi, "Settings.UNIT_PREFERENCE")
+                    if(unitPrefs){
+                        const units = this.config.units || unitPrefs.DEFAULT
+                        if(Object.values(unitPrefs).includes(units)){
+                            StreetSmartApi.Settings.setUnitPreference(units);
+                        }
+                    }
+
                 });
             },
 
