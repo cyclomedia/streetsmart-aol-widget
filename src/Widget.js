@@ -529,7 +529,7 @@ require(REQUIRE_CONFIG, [], function () {
                 this._locator.locationToAddress(location, 0, (result) => {
                     const el = this.streetIndicator;
                     if(el){
-                        el.innerHTML = result.address.ShortLabel;
+                        el.innerHTML = result.address.Address;
                     }
                 });
             },
