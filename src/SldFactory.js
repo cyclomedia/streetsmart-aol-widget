@@ -344,12 +344,13 @@ define([
                 return;
             }
             if (symbol.type === 'picturemarkersymbol') {
+                const size = !symbol.size || symbol.size < 12 ? 12 : symbol.size;
                 content = `
                     <ExternalGraphic>
                        <OnlineResource xlink:type="simple" xlink:href="${symbol.url}" />
                        <Format>${symbol.contentType}</Format>
                     </ExternalGraphic>
-                    <Size>${symbol.size}</Size>
+                    <Size>${size}</Size>
                 `;
             } else {
                 const wellKnownName = this._createWellKnownName(symbol);
@@ -364,13 +365,14 @@ define([
                     stroke = '';
                 }
 
+                const size = !symbol.size || symbol.size < 12 ? 12 : symbol.size;
                 content = `
                     <Mark>
                         <WellKnownName>${wellKnownName}</WellKnownName>
                         ${fill}
                         ${stroke}
                     </Mark>
-                    <Size>${symbol.size || 12}</Size>
+                    <Size>${size}</Size>
                 `;
             }
             return `
