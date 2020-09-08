@@ -326,7 +326,7 @@ define([
         }
 
         createGeoJsonForFeature({ mapLayer, sld, featureSet, wkid }) {
-            const arcgisFeatureSet = featureSet || mapLayer.toJson().featureSet;
+            const arcgisFeatureSet = mapLayer.toJson().featureSet;
             let dates = []
             if(mapLayer){
                 dates = mapLayer.fields.reduce((acc, field) => {

@@ -15,13 +15,11 @@ define(['react', './Layer', '../arcgisToGeojson'], function (React, Layer, geoUt
 
             for (const id of ids){
                 const layer = map.getLayer(id);
-                const layerWkid = layer.spatialReference.latestWkid  || layer.spatialReference.wkid
 
                 if(
                     layer.type === 'Feature Layer' &&
                     layer.isEditable() === true &&
-                    layer.getEditCapabilities().canCreate &&
-                    layerWkid == widget.config.srs.split(':')[1]) {
+                    layer.getEditCapabilities().canCreate) {
                     list.push(layer);
                 }
             }

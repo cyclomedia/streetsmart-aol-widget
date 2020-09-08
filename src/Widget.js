@@ -2,8 +2,8 @@ const REQUIRE_CONFIG = {
     async: true,
     locale: 'en',
     paths: {
-        'react': 'https://unpkg.com/react@16.4.1/umd/react.production.min',
-        'react-dom': 'https://unpkg.com/react-dom@16.4.1/umd/react-dom.production.min',
+        'react': 'https://unpkg.com/react@16.12.0/umd/react.production.min',
+        'react-dom': 'https://unpkg.com/react-dom@16.12.0/umd/react-dom.production.min',
         'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.3.3/ol',
         'lodash': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.min'
     }
@@ -24,7 +24,7 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v19.18/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v20.9/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
