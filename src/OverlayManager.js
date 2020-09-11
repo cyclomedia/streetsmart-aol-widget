@@ -336,6 +336,46 @@ define([
                     return acc
                 }, dates)
             }
+
+            if (arcgisFeatureSet.geometryType === 'esriGeometryPoint') {
+                for (const featureS in arcgisFeatureSet.features) {
+                    const updateFeature = arcgisFeatureSet.features[featureS];
+                    const objectId = updateFeature.attributes.OBJECTID;
+
+                    if (featureSet && featureSet.features) {
+                        for (const featureZ in featureSet.features) {
+                            const fromFeature = featureSet.features[featureZ];
+
+                            if (objectId === fromFeature.attributes.OBJECTID) {
+                                const z = fromFeature.geometry && fromFeature.geometry.z;
+
+                                if (z) {
+                                    updateFeature.geometry.z = z;
+                                }
+
+                                if (updateFeature.geometry.spatialReference.wkid != this.config.srs.split(':')[1]) {
+                                    const x = fromFeature.geometry && fromFeature.geometry.x;
+                                    const y = fromFeature.geometry && fromFeature.geometry.y;
+                                    const spatialReference = featureSet.spatialReference;
+
+                                    if (x) {
+                                        updateFeature.geometry.x = x;
+                                    }
+
+                                    if (y) {
+                                        updateFeature.geometry.y = y;
+                                    }
+
+                                    if (spatialReference) {
+                                        updateFeature.geometry.spatialReference = spatialReference;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet, undefined, dates );
 
 

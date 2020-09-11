@@ -314,13 +314,21 @@ require(REQUIRE_CONFIG, [], function () {
 
             _create3DRequestToStartMeasurementHandler(mapFeature, idField, wkid, typeToUse) {
                 return (res) => {
-                    const feature  = (!!res && res.features) ? geojsonUtils.arcgisToGeoJSON(res.features[0], idField)
-                        :  geojsonUtils.arcgisToGeoJSON(mapFeature, idField);
+                    const feature  = (!!res && res.features && (wkid == this.config.srs.split(':')[1]))
+                        ? geojsonUtils.arcgisToGeoJSON(res.features[0], idField)
+                        : geojsonUtils.arcgisToGeoJSON(mapFeature, idField);
                     if(!feature) return
-                    if(wkid != this.config.srs.split(':')[1]) return;
+                    const newWkid = (wkid == this.config.srs.split(':')[1])
+                        ? wkid
+                        : (mapFeature.geometry.spatialReference.latestWkid || mapFeature.geometry.spatialReference.wkid);
+                    if (newWkid != this.config.srs.split(':')[1]) return;
 
                     this._selectedFeatureID = feature.properties[idField];
-                    const measurementInfo = geojsonUtils.createFeatureCollection([feature], wkid);
+                    if (feature && feature.geometry && feature.geometry.type === 'Point' && (wkid != this.config.srs.split(':')[1])) {
+                        feature.geometry.coordinates = [feature.geometry.coordinates[0], feature.geometry.coordinates[1], res.features[0].geometry.z];
+                    }
+
+                    const measurementInfo = geojsonUtils.createFeatureCollection([feature], newWkid);
                     this.startMeasurement(typeToUse, measurementInfo)
                 }
             },
