@@ -16,6 +16,7 @@ require(REQUIRE_CONFIG, [], function () {
         'dojo/dom',
         'dijit/Tooltip',
         'jimu/BaseWidget',
+        'jimu/WidgetManager',
         'esri/request',
         'esri/SpatialReference',
         'esri/geometry/Point',
@@ -40,6 +41,7 @@ require(REQUIRE_CONFIG, [], function () {
         dom,
         Tooltip,
         BaseWidget,
+        WidgetManager,
         esriRequest,
         SpatialReference,
         Point,
@@ -212,7 +214,13 @@ require(REQUIRE_CONFIG, [], function () {
 
                 const layer = mapFeature.getLayer();
                 if(layer.type !== 'Feature Layer') return
-                this._attributeManager.showInfoOfFeature(mapFeature)
+
+                const wm = WidgetManager.getInstance();
+                const editWidgets = wm.getWidgetsByName('Edit');
+
+                if (editWidgets.length === 0) {
+                    this._attributeManager.showInfoOfFeature(mapFeature);
+                }
 
                 if (!layer.getEditCapabilities().canUpdate) return;
 
@@ -651,7 +659,11 @@ require(REQUIRE_CONFIG, [], function () {
                 this._selectedFeatureID = null;
                 this._measurementButtonOverwrideTimer = clearInterval(this._measurementButtonOverwrideTimer);
                 this._saveButtonOverwrideTimer = clearInterval(this._saveButtonOverwrideTimer);
-                this._sidePanelManager.removeEventListener()
+
+                if (this._sidePanelManager && this._sidePanelManager.removeEventListener) {
+                    this._sidePanelManager.removeEventListener();
+                }
+
                 this._sidePanelManager.toggleMeasurementSidePanel(false);
             },
 
