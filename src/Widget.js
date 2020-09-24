@@ -25,7 +25,8 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v20.9/StreetSmartApi.js',
+        // 'https://streetsmart.cyclomedia.com/api/v20.9/StreetSmartApi.js',
+        'https://labs.cyclomedia.com/streetsmart-api/branch/release-20.9.2-patch/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -76,6 +77,9 @@ require(REQUIRE_CONFIG, [], function () {
             // CM properties
             _cmtTitleColor: '#98C23C',
             _apiKey: 'C3oda7I1S_49-rgV63wtWbgtOXcVe3gJWPAVWnAZK3whi7UxCjMNWzIJyv4Fmrcp',
+
+            _mapIdLayerId: {},
+            _visibleLayers: {},
 
             // Initial construction, might not be added to DOM yet.
             postCreate() {
@@ -461,6 +465,9 @@ require(REQUIRE_CONFIG, [], function () {
                     }else{
                         this.streetIndicatorContainer.classList.add('hidden');
                     }
+                }
+                else {
+                    this._visibleLayers[layerId] = visibility;
                 }
             },
 
