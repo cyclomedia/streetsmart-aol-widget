@@ -155,7 +155,22 @@ define([
 
                         geojson
                     });
-                    this.widget._panoramaViewer.toggleOverlay({ id: overlay.id, visible: !mapLayer.visible, name: mapLayer.name})
+
+                    const oldId = this.widget._mapIdLayerId.hasOwnProperty(mapLayer.id) ?
+                        this.widget._mapIdLayerId[mapLayer.id] :
+                        undefined;
+
+                    this.widget._mapIdLayerId[mapLayer.id] = overlay.id;
+                    const layerVisible = oldId && this.widget._visibleLayers.hasOwnProperty(oldId) ?
+                        this.widget._visibleLayers[oldId] :
+                        mapLayer.visible;
+
+                    if (this.widget._visibleLayers.hasOwnProperty(oldId)) {
+                        delete this.widget._visibleLayers[oldId];
+                    }
+
+                    this.widget._visibleLayers[overlay.id] = layerVisible;
+                    this.widget._panoramaViewer.toggleOverlay({ id: overlay.id, visible: !layerVisible, name: mapLayer.name})
                     this.overlaysByName[mapLayer.name] = overlay.id;
                     this.overlays.push(overlay.id);
                 }

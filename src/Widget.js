@@ -77,6 +77,9 @@ require(REQUIRE_CONFIG, [], function () {
             _cmtTitleColor: '#98C23C',
             _apiKey: 'C3oda7I1S_49-rgV63wtWbgtOXcVe3gJWPAVWnAZK3whi7UxCjMNWzIJyv4Fmrcp',
 
+            _mapIdLayerId: {},
+            _visibleLayers: {},
+
             // Initial construction, might not be added to DOM yet.
             postCreate() {
                 this.inherited(arguments);
@@ -461,6 +464,9 @@ require(REQUIRE_CONFIG, [], function () {
                     }else{
                         this.streetIndicatorContainer.classList.add('hidden');
                     }
+                }
+                else {
+                    this._visibleLayers[layerId] = visibility;
                 }
             },
 
