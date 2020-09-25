@@ -36,16 +36,14 @@ i.e.: 16.1.0 = year 2016, major version 1, patch 0 .
 We also make use of:
 
 Street Smart API:
-	api.version: 16.1
-	api.location: [Street Smart API](https://streetsmart.cyclomedia.com/api/v16.1/StreetSmartAPI.js)
-
-Aperture API:
-	api.location: [Aperture API](https://streetsmart.cyclomedia.com/api/v16.1/Aperture.js)
-
-
+	api.version: 20.9
+	api.location: [Street Smart API](https://streetsmart.cyclomedia.com/api/v20.9/StreetSmartAPI.js)
 
 ## Authors
 
+* **Jasper Roosenmaallen** - [Jasper Roosenmaallen](mailto:jroosenmaallen@cyclomedia.com).
+* **Harm Bruinsma** - [Harm Bruinsma](mailto:hbruinsmaboekema@cyclomedia.com).
+* **Gijs Boekema** - [Gijs Boekema](mailto:gboekema@cyclomedia.com).
 * **Sarath Chandra Kalluri** - *Initial work* - [Sarath Chandra Kalluri](mailto:skalluri@cyclomedia.com).
 * **Jasper Stam** - https://github.com/stam 
 

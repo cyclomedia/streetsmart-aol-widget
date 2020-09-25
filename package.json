@@ -1,7 +1,7 @@
 {
   "name": "streetsmart-widget",
   "description": "Street Smart Widget for ArcGIS Online",
-  "version": "19.1.0",
+  "version": "20.3.0",
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {
@@ -25,6 +25,10 @@
       "name": "Gijs Boekema",
       "email": "gboekema@cyclomedia.com",
       "url": "https://github.com/gpcboekema"
+    },
+    {
+      "name": "Harm Bruinsma",
+      "email": "hbruinsma@cyclomedia.com"
     },
     {
       "name": "Sarath Chandra Kalluri",
