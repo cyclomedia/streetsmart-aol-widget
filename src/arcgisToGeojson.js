@@ -268,7 +268,11 @@ define([], function () {
             geojson.type = 'FeatureCollection';
             geojson.features = [];
             for (var i = 0; i < arcgis.features.length; i++) {
-                geojson.features.push(arcgisToGeoJSON(arcgis.features[i], idAttribute, dates));
+                const feature = arcgisToGeoJSON(arcgis.features[i], idAttribute, dates);
+
+                if (feature && feature.properties) {
+                    geojson.features.push(arcgisToGeoJSON(arcgis.features[i], idAttribute, dates));
+                }
             }
         }
 
@@ -299,7 +303,7 @@ define([], function () {
             geojson = convertRingsToGeoJSON(arcgis.rings.slice(0));
         }
 
-        if (arcgis.geometry || arcgis.attributes) {
+        if (arcgis.geometry) {
             geojson.type = 'Feature';
             geojson.geometry = (arcgis.geometry) ? arcgisToGeoJSON(arcgis.geometry, undefined, dates) : null;
             geojson.properties = (arcgis.attributes) ? shallowClone(arcgis.attributes) : null;
