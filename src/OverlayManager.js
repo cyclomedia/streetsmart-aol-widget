@@ -352,16 +352,19 @@ define([
                 }, dates)
             }
 
-            if (arcgisFeatureSet.geometryType === 'esriGeometryPoint') {
-                for (const featureS in arcgisFeatureSet.features) {
-                    const updateFeature = arcgisFeatureSet.features[featureS];
-                    const objectId = updateFeature.attributes.OBJECTID;
+            const features = []
+            let changedSpatialReference = false;
 
-                    if (featureSet && featureSet.features) {
-                        for (const featureZ in featureSet.features) {
-                            const fromFeature = featureSet.features[featureZ];
+            for (const featureS in arcgisFeatureSet.features) {
+                const updateFeature = arcgisFeatureSet.features[featureS];
+                const objectId = updateFeature.attributes.OBJECTID;
 
-                            if (objectId === fromFeature.attributes.OBJECTID) {
+                if (featureSet && featureSet.features) {
+                    for (const featureZ in featureSet.features) {
+                        const fromFeature = featureSet.features[featureZ];
+
+                        if (objectId === fromFeature.attributes.OBJECTID) {
+                            if (arcgisFeatureSet.geometryType === 'esriGeometryPoint') {
                                 const z = fromFeature.geometry && fromFeature.geometry.z;
 
                                 if (z) {
@@ -385,12 +388,54 @@ define([
                                         updateFeature.geometry.spatialReference = spatialReference;
                                     }
                                 }
+                            } else if (arcgisFeatureSet.geometryType === 'esriGeometryPolyline') {
+                                const paths = fromFeature.geometry && fromFeature.geometry.paths;
+
+                                if (paths.length === 1) {
+                                    const points = paths[0].slice(0);
+
+                                    for (const point in points) {
+                                        const thisPoint = points[point];
+
+                                        const z = thisPoint && thisPoint.length === 3 && thisPoint[2];
+                                        const updatePaths = updateFeature.geometry && updateFeature.geometry.paths;
+
+                                        if (updatePaths.length === 1 && updatePaths[0][point]) {
+                                            if (z) {
+                                                updatePaths[0][point][2] = z;
+                                            }
+
+                                            if (updateFeature.geometry.spatialReference.wkid != this.config.srs.split(':')[1]) {
+                                                const x = thisPoint && thisPoint.length >= 1 && thisPoint[0];
+                                                const y = thisPoint && thisPoint.length >= 2 && thisPoint[1]
+                                                changedSpatialReference = true;
+
+                                                if (x) {
+                                                    updatePaths[0][point][0] = x;
+                                                }
+
+                                                if (y) {
+                                                    updatePaths[0][point][1] = y;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                const spatialReference = featureSet.spatialReference;
+
+                                if (spatialReference && changedSpatialReference) {
+                                    updateFeature.geometry.spatialReference = spatialReference;
+                                }
                             }
+
+                            features.push(updateFeature)
                         }
                     }
                 }
             }
 
+            arcgisFeatureSet.features = features;
             const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet, undefined, dates );
 
 
