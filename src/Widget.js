@@ -25,7 +25,7 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v20.9/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v20.12/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
