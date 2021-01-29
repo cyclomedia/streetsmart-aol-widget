@@ -31,6 +31,6 @@
        zoomoutButton: 'Zoom-out Schaltfläche',
 
        typeSrs: "EPSG-Code eingeben oder Referenzsystem auswählen",
-       version: "Street Smart Widget für Web AppBuilder @ Version 20.3",
+       version: "Street Smart Widget für Web AppBuilder @ Version 21.1",
    })
 );
