@@ -427,6 +427,45 @@ define([
                                 if (spatialReference && changedSpatialReference) {
                                     updateFeature.geometry.spatialReference = spatialReference;
                                 }
+                            } else if (arcgisFeatureSet.geometryType === 'esriGeometryPolygon') {
+                                const rings = fromFeature.geometry && fromFeature.geometry.rings;
+
+                                for (const ring in rings) {
+                                    const thisRing = rings[ring];
+
+                                    for (const point in thisRing) {
+                                        const thisPoint = thisRing[point];
+
+                                        const z = thisPoint && thisPoint.length === 3 && thisPoint[2];
+                                        const updateRings = updateFeature.geometry && updateFeature.geometry.rings;
+
+                                        if (updateRings.length > ring && updateRings[ring][point]) {
+                                            if (z) {
+                                                updateRings[ring][point][2] = z;
+                                            }
+
+                                            if (updateFeature.geometry.spatialReference.wkid != this.config.srs.split(':')[1]) {
+                                                const x = thisPoint && thisPoint.length >= 1 && thisPoint[0];
+                                                const y = thisPoint && thisPoint.length >= 2 && thisPoint[1]
+                                                changedSpatialReference = true;
+
+                                                if (x) {
+                                                    updateRings[ring][point][0] = x;
+                                                }
+
+                                                if (y) {
+                                                    updateRings[ring][point][1] = y;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                const spatialReference = featureSet.spatialReference;
+
+                                if (spatialReference && changedSpatialReference) {
+                                    updateFeature.geometry.spatialReference = spatialReference;
+                                }
                             }
 
                             features.push(updateFeature)
