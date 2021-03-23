@@ -21,8 +21,12 @@ const copySource = () => gulp.src(['src/**/*.*', '!src/**/*.js', '!**/*___jb_old
     .pipe(gulp.dest('dist/CyclomediaAOL_Widget/'))
     .pipe(gulp.dest(process.env.WIDGET_DIR));
 
+const copyPackagejson = () => gulp.src(['package.json', 'package-lock.json'])
+    .pipe(gulp.dest('dist/CyclomediaAOL_Widget/'))
+    .pipe(gulp.dest(process.env.WIDGET_DIR));
+
 // Also copy all non javascript files to the dist folder
-const copy = done => gulp.parallel(copySource, copyAssets)(done);
+const copy = done => gulp.parallel(copySource, copyAssets, copyPackagejson)(done);
 
 const main = done => gulp.series(babelify, copy)(done);
 
