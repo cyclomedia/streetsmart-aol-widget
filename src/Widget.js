@@ -33,7 +33,7 @@ require(REQUIRE_CONFIG, [], function () {
         './SidePanelManager',
         './OverlayManager',
         './FeatureLayerManager',
-        './Attributemanager',
+        './AttributeManager',
         './arcgisToGeojson',
     ], function (
         declare,
