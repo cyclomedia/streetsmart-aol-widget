@@ -32,7 +32,7 @@ define([
                     let agreementPane = dom.byId('agreementContainer');
                     self.getConfig();
                     let settingLocale = dojoConfig.locale;
-                    let url = self.folderUrl + 'setting/agreementCMT/agreement_' + settingLocale + '.md';
+                    let url = self.folderUrl + 'setting/agreementCMT/agreement_' + settingLocale + '.txt';
                     require(['dojo/text!' + url], function(text) {
                         let reader = new commonmark.Parser();
                         let writer = new commonmark.HtmlRenderer();
