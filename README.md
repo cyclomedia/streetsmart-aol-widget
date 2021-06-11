@@ -12,14 +12,14 @@ See: https://www.cyclomedia.com/ for more information.
 - Copy `.env.example` to `.env` and update `WIDGET_DIR` so it points to the widget folder in the AppBuilder install path on your system.
 - Run `npm install`
 - Run `npm run build` which builds this widget to both the `dist` folder and `${WIDGET_DIR}`
-- Add the StreetSmart widget to your development app. 
+- Add the StreetSmart widget to your development app.
 
 ## Developing
 
 Run `npm start` which automatically transpiles and copies everything to `dist` and your widget directory.
 Live reload doesn't work as the AppBuilder in seperate process.
 
-NB: When adding the StreetSmart widget to your development app, the WebAppBuilder copies `client\stemapp\widgets\StreetSmart` to `server\apps\LOCAL_APP_ID\widgets\StreetSmart`. 
+NB: When adding the StreetSmart widget to your development app, the WebAppBuilder copies `client\stemapp\widgets\StreetSmart` to `server\apps\LOCAL_APP_ID\widgets\StreetSmart`.
 To prevent caching issues, make a symlink from the server path to the client path.
 
 ### Livereload
@@ -36,8 +36,8 @@ i.e.: 16.1.0 = year 2016, major version 1, patch 0 .
 We also make use of:
 
 Street Smart API:
-	api.version: 21.1
-	api.location: [Street Smart API](https://streetsmart.cyclomedia.com/api/v21.1/StreetSmartAPI.js)
+	api.version: 21.4
+	api.location: [Street Smart API](https://streetsmart.cyclomedia.com/api/v21.4/StreetSmartAPI.js)
 
 ## Authors
 
@@ -45,7 +45,8 @@ Street Smart API:
 * **Harm Bruinsma** - [Harm Bruinsma](mailto:hbruinsmaboekema@cyclomedia.com).
 * **Gijs Boekema** - [Gijs Boekema](mailto:gboekema@cyclomedia.com).
 * **Sarath Chandra Kalluri** - *Initial work* - [Sarath Chandra Kalluri](mailto:skalluri@cyclomedia.com).
-* **Jasper Stam** - https://github.com/stam 
+* **Jasper Stam** - https://github.com/stam
+* **Chris Taylor** - [Chris Taylor](mailto:ctaylor@cyclomedia.com).
 
 ## License
 
