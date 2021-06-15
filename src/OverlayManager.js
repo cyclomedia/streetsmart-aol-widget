@@ -152,8 +152,7 @@ define([
                         // sourceSrs: 'EPSG:3857',  // Broken in API
                         name: mapLayer.name,
                         sldXMLtext: sld.xml,
-
-                        geojson
+                        geojson: geojson
                     });
 
                     const oldId = this.widget._mapIdLayerId.hasOwnProperty(mapLayer.id) ?
@@ -341,7 +340,7 @@ define([
         }
 
         createGeoJsonForFeature({ mapLayer, sld, featureSet, wkid }) {
-            const arcgisFeatureSet = mapLayer.toJson().featureSet;
+            let arcgisFeatureSet = mapLayer.toJson().featureSet;
             let dates = []
             if(mapLayer){
                 dates = mapLayer.fields.reduce((acc, field) => {
@@ -352,11 +351,11 @@ define([
                 }, dates)
             }
 
-            const features = []
+            let features = []
             let changedSpatialReference = false;
 
             for (const featureS in arcgisFeatureSet.features) {
-                const updateFeature = arcgisFeatureSet.features[featureS];
+                let updateFeature = arcgisFeatureSet.features[featureS];
                 const objectId = updateFeature.attributes.OBJECTID;
 
                 if (featureSet && featureSet.features) {
@@ -398,7 +397,7 @@ define([
                                         const thisPoint = points[point];
 
                                         const z = thisPoint && thisPoint.length === 3 && thisPoint[2];
-                                        const updatePaths = updateFeature.geometry && updateFeature.geometry.paths;
+                                        let updatePaths = updateFeature.geometry && updateFeature.geometry.paths;
 
                                         if (updatePaths.length === 1 && updatePaths[0][point]) {
                                             if (z) {
@@ -437,7 +436,7 @@ define([
                                         const thisPoint = thisRing[point];
 
                                         const z = thisPoint && thisPoint.length === 3 && thisPoint[2];
-                                        const updateRings = updateFeature.geometry && updateFeature.geometry.rings;
+                                        let updateRings = updateFeature.geometry && updateFeature.geometry.rings;
 
                                         if (updateRings.length > ring && updateRings[ring][point]) {
                                             if (z) {
@@ -471,13 +470,12 @@ define([
                             features.push(updateFeature)
                         }
                     }
+
+                    arcgisFeatureSet.features = features;
                 }
             }
 
-            arcgisFeatureSet.features = features;
-            const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet, undefined, dates );
-
-
+            const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet, undefined, dates);
 
             // Make sure the panoramaviewer knows which srs this is in.
             let wkidToUse = _.get(arcgisFeatureSet, 'features[0].geometry.spatialReference.wkid', null) || wkid;
