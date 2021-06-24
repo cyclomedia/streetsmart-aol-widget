@@ -666,6 +666,9 @@ require(REQUIRE_CONFIG, [], function () {
                 this._measurementButtonOverwrideTimer = clearInterval(this._measurementButtonOverwrideTimer);
                 this._saveButtonOverwrideTimer = clearInterval(this._saveButtonOverwrideTimer);
 
+                this._mapIdLayerId = {};
+                this._visibleLayers = {};
+
                 if (this._sidePanelManager && this._sidePanelManager.removeEventListener) {
                     this._sidePanelManager.removeEventListener();
                 }
