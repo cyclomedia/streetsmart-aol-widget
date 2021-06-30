@@ -7,5 +7,7 @@
        save: "Enregistrer",
        delete: "Effacer",
        measurementLayerName: "Mesures",
+       recordingLayerName: "Calque Enregistrement Cyclorama",
+       viewingConeLayerName: "Calque Visualisation Cônique"
    })
 );

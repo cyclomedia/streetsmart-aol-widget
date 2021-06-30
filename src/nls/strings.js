@@ -6,7 +6,9 @@
         startMeasurement: "Start Measurement",
         save: "Save",
         delete: "Delete",
-        measurementLayerName: "Measurements"
+        measurementLayerName: "Measurements",
+        recordingLayerName: "Cyclorama Recording Layer",
+        viewingConeLayerName: "Viewing Cone Layer"
     }) ,
     "de": true,
     "nl": true,
