@@ -25,7 +25,7 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v21.1/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v21.4/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -665,6 +665,9 @@ require(REQUIRE_CONFIG, [], function () {
                 this._selectedFeatureID = null;
                 this._measurementButtonOverwrideTimer = clearInterval(this._measurementButtonOverwrideTimer);
                 this._saveButtonOverwrideTimer = clearInterval(this._saveButtonOverwrideTimer);
+
+                this._mapIdLayerId = {};
+                this._visibleLayers = {};
 
                 if (this._sidePanelManager && this._sidePanelManager.removeEventListener) {
                     this._sidePanelManager.removeEventListener();

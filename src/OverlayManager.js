@@ -135,7 +135,7 @@ define([
             const extent = this._calcRecordingExtent();
             const requestBundle = {ID, extent, req: []};
             _.each(featureLayers, (mapLayer) => {
-                if(mapLayer.hasZ) {
+                if(mapLayer.hasZ && mapLayer.version > 10.8) {
                     const requestObj = {mapLayer, overlayID: null};
                     requestBundle.req.push(requestObj);
                 } else if (!mapLayer.hasZ && mapLayer.graphics.length === 0 && mapLayer.visible === false){
@@ -152,8 +152,8 @@ define([
                         // sourceSrs: 'EPSG:3857',  // Broken in API
                         name: mapLayer.name,
                         sldXMLtext: sld.xml,
-
-                        geojson
+                        geojson: geojson,
+                        visible: false
                     });
 
                     const oldId = this.widget._mapIdLayerId.hasOwnProperty(mapLayer.id) ?
@@ -196,9 +196,10 @@ define([
                                 f: 'json',
                                 returnGeometry: true,
                                 returnZ: true,
+                                spatialRel: 'esriSpatialRelIntersects',
                                 outFields: '*',
-                                geometry: JSON.stringify(item.extent),
-                                outSpatialReference: this.wkid,
+                                geometry: JSON.stringify(request.mapLayer.fullExtent),
+                                outSR: this.wkid
                             }
                         };
                         if(token) options.content.token = token;
@@ -224,32 +225,54 @@ define([
                 try {
                     const wkid = result.spatialReference && result.spatialReference.wkid;
 
+                    let info;
                     if (wkid && result.features.length) {
-                        let info = this.createGeoJsonForFeature({
+                        info = this.createGeoJsonForFeature({
                             mapLayer,
-                            wkid,
-                            featureSet: result,
+                            wkid: wkid,
+                            featureSet: result
                         });
-
-                        const sld = new SLD(mapLayer, info);
-                        info = this.applyDefaultCaseIfNeeded(info, sld);
-                        if(sld.xml === undefined){
-                            return;
-                        }
-                        const overlay = this.api.addOverlay({
-                            // sourceSrs: 'EPSG:3857',  // Broken in API
-                            name: mapLayer.name,
-                            sldXMLtext: sld.xml,
-                            geojson: info
-                        });
-
-                        request.overlayID = overlay;
-                        this.widget._panoramaViewer.toggleOverlay({ id: overlay.id, visible: !mapLayer.visible, name: mapLayer.name})
-                        this.overlaysByName[mapLayer.name] = overlay.id;
-                        this.overlays.push(overlay.id);
                     } else {
-                        request.overlayID = 'No wkid or features found.';
+                        // Bad result bypass:
+                        //request.overlayID = 'No wkid or features found.';
+                        info = this.createGeoJsonForFeature({
+                            mapLayer
+                        });
                     }
+
+                    const sld = new SLD(mapLayer, info);
+                    info = this.applyDefaultCaseIfNeeded(info, sld);
+                    if(sld.xml === undefined){
+                        return;
+                    }
+                    const overlay = this.api.addOverlay({
+                        // sourceSrs: 'EPSG:3857',  // Broken in API
+                        name: mapLayer.name,
+                        sldXMLtext: sld.xml,
+                        geojson: info,
+                        visible: false
+                    });
+
+                    const oldId = this.widget._mapIdLayerId.hasOwnProperty(mapLayer.id) ?
+                        this.widget._mapIdLayerId[mapLayer.id] :
+                        undefined;
+
+                    this.widget._mapIdLayerId[mapLayer.id] = overlay.id;
+                    const layerVisible = oldId && this.widget._visibleLayers.hasOwnProperty(oldId) ?
+                        this.widget._visibleLayers[oldId] :
+                        mapLayer.visible;
+
+                    if (this.widget._visibleLayers.hasOwnProperty(oldId)) {
+                        delete this.widget._visibleLayers[oldId];
+                    }
+
+                    this.widget._visibleLayers[overlay.id] = layerVisible;
+
+                    request.overlayID = overlay;
+                    this.widget._panoramaViewer.toggleOverlay({ id: overlay.id, visible: !layerVisible, name: mapLayer.name})
+                    this.overlaysByName[mapLayer.name] = overlay.id;
+                    this.overlays.push(overlay.id);
+
                     let isBundleComplete = true;
                     for (const reg of requestBundle.req) {
                         if (!reg.overlayID) {
@@ -341,7 +364,7 @@ define([
         }
 
         createGeoJsonForFeature({ mapLayer, sld, featureSet, wkid }) {
-            const arcgisFeatureSet = mapLayer.toJson().featureSet;
+            let arcgisFeatureSet = mapLayer.toJson().featureSet;
             let dates = []
             if(mapLayer){
                 dates = mapLayer.fields.reduce((acc, field) => {
@@ -352,7 +375,7 @@ define([
                 }, dates)
             }
 
-            const features = []
+            const features = [];
             let changedSpatialReference = false;
 
             for (const featureS in arcgisFeatureSet.features) {
@@ -363,7 +386,7 @@ define([
                     for (const featureZ in featureSet.features) {
                         const fromFeature = featureSet.features[featureZ];
 
-                        if (objectId === fromFeature.attributes.OBJECTID) {
+                        if (fromFeature && objectId === fromFeature.attributes.OBJECTID) {
                             if (arcgisFeatureSet.geometryType === 'esriGeometryPoint') {
                                 const z = fromFeature.geometry && fromFeature.geometry.z;
 
@@ -371,7 +394,7 @@ define([
                                     updateFeature.geometry.z = z;
                                 }
 
-                                if (updateFeature.geometry.spatialReference.wkid != this.config.srs.split(':')[1]) {
+                                if (!updateFeature.geometry.spatialReference || updateFeature.geometry.spatialReference.wkid != this.config.srs.split(':')[1]) {
                                     const x = fromFeature.geometry && fromFeature.geometry.x;
                                     const y = fromFeature.geometry && fromFeature.geometry.y;
                                     const spatialReference = featureSet.spatialReference;
@@ -467,17 +490,21 @@ define([
                                     updateFeature.geometry.spatialReference = spatialReference;
                                 }
                             }
-
-                            features.push(updateFeature)
                         }
                     }
                 }
+
+                features.push(updateFeature);
             }
 
-            arcgisFeatureSet.features = features;
-            const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet, undefined, dates );
+            //arcgisFeatureSet.features = features;
 
+            // Handle cases where the incoming FeatureSet has the majority data after this point.
+            if (featureSet && featureSet.features && featureSet.features.length > arcgisFeatureSet.features.length) {
+                arcgisFeatureSet = featureSet;
+            }
 
+            const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet, undefined, dates);
 
             // Make sure the panoramaviewer knows which srs this is in.
             let wkidToUse = _.get(arcgisFeatureSet, 'features[0].geometry.spatialReference.wkid', null) || wkid;

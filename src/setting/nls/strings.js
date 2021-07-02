@@ -31,7 +31,7 @@ define({
       zoomoutButton: 'Zoom-out Button',
 
       typeSrs: "Type or Select SRS",
-      version: "Street Smart Widget for Web AppBuilder @ version 21.1",
+      version: "Street Smart Widget for Web AppBuilder @ version 21.2",
   }),
   "de": true,
   "nl": true,
