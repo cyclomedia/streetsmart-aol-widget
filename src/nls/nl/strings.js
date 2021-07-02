@@ -7,6 +7,7 @@
        save: "Opslaan",
        delete: "Verwijderen",
        measurementLayerName: "Metingen",
-
+       recordingLayerName: "Cyclorama Opnamelocaties",
+       viewingConeLayerName: "Kijkhoeken"
    })
 );
