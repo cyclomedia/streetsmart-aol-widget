@@ -123,19 +123,69 @@ define([
             });
         }
 
+        _getRecordingLayerId(){
+            const nameByLocale = {
+                'fr': 'Calque Enregistrement Cyclorama',
+                'de': 'Cyclorama Aufnahmeorte',
+                'nl': 'Cyclorama Opnamelocaties',
+                'en-US': 'Cyclorama Recording Layer' ,
+                'en-EN': 'Cyclorama Recording Layer'
+            }
+            const id = nameByLocale[this.config.locale]
+            const fromNls = this.nls.recordingLayerName
+            return fromNls || id || nameByLocale['en-US']
+        }
+
         _createRecordingLayer({ onClick }) {
+            const recordingCollection = {
+                layerDefinition: {
+                    geometryType: 'esriGeometryPoint',
+                    fields: [{
+                        name: 'id',
+                        alias: 'ID',
+                        type: 'esriFieldTypeOID'
+                    }]
+                },
+                featureSet: null
+            };
+
             const renderer = new UniqueValueRenderer(this._createRecordingSymbol(this._recordingColor), 'hasDepthMap');
             renderer.addValue('true', this._createRecordingSymbol(this._recordingColorDepth));
 
-            const layer = new GraphicsLayer({ id: 'cmt_recordingLayer' });
+            const layer = new FeatureLayer(recordingCollection, { id: this._getRecordingLayerId()});
             layer.setRenderer(renderer);
 
             on(layer, 'click', onClick);
             return layer;
         }
 
+        _getViewingConeLayerId(){
+            const nameByLocale = {
+                'fr': 'Calque Visualisation Cônique',
+                'de': 'Betrachtungskoni',
+                'nl': 'Kijkhoeken',
+                'en-US': 'Viewing Cone Layer' ,
+                'en-EN': 'Viewing Cone Layer'
+            }
+            const id = nameByLocale[this.config.locale]
+            const fromNls = this.nls.viewingConeLayerName
+            return fromNls || id || nameByLocale['en-US']
+        }
+
         _createViewingConeLayer() {
-            const layer = new GraphicsLayer({ id: 'cmd_viewingConeLayer' });
+            const viewingConeCollection = {
+                layerDefinition: {
+                    geometryType: 'esriGeometryNull',
+                    fields: [{
+                        name: 'id',
+                        alias: 'ID',
+                        type: 'esriFieldTypeOID'
+                    }]
+                },
+                featureSet: null
+            };
+
+            const layer = new FeatureLayer(viewingConeCollection, { id: this._getViewingConeLayerId()});
             return layer;
         }
 
@@ -144,7 +194,7 @@ define([
                 'fr': 'Mesures',
                 'de': 'Messungen',
                 'nl': 'Metingen',
-                'en-US': 'Measurements' ,
+                'en-US': 'Measurements',
                 'en-EN': 'Measurements'
             }
             const id = nameByLocale[this.config.locale]

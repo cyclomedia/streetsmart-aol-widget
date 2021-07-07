@@ -7,5 +7,7 @@
        save: "Speichern",
        delete: "Löschen",
        measurementLayerName: "Messungen",
+       recordingLayerName: "Cyclorama Aufnahmeorte",
+       viewingConeLayerName: "Betrachtungskoni"
   })
 );
