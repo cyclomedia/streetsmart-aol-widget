@@ -1,7 +1,7 @@
 {
   "name": "streetsmart-widget",
   "description": "Street Smart Widget for ArcGIS Online",
-  "version": "21.3.0",
+  "version": "21.3.1",
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {
@@ -43,10 +43,15 @@
     {
       "name": "Jasper Stam",
       "url": "https://github.com/stam"
+    },
+    {
+      "name": "Chris Taylor",
+      "email": "ctaylor@cyclomedia.com",
+      "url": "https://github.com/ctalr"
     }
   ],
   "dependencies": {
-    "eslint": "^5.14.1",
+    "eslint": "^7.32.0",
     "natives": "^1.1.6"
   }
 }

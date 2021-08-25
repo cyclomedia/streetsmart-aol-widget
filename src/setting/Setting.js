@@ -171,7 +171,7 @@ define([
                     ELEVATION: this.elevationButtonEnable.checked,
                     REPORT_BLURRING: this.reportblurringButtonEnable.checked,
                     OPEN_OBLIQUE: false,
-                    MEASURE: this.config.saveMeasurements || this.measureButtonEnable.checked,
+                    MEASURE: this.measureButtonEnable.checked,
                     SAVE_IMAGE: this.saveimageButtonEnable.checked,
                     IMAGE_INFORMATION: this.imageinformationButtonEnable.checked,
                     ZOOM_IN: this.zoominButtonEnable.checked,

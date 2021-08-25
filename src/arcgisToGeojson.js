@@ -313,11 +313,11 @@ define([], function () {
                     }
                     else {
 
-                      const feature = arcgisToGeoJSON(arcgis.features[i], idAttribute, dates);
+                        const feature = arcgisToGeoJSON(arcgis.features[i], idAttribute, dates);
 
-                      if (feature && feature.properties) {
-                          geojson.features.push(feature);
-                      }
+                        if (feature && feature.properties) {
+                            geojson.features.push(feature);
+                        }
                     }
                 }
             }
