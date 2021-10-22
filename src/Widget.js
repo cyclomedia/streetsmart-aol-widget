@@ -4,8 +4,8 @@ const REQUIRE_CONFIG = {
     paths: {
         'react': 'https://unpkg.com/react@16.12.0/umd/react.production.min',
         'react-dom': 'https://unpkg.com/react-dom@16.12.0/umd/react-dom.production.min',
-        'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.3.3/ol',
-        'lodash': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.min'
+        'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol',
+        'lodash': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min'
     }
 };
 
