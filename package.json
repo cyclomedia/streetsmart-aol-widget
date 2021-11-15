@@ -13,7 +13,8 @@
     "gulp": "^4.0.2",
     "gulp-babel": "^7.0.1",
     "gulp-cli": "^2.0.1",
-    "gulp-livereload": "^3.8.1"
+    "gulp-livereload": "^3.8.1",
+    "eslint": "^7.32.0"
   },
   "scripts": {
     "start": "gulp watch",
@@ -51,7 +52,6 @@
     }
   ],
   "dependencies": {
-    "eslint": "^7.32.0",
     "natives": "^1.1.6"
   }
 }
