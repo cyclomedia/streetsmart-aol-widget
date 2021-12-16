@@ -49,6 +49,7 @@ Street Smart API:
 * **Sarath Chandra Kalluri** - *Initial work* - [Sarath Chandra Kalluri](mailto:skalluri@cyclomedia.com).
 * **Jasper Stam** - https://github.com/stam
 * **Chris Taylor** - [Chris Taylor](mailto:ctaylor@cyclomedia.com).
+* **Giorgy Castaneda** - [Giorgy Castaneda](mailto:gcastaneda@cyclomedia.com).
 
 ## License
 
