@@ -2,10 +2,10 @@ const REQUIRE_CONFIG = {
     async: true,
     locale: 'en',
     paths: {
-        'react': 'https://unpkg.com/react@16.12.0/umd/react.production.min',
-        'react-dom': 'https://unpkg.com/react-dom@16.12.0/umd/react-dom.production.min',
-        'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol',
-        'lodash': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min'
+        'react': '/../packages/react.production.min',
+        'react-dom': '/../packages/react-dom.production.min',
+        'openlayers': '/../packages/ol.min',
+        'lodash': '/../packages/lodash.min'
     }
 };
 
