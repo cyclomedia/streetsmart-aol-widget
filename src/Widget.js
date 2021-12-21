@@ -2,10 +2,10 @@ const REQUIRE_CONFIG = {
     async: true,
     locale: 'en',
     paths: {
-        'react': './packages/react.production.min',
-        'react-dom': './packages/react-dom.production.min',
-        'openlayers': './packages/ol.min',
-        'lodash': './packages/lodash.min'
+        'react': '/../widgets/StreetSmart/packages/react.production.min',
+        'react-dom': '/../widgets/StreetSmart/packages/react-dom.production.min',
+        'openlayers': '/../widgets/StreetSmart/packages/ol.min',
+        'lodash': '/../widgets/StreetSmart/packages/lodash.min'
     }
 };
 
