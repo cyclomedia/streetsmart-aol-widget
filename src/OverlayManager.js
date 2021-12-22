@@ -312,7 +312,7 @@ define([
 
         _calcRecordingExtent() {
             const recording = this.widget._panoramaViewer.getRecording();
-            const featureRadius = 30;
+            const featureRadius = 30; //might need to change to 99
             const {xyz, srs} = recording;
             // needs support for feet.
             const ext = new Extent(xyz[0] - featureRadius, xyz[1] - featureRadius, xyz[0] + featureRadius, xyz[1] + featureRadius, new SpatialReference(srs.split(':')[1]) )
