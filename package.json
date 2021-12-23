@@ -1,7 +1,7 @@
 {
   "name": "streetsmart-widget",
   "description": "Street Smart Widget for ArcGIS Online",
-  "version": "21.4.0",
+  "version": "21.4.1",
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {
@@ -49,6 +49,11 @@
       "name": "Chris Taylor",
       "email": "ctaylor@cyclomedia.com",
       "url": "https://github.com/ctalr"
+    },
+    {
+      "name": "Giorgy Castaneda",
+      "email": "gcastaneda@cyclomedia.com",
+      "url": "https://github.com/gcastaneda-cm"
     }
   ],
   "dependencies": {
