@@ -2,6 +2,7 @@ const REQUIRE_CONFIG = {
     async: true,
     locale: 'en',
     paths: {
+        //add /../../ in front of file paths for hosted widget publishing
         'react': '/widgets/StreetSmart/packages/react.production.min',
         'react-dom': '/widgets/StreetSmart/packages/react-dom.production.min',
         'openlayers': '/widgets/StreetSmart/packages/ol.min',
@@ -25,7 +26,7 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v21.10/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v21.13/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',

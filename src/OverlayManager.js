@@ -432,7 +432,7 @@ define([
                                         const thisPoint = points[point];
 
                                         const z = thisPoint && thisPoint.length === 3 && thisPoint[2];
-                                        const updatePaths = updateFeature.geometry && updateFeature.geometry.paths;
+                                        let updatePaths = updateFeature.geometry && updateFeature.geometry.paths;
 
                                         if (updatePaths.length === 1 && updatePaths[0][point]) {
                                             if (z) {
@@ -454,6 +454,7 @@ define([
                                             }
                                         }
                                         else {
+                                            updatePaths = [[]];
                                             updatePaths[0][point] = thisPoint;
                                         }
                                     }
