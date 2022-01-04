@@ -143,6 +143,7 @@ define([
                     if(bv.OVERLAYS !== undefined) this.overlaysButtonEnable.checked = !!bv.OVERLAYS;
                     if(bv.ELEVATION !== undefined) this.elevationButtonEnable.checked = !!bv.ELEVATION;
                     if(bv.REPORT_BLURRING !== undefined) this.reportblurringButtonEnable.checked = !!bv.REPORT_BLURRING;
+                    if(bv.OPEN_OBLIQUE !== undefined) this.obliqueButtonEnable.checked = !!bv.OPEN_OBLIQUE;
                     if(bv.MEASURE !== undefined) this.measureButtonEnable.checked = !!bv.MEASURE;
                     if(bv.SAVE_IMAGE !== undefined) this.saveimageButtonEnable.checked = !!bv.SAVE_IMAGE;
                     if(bv.IMAGE_INFORMATION !== undefined) this.imageinformationButtonEnable.checked = !!bv.IMAGE_INFORMATION;
@@ -170,7 +171,7 @@ define([
                     OVERLAYS: this.overlaysButtonEnable.checked,
                     ELEVATION: this.elevationButtonEnable.checked,
                     REPORT_BLURRING: this.reportblurringButtonEnable.checked,
-                    OPEN_OBLIQUE: false,
+                    OPEN_OBLIQUE: this.obliqueButtonEnable.checked,
                     MEASURE: this.measureButtonEnable.checked,
                     SAVE_IMAGE: this.saveimageButtonEnable.checked,
                     IMAGE_INFORMATION: this.imageinformationButtonEnable.checked,
