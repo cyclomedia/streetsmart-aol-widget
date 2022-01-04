@@ -25,6 +25,7 @@ define({
       overlaysButton: 'Overlays Button',
       elevationButton: 'Elevation Button',
       reportblurringButton: 'Report Issue Button',
+      obliqueButton: 'Oblique Button',
       measureButton: 'Measurement Button',
       saveimageButtonEnable: 'Save Image Button',
       imageinformationButton: 'Image Information Button',
