@@ -1,7 +1,7 @@
 {
   "name": "streetsmart-widget",
   "description": "Street Smart Widget for ArcGIS Online",
-  "version": "21.4.0",
+  "version": "21.4.1",
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {
@@ -10,11 +10,11 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "dotenv": "^5.0.1",
+    "eslint": "^7.32.0",
     "gulp": "^4.0.2",
     "gulp-babel": "^7.0.1",
     "gulp-cli": "^2.0.1",
-    "gulp-livereload": "^3.8.1",
-    "eslint": "^7.32.0"
+    "gulp-livereload": "^3.8.1"
   },
   "scripts": {
     "start": "gulp watch",
@@ -49,6 +49,11 @@
       "name": "Chris Taylor",
       "email": "ctaylor@cyclomedia.com",
       "url": "https://github.com/ctalr"
+    },
+    {
+      "name": "Giorgy Castaneda",
+      "email": "gcastaneda@cyclomedia.com",
+      "url": "https://github.com/gcastaneda-cm"
     }
   ],
   "dependencies": {

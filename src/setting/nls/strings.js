@@ -25,6 +25,7 @@ define({
       overlaysButton: 'Overlays Button',
       elevationButton: 'Elevation Button',
       reportblurringButton: 'Report Issue Button',
+      obliqueButton: 'Oblique Button',
       measureButton: 'Measurement Button',
       saveimageButtonEnable: 'Save Image Button',
       imageinformationButton: 'Image Information Button',
@@ -32,7 +33,7 @@ define({
       zoomoutButton: 'Zoom-out Button',
 
       typeSrs: "Type or Select SRS",
-      version: "Street Smart Widget for Web AppBuilder @ version 21.3",
+      version: "Street Smart Widget for Web AppBuilder @ version 21.4.1",
   }),
   "de": true,
   "nl": true,

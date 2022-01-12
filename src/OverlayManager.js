@@ -312,7 +312,7 @@ define([
 
         _calcRecordingExtent() {
             const recording = this.widget._panoramaViewer.getRecording();
-            const featureRadius = 30;
+            const featureRadius = 30; //might need to change to 99 radius
             const {xyz, srs} = recording;
             // needs support for feet.
             const ext = new Extent(xyz[0] - featureRadius, xyz[1] - featureRadius, xyz[0] + featureRadius, xyz[1] + featureRadius, new SpatialReference(srs.split(':')[1]) )
@@ -432,7 +432,7 @@ define([
                                         const thisPoint = points[point];
 
                                         const z = thisPoint && thisPoint.length === 3 && thisPoint[2];
-                                        const updatePaths = updateFeature.geometry && updateFeature.geometry.paths;
+                                        let updatePaths = updateFeature.geometry && updateFeature.geometry.paths;
 
                                         if (updatePaths.length === 1 && updatePaths[0][point]) {
                                             if (z) {
@@ -454,6 +454,7 @@ define([
                                             }
                                         }
                                         else {
+                                            updatePaths = [[]];
                                             updatePaths[0][point] = thisPoint;
                                         }
                                     }

@@ -30,7 +30,7 @@ Add [this plugin](https://chrome.google.com/webstore/detail/livereload/jnihajbhp
 
 ## Versioning
 
-Current version: **21.4.0**
+Current version: **21.4.1**
 
 We use YEAR.MAJOR.PATCH versioning.
 i.e.: 16.1.0 = year 2016, major version 1, patch 0.
@@ -38,8 +38,8 @@ i.e.: 16.1.0 = year 2016, major version 1, patch 0.
 We also make use of:
 
 Street Smart API:
-*	api.version: 21.6
-*	api.location: [Street Smart API](https://streetsmart.cyclomedia.com/api/v21.6/StreetSmartAPI.js)
+*	api.version: 21.13
+*	api.location: [Street Smart API](https://streetsmart.cyclomedia.com/api/v21.13/StreetSmartAPI.js)
 
 ## Authors
 
@@ -49,6 +49,7 @@ Street Smart API:
 * **Sarath Chandra Kalluri** - *Initial work* - [Sarath Chandra Kalluri](mailto:skalluri@cyclomedia.com).
 * **Jasper Stam** - https://github.com/stam
 * **Chris Taylor** - [Chris Taylor](mailto:ctaylor@cyclomedia.com).
+* **Giorgy Castaneda** - [Giorgy Castaneda](mailto:gcastaneda@cyclomedia.com).
 
 ## License
 

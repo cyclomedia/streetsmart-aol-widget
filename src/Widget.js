@@ -2,10 +2,14 @@ const REQUIRE_CONFIG = {
     async: true,
     locale: 'en',
     paths: {
-        'react': 'https://unpkg.com/react@16.12.0/umd/react.production.min',
-        'react-dom': 'https://unpkg.com/react-dom@16.12.0/umd/react-dom.production.min',
-        'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol',
-        'lodash': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min'
+        'react': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/react.production.min',
+        'react-dom': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/react-dom.production.min',
+        'openlayers': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/ol.min',
+        'lodash': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/lodash.min'
+        // 'react': '/widgets/StreetSmart/packages/react.production.min',
+        // 'react-dom': '/widgets/StreetSmart/packages/react-dom.production.min',
+        // 'openlayers': '/widgets/StreetSmart/packages/ol.min',
+        // 'lodash': '/widgets/StreetSmart/packages/lodash.min'
     }
 };
 
@@ -25,7 +29,7 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v21.10/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v21.13/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -146,7 +150,7 @@ require(REQUIRE_CONFIG, [], function () {
                     config: this.config,
                     nls: this.nls,
                     api: StreetSmartApi
-                })
+                });
 
                 this._applyWidgetStyle();
                 this._determineZoomThreshold();
@@ -379,6 +383,7 @@ require(REQUIRE_CONFIG, [], function () {
                     helperFunction( 'ELEVATION');
                     helperFunction( 'REPORT_BLURRING');
                     helperFunction( 'OPEN_OBLIQUE');
+                    helperFunction( 'POINT_CLOUD');
                     helperFunction( 'MEASURE');
                     helperFunction( 'SAVE_IMAGE');
                     helperFunction( 'IMAGE_INFORMATION');
