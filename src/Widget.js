@@ -2,11 +2,14 @@ const REQUIRE_CONFIG = {
     async: true,
     locale: 'en',
     paths: {
-        //add /../../ in front of file paths for hosted widget publishing
-        'react': '/widgets/StreetSmart/packages/react.production.min',
-        'react-dom': '/widgets/StreetSmart/packages/react-dom.production.min',
-        'openlayers': '/widgets/StreetSmart/packages/ol.min',
-        'lodash': '/widgets/StreetSmart/packages/lodash.min'
+        'react': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/react.production.min',
+        'react-dom': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/react-dom.production.min',
+        'openlayers': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/ol.min',
+        'lodash': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/lodash.min'
+        // 'react': '/widgets/StreetSmart/packages/react.production.min',
+        // 'react-dom': '/widgets/StreetSmart/packages/react-dom.production.min',
+        // 'openlayers': '/widgets/StreetSmart/packages/ol.min',
+        // 'lodash': '/widgets/StreetSmart/packages/lodash.min'
     }
 };
 
@@ -147,7 +150,7 @@ require(REQUIRE_CONFIG, [], function () {
                     config: this.config,
                     nls: this.nls,
                     api: StreetSmartApi
-                })
+                });
 
                 this._applyWidgetStyle();
                 this._determineZoomThreshold();
@@ -380,6 +383,7 @@ require(REQUIRE_CONFIG, [], function () {
                     helperFunction( 'ELEVATION');
                     helperFunction( 'REPORT_BLURRING');
                     helperFunction( 'OPEN_OBLIQUE');
+                    helperFunction( 'POINT_CLOUD');
                     helperFunction( 'MEASURE');
                     helperFunction( 'SAVE_IMAGE');
                     helperFunction( 'IMAGE_INFORMATION');
