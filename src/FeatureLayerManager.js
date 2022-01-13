@@ -118,7 +118,8 @@ define([
                 return;
             }
 
-            const layerWkid = layer.spatialReference.latestWkid;
+            //const layerWkid = layer.spatialReference.latestWkid;
+            const layerWkid = layer.spatialReference.wkid;
             const transformedCoords = this._transformPoints(coords, layerWkid);
 
             const polyJson = [{"geometry":
