@@ -94,6 +94,14 @@ define([
         _showInfoWindow(feature){
             const extent = feature.geometry.getExtent && feature.geometry.getExtent();
             const centroid = (extent && extent.getCenter()) || feature.geometry;
+            //GC: checks if the clicked feature is a line and moves to the center of the path depending how long it is
+            if(feature.geometry && feature.geometry.paths){
+                let half = feature.geometry.paths[0].length/2;
+                half = Math.floor(half);
+                let halfPoint = feature.geometry.paths[0][half];
+                centroid.x = halfPoint[0];
+                centroid.y = halfPoint[1];
+            }
             this.map.infoWindow.resize(350, 240);
             this.map.infoWindow.show(new Point (centroid));
             this.map.infoWindow.setTitle('');
