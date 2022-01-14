@@ -144,6 +144,7 @@ define([
                     if(bv.ELEVATION !== undefined) this.elevationButtonEnable.checked = !!bv.ELEVATION;
                     if(bv.REPORT_BLURRING !== undefined) this.reportblurringButtonEnable.checked = !!bv.REPORT_BLURRING;
                     if(bv.OPEN_OBLIQUE !== undefined) this.obliqueButtonEnable.checked = !!bv.OPEN_OBLIQUE;
+                    if(bv.OPEN_POINTCLOUD !== undefined) this.cloudButtonEnable.checked = !!bv.OPEN_POINTCLOUD;
                     if(bv.MEASURE !== undefined) this.measureButtonEnable.checked = !!bv.MEASURE;
                     if(bv.SAVE_IMAGE !== undefined) this.saveimageButtonEnable.checked = !!bv.SAVE_IMAGE;
                     if(bv.IMAGE_INFORMATION !== undefined) this.imageinformationButtonEnable.checked = !!bv.IMAGE_INFORMATION;
@@ -172,6 +173,7 @@ define([
                     ELEVATION: this.elevationButtonEnable.checked,
                     REPORT_BLURRING: this.reportblurringButtonEnable.checked,
                     OPEN_OBLIQUE: this.obliqueButtonEnable.checked,
+                    OPEN_POINTCLOUD: this.cloudButtonEnable.checked,
                     MEASURE: this.measureButtonEnable.checked,
                     SAVE_IMAGE: this.saveimageButtonEnable.checked,
                     IMAGE_INFORMATION: this.imageinformationButtonEnable.checked,

@@ -26,6 +26,7 @@ define({
       elevationButton: 'Elevation Button',
       reportblurringButton: 'Report Issue Button',
       obliqueButton: 'Oblique Button',
+      cloudButton: 'Point Cloud Button',
       measureButton: 'Measurement Button',
       saveimageButtonEnable: 'Save Image Button',
       imageinformationButton: 'Image Information Button',
