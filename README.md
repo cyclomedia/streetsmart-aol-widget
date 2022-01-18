@@ -5,7 +5,7 @@ See: https://www.cyclomedia.com/ for more information.
 
 ## Getting Started
 
-- Install node.
+- Install Node.js to your computer.
 - Download the [Web AppBuilder for ArcGIS](https://developers.arcgis.com/web-appbuilder/) and run the executable.
 - Insert your ArcGIS credentials and the right portalUrl and appID when asked.
 - Create a new app in the AppBuilder
@@ -13,11 +13,12 @@ See: https://www.cyclomedia.com/ for more information.
 - Run `npm install`
 - Run `npm run build` which builds this widget to both the `dist` folder and `${WIDGET_DIR}`
 - Add the StreetSmart widget to your development app.
+- *Make sure to uncomment the SECOND four package paths on the widget.js pointing to the local packages using relative paths*
 
 ## Developing
 
 Run `npm start` which automatically transpiles and copies everything to `dist` and your widget directory.
-Live reload doesn't work as the AppBuilder in seperate process.
+Live reload doesn't work as the AppBuilder in separate process.
 
 NB: When adding the StreetSmart widget to your development app, the WebAppBuilder copies `client\stemapp\widgets\StreetSmart` to `server\apps\LOCAL_APP_ID\widgets\StreetSmart`.
 To prevent caching issues, make a symlink from the server path to the client path.
@@ -26,7 +27,8 @@ To prevent caching issues, make a symlink from the server path to the client pat
 
 We rely on the module bundler of the ArcGis WebApp Builder for Widget Development, and we cannot simply hook into this process to add livereload.
 To support livereload in this symbiotic setup, we rely on `gulp-livereload` in combination with a browser addon.
-Add [this plugin](https://chrome.google.com/webstore/detail/livereload/jnihajbhpnppcggbcgedagnkighmdlei) to Chrome and click on the icon in the ArcGis tab to enable livereload.
+Add [this plugin](https://chrome.google.com/webstore/detail/livereload/jnihajbhpnppcggbcgedagnkighmdlei) to Chrome or this [add-on](https://addons.mozilla.org/en-US/firefox/addon/livereload-web-extension/) 
+to Firefox and click on the icon in the ArcGIS tab to enable livereload.
 
 ## Versioning
 
