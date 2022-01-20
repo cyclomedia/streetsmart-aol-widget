@@ -105,7 +105,8 @@ define([
             this.map.infoWindow.resize(350, 240);
             this.map.infoWindow.show(new Point (centroid));
             this.map.infoWindow.setTitle('');
-            this.map.centerAt(centroid)
+            //GC: stop the map from centering on the clicked feature because it's disorienting
+            //this.map.centerAt(centroid)
         }
 
         showInfoOfFeature(feature){
@@ -113,7 +114,7 @@ define([
             const insp = this._constructNewInspector(feature.getLayer())
             this.map.infoWindow.clearFeatures();
             this.map.infoWindow.setContent(insp.domNode);
-            this._showInfoWindow(feature)
+            this._showInfoWindow(feature);
             this.inspector.showFeature(feature);
             this.selectedFeature = feature
         }
