@@ -468,11 +468,16 @@ define([], function () {
         POINT: 'POINT',
         LINE: 'LINE',
         POLYGON: 'POLYGON',
+        ORTHOGONAL: 'ORTHOGONAL',
+        HEIGHT: 'HEIGHT',
     };
+    //GC: Added additional measurement options
     const EsriGeomTypes = {
         "esriGeometryPoint": [geomTypes.POINT],
         "esriGeometryPolyline": [geomTypes.LINE],
-        "esriGeometryPolygon": [geomTypes.POLYGON]
+        "esriGeometryPolygon": [geomTypes.POLYGON],
+        "esriGeometryOrthogonal": [geomTypes.ORTHOGONAL],
+        "esriGeometryHeight": [geomTypes.HEIGHT],
     };
 
 

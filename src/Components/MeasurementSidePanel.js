@@ -63,9 +63,16 @@ define(['react', './Layer', '../arcgisToGeojson'], function (React, Layer, geoUt
                 const layer = map.getLayer(selectedLayer);
                 layerGeometryTypes = this.esriGeomToGeoJson(layer)
             }else{
-                layerGeometryTypes = [geoUtils.geomTypes.POINT, geoUtils.geomTypes.LINE, geoUtils.geomTypes.POLYGON];
+                layerGeometryTypes = [geoUtils.geomTypes.POINT, geoUtils.geomTypes.LINE, geoUtils.geomTypes.POLYGON, geoUtils.geomTypes.ORTHOGONAL, geoUtils.geomTypes.HEIGHT];
             }
-
+            const measureStyle = {
+                marginLeft: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                textAlign: 'center'
+            };
+            //GC: changed the styling for the measurement buttons to allow for captions underneath
+            //GC: Added additional measurement options
             return(
             <div id={'measurementPanel'}>
                 <div className={'cmt close-button'}>
@@ -77,30 +84,59 @@ define(['react', './Layer', '../arcgisToGeojson'], function (React, Layer, geoUt
                         return (<Layer layer={l} isSelected={isSelected} selectLayer={() => {this.selectLayer(l.id)}} />)
                     })}
                 </div>
-                    <div className={'measurement-types-list'}>
-                        <h2>{nls.startMeasurement}</h2>
+                    <div className={'measurement-types-list'} role={'toolbar'}>
+                        <p style={{fontWeight: 'bold', fontSize: 15, fontFamily: 'Arial', marginBottom: 2}}>{nls.startMeasurement}</p>
                         <div className={'cmt measurement-button-container'}>
-                            <button
-                                className={'measurement-button glyphicon novaicon-custom-dot'}
-                                disabled={!layerGeometryTypes.includes(geoUtils.geomTypes.POINT)}
-                                onClick={() => {
-                                    this.startMeasurement(geoUtils.geomTypes.POINT)
-                                }}
-                            ></button>
-                            <button
-                                className={'measurement-button glyphicon novaicon-organization-graph'}
-                                disabled={!layerGeometryTypes.includes(geoUtils.geomTypes.LINE)}
-                                onClick={() => {
-                                    this.startMeasurement(geoUtils.geomTypes.LINE)
-                                }}
-                            ></button>
-                            <button
-                                className={'measurement-button glyphicon novaicon-organization-flowchart-1'}
-                                disabled={!layerGeometryTypes.includes(geoUtils.geomTypes.POLYGON)}
-                                onClick={() => {
-                                    this.startMeasurement(geoUtils.geomTypes.POLYGON)
-                                }}
-                            ></button>
+                            <div>
+                                <button
+                                    className={'measurement-button glyphicon novaicon-custom-dot'}
+                                    disabled={!layerGeometryTypes.includes(geoUtils.geomTypes.POINT)}
+                                    onClick={() => {
+                                        this.startMeasurement(geoUtils.geomTypes.POINT)
+                                    }}
+                                ></button>
+                                <span>Location</span>
+                            </div>
+                            <div>
+                                <button
+                                    className={'measurement-button glyphicon novaicon-organization-graph'}
+                                    disabled={!layerGeometryTypes.includes(geoUtils.geomTypes.LINE)}
+                                    onClick={() => {
+                                        this.startMeasurement(geoUtils.geomTypes.LINE)
+                                    }}
+                                ></button>
+                                <span>Distance</span>
+                            </div>
+                            <div>
+                                <button
+                                    className={'measurement-button glyphicon novaicon-organization-flowchart-1'}
+                                    disabled={!layerGeometryTypes.includes(geoUtils.geomTypes.POLYGON)}
+                                    onClick={() => {
+                                        this.startMeasurement(geoUtils.geomTypes.POLYGON)
+                                    }}
+                                ></button>
+                                <span>Surface</span>
+                            </div>
+                            <div>
+                                <button
+                                    className={'measurement-button glyphicon novaicon-ruler-2'}
+                                    disabled={!layerGeometryTypes.includes(geoUtils.geomTypes.ORTHOGONAL)}
+                                    onClick={() => {
+                                        this.startMeasurement(geoUtils.geomTypes.ORTHOGONAL)
+                                    }}
+                                ></button>
+                                <span>Orthogonal</span>
+                            </div>
+                            <div>
+                                <button
+                                    className={'measurement-button glyphicon novaicon-cursor-move-up-1'}
+                                    disabled={!layerGeometryTypes.includes(geoUtils.geomTypes.HEIGHT)}
+                                    onClick={() => {
+                                        this.startMeasurement(geoUtils.geomTypes.HEIGHT)
+                                    }}
+                                ></button>
+                                <span>Height</span>
+                            </div>
                         </div>
                     </div>
             </div>
