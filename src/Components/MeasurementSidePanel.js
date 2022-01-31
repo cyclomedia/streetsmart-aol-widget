@@ -95,7 +95,7 @@ define(['react', './Layer', '../arcgisToGeojson'], function (React, Layer, geoUt
                                         this.startMeasurement(geoUtils.geomTypes.POINT)
                                     }}
                                 ></button>
-                                <span>Location</span>
+                                <span>  Location</span>
                             </div>
                             <div>
                                 <button
@@ -105,7 +105,7 @@ define(['react', './Layer', '../arcgisToGeojson'], function (React, Layer, geoUt
                                         this.startMeasurement(geoUtils.geomTypes.LINE)
                                     }}
                                 ></button>
-                                <span>Distance</span>
+                                <span>  Distance</span>
                             </div>
                             <div>
                                 <button
@@ -115,7 +115,7 @@ define(['react', './Layer', '../arcgisToGeojson'], function (React, Layer, geoUt
                                         this.startMeasurement(geoUtils.geomTypes.POLYGON)
                                     }}
                                 ></button>
-                                <span>Surface</span>
+                                <span>  Surface</span>
                             </div>
                             <div>
                                 <button
@@ -125,7 +125,7 @@ define(['react', './Layer', '../arcgisToGeojson'], function (React, Layer, geoUt
                                         this.startMeasurement(geoUtils.geomTypes.ORTHOGONAL)
                                     }}
                                 ></button>
-                                <span>Orthogonal</span>
+                                <span>  Orthogonal</span>
                             </div>
                             <div>
                                 <button
@@ -135,7 +135,7 @@ define(['react', './Layer', '../arcgisToGeojson'], function (React, Layer, geoUt
                                         this.startMeasurement(geoUtils.geomTypes.HEIGHT)
                                     }}
                                 ></button>
-                                <span>Height</span>
+                                <span>  Height</span>
                             </div>
                         </div>
                     </div>
