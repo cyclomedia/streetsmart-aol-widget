@@ -2,6 +2,7 @@ const REQUIRE_CONFIG = {
     async: true,
     locale: 'en',
     paths: {
+        //use the first set of paths for ESRI portal/AGOL, use the second set of paths for Developer's Edition of WAB
         // 'react': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/react.production.min',
         // 'react-dom': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/react-dom.production.min',
         // 'openlayers': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/ol.min',
@@ -717,7 +718,7 @@ require(REQUIRE_CONFIG, [], function () {
 
                 this.query(`${vPoint.x},${vPoint.y}`);
             },
-
+            //GC: Added additional measurement options
             startMeasurement(type, geojson){
                 let geometry;
                 switch (type) {
@@ -731,6 +732,14 @@ require(REQUIRE_CONFIG, [], function () {
                         break;
                     case 'POLYGON':
                         geometry = StreetSmartApi.MeasurementGeometryType.POLYGON;
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        break;
+                    case 'ORTHOGONAL':
+                        geometry = StreetSmartApi.MeasurementGeometryType.ORTHOGONAL;
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        break;
+                    case 'HEIGHT':
+                        geometry = StreetSmartApi.MeasurementGeometryType.HEIGHT;
                         StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
                         break;
                     default:

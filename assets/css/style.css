@@ -15,7 +15,8 @@
 .cmt-widget #sidePanel {
     position: absolute;
     right: 0px;
-    width: 330px;
+    /*width: 300px;*/
+    display: flex;
     height: 100%;
     background-color: white;
     transition: width 0.5s ease-out;
@@ -31,20 +32,21 @@
 }
 
 .cmt-widget #measurementPanel{
-    min-width: 330px;
+    min-width: 250px;
     width: 100%;
     background-color: white;
     display: flex;
     flex-direction: column;
     white-space: nowrap;
     overflow: visible;
+    margin: 5px;
 }
 
 .cmt-widget #side-panel-close-button{
     width: 28px;
     height: 28px;
     background-color: unset;
-    margin: 9px;
+    /*margin: 9px;*/
     padding: 0px;
     border: 0px;
     transform: rotate(-90deg);
@@ -141,21 +143,24 @@
 .cmt-widget.cmt.measurement-button-container{
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    flex-grow: 1;
+    justify-content: space-between;
     padding: 0 15px 0 15px;
     min-width: 100%;
+    margin-left: 0;
+    align-items: center;
 }
 
 .cmt-widget button.measurement-button.glyphicon {
-    min-width: 70px;
-    width: 70px;
-    height: 70px;
+    min-width: 50px;
+    width: 50px;
+    height: 50px;
     font-size: 28px;
     color: white;
     background: #98c23c;
     border: 1px solid #98c23c;
     border-radius: 50%;
-    margin-right: 10px;
+    /*margin-right: 10px;*/
 }
 .cmt-widget button.measurement-button.glyphicon:disabled {
     opacity: 0.3;
