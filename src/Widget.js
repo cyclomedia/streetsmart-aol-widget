@@ -172,10 +172,12 @@ require(REQUIRE_CONFIG, [], function () {
                     return
                 }
 
+                const decodedToken = atob(this.config.token).split(':');
+
                 const CONFIG = {
                     targetElement: this.panoramaViewerDiv, // I have no idea where this comes from
-                    username: this.config.uName,
-                    password: this.config.uPwd,
+                    username: decodedToken[0],
+                    password: decodedToken[1],
                     apiKey: this._apiKey,
                     srs: this.config.srs,
                     locale: this.config.locale,
