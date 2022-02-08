@@ -49,7 +49,7 @@ define([
 
             var source = this.proj4(sourceEpsg);
             //var dest = this.proj4(destEpsg);
-            //looks for an error exception if the proj4 function cannot find the destination projection
+            //GC: looks for an error exception if the proj4 function cannot find the destination projection
             //if error is caught, then the destination projection is the same as the source projection
             try{
                 var dest = this.proj4(destEpsg);

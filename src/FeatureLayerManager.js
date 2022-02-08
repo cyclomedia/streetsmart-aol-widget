@@ -117,7 +117,7 @@ define([
             if (coords === null) {
                 return;
             }
-
+            //GC: SRS of the layer did not match up with the SRS of the widget
             //const layerWkid = layer.spatialReference.latestWkid;
             const layerWkid = layer.spatialReference.wkid;
             const transformedCoords = this._transformPoints(coords, layerWkid);
