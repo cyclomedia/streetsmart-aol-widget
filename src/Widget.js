@@ -7,10 +7,14 @@ const REQUIRE_CONFIG = {
         // 'react-dom': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/react-dom.production.min',
         // 'openlayers': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/ol.min',
         // 'lodash': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/lodash.min'
-        'react': '/widgets/StreetSmart/packages/react.production.min',
-        'react-dom': '/widgets/StreetSmart/packages/react-dom.production.min',
-        'openlayers': '/widgets/StreetSmart/packages/ol.min',
-        'lodash': '/widgets/StreetSmart/packages/lodash.min'
+        // 'react': '/widgets/StreetSmart/packages/react.production.min',
+        // 'react-dom': '/widgets/StreetSmart/packages/react-dom.production.min',
+        // 'openlayers': '/widgets/StreetSmart/packages/ol.min',
+        // 'lodash': '/widgets/StreetSmart/packages/lodash.min'
+        'react': 'https://unpkg.com/react@16.12.0/umd/react.production.min',
+        'react-dom': 'https://unpkg.com/react-dom@16.12.0/umd/react-dom.production.min',
+        'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol',
+        'lodash': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min'
     }
 };
 
@@ -22,6 +26,7 @@ require(REQUIRE_CONFIG, [], function () {
         'dijit/Tooltip',
         'jimu/BaseWidget',
         'jimu/WidgetManager',
+        'jimu/PanelManager',
         'esri/request',
         'esri/SpatialReference',
         'esri/geometry/Point',
@@ -30,7 +35,7 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v21.13/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v22.2/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -47,6 +52,7 @@ require(REQUIRE_CONFIG, [], function () {
         Tooltip,
         BaseWidget,
         WidgetManager,
+        PanelManager,
         esriRequest,
         SpatialReference,
         Point,
@@ -172,10 +178,12 @@ require(REQUIRE_CONFIG, [], function () {
                     return
                 }
 
+                const decodedToken = atob(this.config.token).split(':');
+
                 const CONFIG = {
                     targetElement: this.panoramaViewerDiv, // I have no idea where this comes from
-                    username: this.config.uName,
-                    password: this.config.uPwd,
+                    username: decodedToken[0],
+                    password: decodedToken[1],
                     apiKey: this._apiKey,
                     srs: this.config.srs,
                     locale: this.config.locale,
@@ -520,7 +528,14 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _handleConeChange() {
-                this._layerManager.updateViewingCone(this._panoramaViewer);
+                //GC: Checks if cycloramas are found in the area and creates an alert message while closing the widget if no recordings were found
+                if(this._panoramaViewer){
+                    this._layerManager.updateViewingCone(this._panoramaViewer);
+                }else{
+                    alert("There were no Cycloramas found in the area. Please center the map on an area with Cycloramas and try again.");
+                    PanelManager.getInstance().closePanel(this.id + "_panel");
+                }
+
             },
 
             _handleImageChange() {
