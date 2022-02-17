@@ -32,7 +32,7 @@ to Firefox and click on the icon in the ArcGIS tab to enable livereload.
 
 ## Versioning
 
-Current version: **21.4.1**
+Current version: **22.1.0**
 
 We use YEAR.MAJOR.PATCH versioning.
 i.e.: 16.1.0 = year 2016, major version 1, patch 0.
@@ -40,8 +40,8 @@ i.e.: 16.1.0 = year 2016, major version 1, patch 0.
 We also make use of:
 
 Street Smart API:
-*	api.version: 21.13
-*	api.location: [Street Smart API](https://streetsmart.cyclomedia.com/api/v21.13/StreetSmartAPI.js)
+*	api.version: 22.2
+*	api.location: [Street Smart API](https://streetsmart.cyclomedia.com/api/v22.2/StreetSmartAPI.js)
 
 ## Authors
 
