@@ -532,7 +532,7 @@ require(REQUIRE_CONFIG, [], function () {
                 if(this._panoramaViewer){
                     this._layerManager.updateViewingCone(this._panoramaViewer);
                 }else{
-                    alert("There were no Cycloramas found in the area. Please center the map on an area with Cycloramas and try again.");
+                    alert(this.nls.recordingAlert);
                     PanelManager.getInstance().closePanel(this.id + "_panel");
                 }
 

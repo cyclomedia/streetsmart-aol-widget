@@ -8,6 +8,7 @@
        delete: "Löschen",
        measurementLayerName: "Messungen",
        recordingLayerName: "Cyclorama Aufnahmeorte",
-       viewingConeLayerName: "Betrachtungskoni"
+       viewingConeLayerName: "Betrachtungskoni",
+       recordingAlert: "In der Gegend wurden keine Cycloramas gefunden. Bitte zentrieren Sie die Karte auf einem Bereich mit Cycloramas und versuchen Sie es erneut."
   })
 );
