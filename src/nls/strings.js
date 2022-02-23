@@ -8,7 +8,8 @@
         delete: "Delete",
         measurementLayerName: "Measurements",
         recordingLayerName: "Cyclorama Recording Layer",
-        viewingConeLayerName: "Viewing Cone Layer"
+        viewingConeLayerName: "Viewing Cone Layer",
+        recordingAlert: "There were no Cycloramas found in the area. Please center the map on an area with Cycloramas and try again."
     }) ,
     "de": true,
     "nl": true,

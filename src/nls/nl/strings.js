@@ -8,6 +8,7 @@
        delete: "Verwijderen",
        measurementLayerName: "Metingen",
        recordingLayerName: "Cyclorama Opnamelocaties",
-       viewingConeLayerName: "Kijkhoeken"
+       viewingConeLayerName: "Kijkhoeken",
+       recordingAlert: "Er werden geen Cyclorama's gevonden in het gebied. Centreer de kaart op een gebied met Cycloramas en probeer het opnieuw."
    })
 );
