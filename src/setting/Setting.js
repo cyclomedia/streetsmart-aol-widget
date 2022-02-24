@@ -64,7 +64,7 @@ define([
                     this.selectUnitToggle.set("value", this.config.units);
                 }
 
-                if(this.config.token) {
+                if(this.config.token){
                     const decodedToken = atob(this.config.token).split(':');
                     if (decodedToken) {
                         this.uNameCyclomedia.value = decodedToken[0];
