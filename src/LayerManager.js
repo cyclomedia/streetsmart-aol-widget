@@ -13,7 +13,8 @@ define([
     'esri/layers/FeatureLayer',
     'esri/layers/GraphicsLayer',
     'esri/SpatialReference',
-    './utils'
+    './utils',
+    'esri/layers/WebTiledLayer'
 ], function (
     Color,
     on,
@@ -29,7 +30,8 @@ define([
     FeatureLayer,
     GraphicsLayer,
     SpatialReference,
-    utils
+    utils,
+    WebTiledLayer
 ) {
     return class LayerManager {
         constructor({ map, wkid, onRecordingLayerClick, addEventListener, removeEventListener, setPanoramaViewerOrientation, config, nls}) {
@@ -46,6 +48,7 @@ define([
             this.recordingLayer = this._createRecordingLayer({ onClick: onRecordingLayerClick });
             this.viewingConeLayer = this._createViewingConeLayer();
             this.measureLayer = this._createMeasureLayer();
+            this.coverageLayer = this._createCoverageLayer();
             this.srs = new SpatialReference({ wkid });
         }
 
@@ -54,6 +57,7 @@ define([
             this.map.addLayer(this.viewingConeLayer);
             this.addEventListener(this.viewingConeLayer, 'mouse-down', this.startConeInteraction.bind(this));
             this.map.addLayer(this.measureLayer);
+            this.map.addLayer(this.coverageLayer);
         }
 
         removeLayers() {
@@ -63,6 +67,7 @@ define([
             this.map.removeLayer(this.recordingLayer);
             this.map.removeLayer(this.viewingConeLayer);
             this.map.removeLayer(this.measureLayer);
+            this.map.removeLayer(this.coverageLayer);
         }
 
         updateRecordings(recordingData) {
@@ -186,6 +191,16 @@ define([
             };
 
             const layer = new FeatureLayer(viewingConeCollection, { id: this._getViewingConeLayerId()});
+            return layer;
+        }
+        //GC: creating the cyclorama coverage map and adding it to the layer list
+        _createCoverageLayer() {
+            const layer = new WebTiledLayer("https://atlas.cyclomedia.com/webmercator/cycloramas/{z}/{x}/{y}.png", {
+                "id": "CycloramaCoverage",
+                "maxScale": 5,
+                "opacity": 0.75
+            });
+
             return layer;
         }
 
