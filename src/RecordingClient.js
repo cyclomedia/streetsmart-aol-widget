@@ -9,13 +9,13 @@ define([], function() {
         }
 
         _constructWfsClient() {
-            const { uName, uPwd, atlasHost } = this.config;
+            const { token, atlasHost } = this.config;
             if (!atlasHost) {
                 alert(`Street Smart: atlasHost not configured!`);
             }
 
             const authHeader = {
-                Authorization: `Basic ${btoa(uName + ':' + uPwd)}`
+                Authorization: `Basic ${token}`
             };
             return new CM.aperture.WfsRecordingClient({
                 uriManager: new CM.aperture.WfsRecordingUriManager({
