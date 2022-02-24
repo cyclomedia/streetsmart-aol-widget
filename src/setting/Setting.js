@@ -64,12 +64,12 @@ define([
                     this.selectUnitToggle.set("value", this.config.units);
                 }
 
-                if(this.config.token){
-                    const decodedToken = atob(this.config.token).split(':');
-                    if (decodedToken) {
-                        this.uNameCyclomedia.value = decodedToken[0];
-                        this.uPwdCyclomedia.value = decodedToken[1];
-                    }
+                if(this.config.uName){
+                    this.uNameCyclomedia.value = this.config.uName;
+                }
+
+                if(this.config.uPwd){
+                    this.uPwdCyclomedia.value = this.config.uPwd;
                 }
 
                 if(this.config.agreement){
@@ -156,7 +156,8 @@ define([
             getConfig: function () {
                 this.config.locale = this.selectCyclomediaLocation.value;
                 this.config.units = this.selectUnitToggle.value;
-                this.config.token = btoa(`${this.uNameCyclomedia.value}:${this.uPwdCyclomedia.value}`);
+                this.config.uName = this.uNameCyclomedia.value;
+                this.config.uPwd = this.uPwdCyclomedia.value;
                 this.config.agreement = this.agreementCheck.checked;
                 this.config.saveMeasurements = this.saveMeasurementsEnabled.checked;
                 this.config.overlays = this.overlaysEnabled.checked;

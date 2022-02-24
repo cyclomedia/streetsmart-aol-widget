@@ -35,7 +35,7 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v22.2/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v22.3/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -45,6 +45,7 @@ require(REQUIRE_CONFIG, [], function () {
         './FeatureLayerManager',
         './AttributeManager',
         './arcgisToGeojson',
+        'esri/layers/WebTiledLayer'
     ], function (
         declare,
         on,
@@ -69,7 +70,8 @@ require(REQUIRE_CONFIG, [], function () {
         OverlayManager,
         FeatureLayerManager,
         Attributemanager,
-        geojsonUtils
+        geojsonUtils,
+        WebTiledLayer
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
@@ -429,8 +431,16 @@ require(REQUIRE_CONFIG, [], function () {
 
             _openApiWhenZoomedIn() {
                 this.zoomWarning.classList.remove('hidden');
+                //GC: show coverage map when widget first opens, even if zoomed out too far
+                const coverLayer = new WebTiledLayer("https://atlas.cyclomedia.com/webmercator/cycloramas/{z}/{x}/{y}.png", {
+                    "id": "CycloramaCoverage",
+                    "maxScale": 5,
+                    "opacity": 0.75
+                });
+                this.map.addLayer(coverLayer);
                 const listener = this.addEventListener(this.map, 'zoom-end', (zoomEvent) => {
                     if (this.map.getScale() < this._zoomThreshold) {
+                        this.map.removeLayer(coverLayer);
                         this.zoomWarning.classList.add('hidden');
                         this._initApi();
                         this.removeEventListener(listener);

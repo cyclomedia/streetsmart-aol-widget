@@ -62,7 +62,9 @@ define([
                 return;
             }
             const zValue = coords[2];
-            const layerWkid = layer.spatialReference.latestWkid;
+            //GC: SRS of the layer did not match up with the SRS of the widget
+            //const layerWkid = layer.spatialReference.latestWkid;
+            const layerWkid = layer.spatialReference.wkid;
             const transformedCoords = this._transformPoints([coords], layerWkid);
 
             const pointJson = [{"geometry":
@@ -91,7 +93,9 @@ define([
             if (coords === null) {
                 return;
             }
-            const layerWkid = layer.spatialReference.latestWkid;
+            //GC: SRS of the layer did not match up with the SRS of the widget
+            //const layerWkid = layer.spatialReference.latestWkid;
+            const layerWkid = layer.spatialReference.wkid;
             const transformedCoords = this._transformPoints(coords, layerWkid);
 
             const lineJson = [{"geometry":
