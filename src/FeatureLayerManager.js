@@ -44,14 +44,14 @@ define([
             return Promise.resolve(null)
         }
 
-        _transformPoints(coords, layerWkid) {
+        _transformPoints(coords, layerWkid, latestWkid) {
             return coords.map(coord => {
                 // Ignore incomplete forward intersection:
                 if (_.includes(coord, null)) {
                     return null;
                 }
                 const pointViewer = new Point(coord[0], coord[1], new SpatialReference({ wkid: this.wkid }));
-                const coordMap = utils.transformProj4js(pointViewer, layerWkid);
+                const coordMap = utils.transformProj4js(pointViewer, layerWkid, latestWkid);
                 return [coordMap.x, coordMap.y, coord[2]];
             })
         }
@@ -62,10 +62,10 @@ define([
                 return;
             }
             const zValue = coords[2];
-            //GC: SRS of the layer did not match up with the SRS of the widget
-            //const layerWkid = layer.spatialReference.latestWkid;
+            //GC: allowing both SRS of the layer to match up with the SRS of the widget
+            const latestWkid = layer.spatialReference.latestWkid;
             const layerWkid = layer.spatialReference.wkid;
-            const transformedCoords = this._transformPoints([coords], layerWkid);
+            const transformedCoords = this._transformPoints([coords], layerWkid, latestWkid);
 
             const pointJson = [{"geometry":
                     {
@@ -93,10 +93,10 @@ define([
             if (coords === null) {
                 return;
             }
-            //GC: SRS of the layer did not match up with the SRS of the widget
-            //const layerWkid = layer.spatialReference.latestWkid;
+            //GC: allowing both SRS of the layer to match up with the SRS of the widget
+            const latestWkid = layer.spatialReference.latestWkid;
             const layerWkid = layer.spatialReference.wkid;
-            const transformedCoords = this._transformPoints(coords, layerWkid);
+            const transformedCoords = this._transformPoints(coords, layerWkid, latestWkid);
 
             const lineJson = [{"geometry":
                     {   "hasZ": true,
@@ -121,10 +121,10 @@ define([
             if (coords === null) {
                 return;
             }
-            //GC: SRS of the layer did not match up with the SRS of the widget
-            //const layerWkid = layer.spatialReference.latestWkid;
+            //GC: allowing both SRS of the layer to match up with the SRS of the widget
+            const latestWkid = layer.spatialReference.latestWkid;
             const layerWkid = layer.spatialReference.wkid;
-            const transformedCoords = this._transformPoints(coords, layerWkid);
+            const transformedCoords = this._transformPoints(coords, layerWkid, latestWkid);
 
             const polyJson = [{"geometry":
                     {   "hasZ": true,
