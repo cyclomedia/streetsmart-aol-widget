@@ -29,11 +29,15 @@ define([
          * @param targetSrs srs to transform the point to
          * @returns {Point} the (original) transformed point
          */
-        transformProj4js: function(sourceGeom, targetSrs) {
+        transformProj4js: function(sourceGeom, targetSrs, backupSRS) {
             //NB: Only works with points.
 
             //No transformation needed if source SRS == target SRS
             if (sourceGeom.spatialReference.wkid === targetSrs) {
+                //this will return a new saved measurement
+                return sourceGeom;
+            }else if(sourceGeom.spatialReference.wkid === backupSRS) {
+                //GC: added a backup SRS for the latestWkid
                 //this will return a new saved measurement
                 return sourceGeom;
             }
