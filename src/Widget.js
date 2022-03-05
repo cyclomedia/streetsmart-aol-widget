@@ -328,6 +328,7 @@ require(REQUIRE_CONFIG, [], function () {
                 // Always make sure newViewer is set as newViewer can be undefined
                 // while this._panoramaViewer can be null
                 if (newViewer && newViewer !== this._panoramaViewer) {
+                    this.removeEventListener(this._timeTravelListener);
                     this.removeEventListener(this._viewChangeListener);
                     this.removeEventListener(this._imageChangeListener);
                     this.removeEventListener(this._featureClickListener);
@@ -493,10 +494,17 @@ require(REQUIRE_CONFIG, [], function () {
                 }
             },
 
+            //GC: additional function catch time travel change
+            _handleTimeChange(info) {
+                this._timeTravel = info.detail.date;
+                this._loadRecordings();
+            },
+
             _bindViewerDependantEventHandlers(options) {
                 const opts = Object.assign({}, options, { viewerOnly: false });
                 const panoramaEvents = StreetSmartApi.Events.panoramaViewer;
                 const viewerEvents = StreetSmartApi.Events.viewer;
+                this._timeTravelListener = this.addEventListener(this._panoramaViewer, panoramaEvents.TIME_TRAVEL_CHANGE, this._handleTimeChange.bind(this));
                 this._viewChangeListener = this.addEventListener(this._panoramaViewer, panoramaEvents.VIEW_CHANGE, this._handleConeChange.bind(this));
                 this._imageChangeListener = this.addEventListener(this._panoramaViewer, panoramaEvents.IMAGE_CHANGE, this._handleImageChange.bind(this));
                 this._featureClickListener = this.addEventListener(this._panoramaViewer, panoramaEvents.FEATURE_CLICK, this._handleFeatureClick.bind(this));
@@ -595,7 +603,8 @@ require(REQUIRE_CONFIG, [], function () {
                     return;
                 }
                 if (this.map.getScale() < this._zoomThreshold) {
-                    this._recordingClient.load().then((response) => {
+                    //GC: include the time travel variable if it was activated
+                    this._recordingClient.load(this._timeTravel).then((response) => {
                         this._layerManager.updateRecordings(response);
                     });
                 } else {

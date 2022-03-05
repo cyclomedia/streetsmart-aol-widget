@@ -37,6 +37,7 @@ define([
         constructor({ map, wkid, onRecordingLayerClick, addEventListener, removeEventListener, setPanoramaViewerOrientation, config, nls}) {
             this._recordingColor = new Color.fromString('#80B0FF');
             this._recordingColorDepth = new Color.fromString('#98C23C');
+            this._historicRecording = new Color.fromString('#FF8D29');
 
             this.map = map;
             this.wkid = wkid;
@@ -75,10 +76,17 @@ define([
 
             recordingData.map((data) => {
                 const coord = new Point(data.xyz[0], data.xyz[1], this.srs);
+                //GC: created a new variable to show if the current recordings are historic or not
+                if(data.expiredAt){
+                    data.isHistoric = true;
+                }else{
+                    data.isHistoric = false;
+                }
 
                 const graphic = new Graphic(coord, null, {
                     recordingId: data.id,
                     hasDepthMap: data.hasDepthMap,
+                    isHistoric: data.isHistoric
                 });
                 this.recordingLayer.add(graphic);
             });
@@ -153,9 +161,11 @@ define([
                 },
                 featureSet: null
             };
-
-            const renderer = new UniqueValueRenderer(this._createRecordingSymbol(this._recordingColor), 'hasDepthMap');
-            renderer.addValue('true', this._createRecordingSymbol(this._recordingColorDepth));
+            //GC: added historic attribute to the render creator
+            const renderer = new UniqueValueRenderer(this._createRecordingSymbol(this._recordingColor), 'hasDepthMap', 'isHistoric', null, ':');
+            renderer.addValue('true:false', this._createRecordingSymbol(this._recordingColorDepth));
+            //GC: added a new value that is only used when the historic attribute is true
+            renderer.addValue('true:true', this._createRecordingSymbol(this._historicRecording));
 
             const layer = new FeatureLayer(recordingCollection, { id: this._getRecordingLayerId()});
             layer.setRenderer(renderer);
