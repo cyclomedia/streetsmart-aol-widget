@@ -45,12 +45,14 @@ define([], function() {
                 let month2 = now.getMonth()+2;
                 let year1 = now.getFullYear();
                 let year2 = now.getFullYear();
+
                 if(month1 === 0){
                     month1 = '12';
                     year1 = now.getFullYear()-1;
                 }else if(month1 < 10){
                     month1 = '0'+month1;
                 }
+
                 if(month2 === 13){
                     month2 = '01';
                     year2 = now.getFullYear()+1;
@@ -59,6 +61,7 @@ define([], function() {
                 }
 
                 const options = {dateRange: {from: year1+'-'+month1+'-01' , to: year2+'-'+month2+'-'+date2}, };
+
                 const {
                     extent: { xmin, ymin, xmax, ymax },
                     spatialReference: { wkid }
