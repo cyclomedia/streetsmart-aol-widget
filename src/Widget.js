@@ -701,6 +701,7 @@ require(REQUIRE_CONFIG, [], function () {
                 this._selectedFeatureID = null;
                 this._measurementButtonOverwrideTimer = clearInterval(this._measurementButtonOverwrideTimer);
                 this._saveButtonOverwrideTimer = clearInterval(this._saveButtonOverwrideTimer);
+                this._timeTravel = null;
 
                 this._mapIdLayerId = {};
                 this._visibleLayers = {};
