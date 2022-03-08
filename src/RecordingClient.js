@@ -57,7 +57,7 @@ define([], function() {
                 }else if(month2 < 10){
                     month2 = '0'+month2;
                 }
-                //const options = {dateRange: {from: now.getFullYear()+'-'+(now.getMonth()+1)+'-'+(now.getDate()-1), to: (now.getFullYear())+'-'+(now.getMonth()+1)+'-'+(now.getDate()+1)}, };
+
                 const options = {dateRange: {from: year1+'-'+month1+'-01' , to: year2+'-'+month2+'-'+date2}, };
                 const {
                     extent: { xmin, ymin, xmax, ymax },
