@@ -636,6 +636,10 @@ require(REQUIRE_CONFIG, [], function () {
                 // Manually fire these events as they are fired too early by the API,
                 // we can't listen to them yet.
                 this.query(`${localCenter.x},${localCenter.y}`);
+                //GC: changes the time travel setting back to default and loads default recordings when map is centered
+                //temporary until we find a way to make the query return a viewer with the current time settings
+                this._timeTravel = null;
+                this._loadRecordings();
             },
 
             query(query) {
@@ -666,7 +670,7 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _determineZoomThreshold: function () {
-                // Excplcit zoom level replaced for zoom scale values for consistency.
+                // Explicit zoom level replaced for zoom scale values for consistency.
                 let zoomThreshold = 1200;
 
                 this._zoomThreshold = zoomThreshold;
@@ -691,6 +695,11 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             onClose() {
+                //GC: Removes the coverage layer in case it was not removed before zooming in first
+                if(this.map.getLayer("CycloramaCoverage")){
+                    this.map.removeLayer(this.map.getLayer("CycloramaCoverage"));
+                }
+
                 StreetSmartApi.destroy({ targetElement: this.panoramaViewerDiv });
                 this.loadingIndicator.classList.remove('hidden');
                 this.streetIndicator.innerHTML = '';
