@@ -628,40 +628,106 @@ require(REQUIRE_CONFIG, [], function () {
                 }
             },
 
+            //GC: Added a new function to get the dateRange of the current time travel
+            _getDateRange(timeTravel){
+                const now = timeTravel;
+                let date2 = '31';
+                //Makes the end date 28 if the end month is February
+                if((now.getMonth()+1) === 1){
+                    date2 = '28';
+                }
+                //Makes the end date 30 if the end month is April, June, September, or November
+                if((now.getMonth()+1) === 3 || (now.getMonth()+1) === 5 || (now.getMonth()+1) === 8 || (now.getMonth()+1) === 10){
+                    date2 = '30';
+                }
+                //separate start and end dates by three months
+                let month1 = now.getMonth();
+                let month2 = now.getMonth()+2;
+                let year1 = now.getFullYear();
+                let year2 = now.getFullYear();
+
+                if(month1 === 0){
+                    month1 = '12';
+                    year1 = now.getFullYear()-1;
+                }else if(month1 < 10){
+                    month1 = '0'+month1;
+                }
+
+                if(month2 === 13){
+                    month2 = '01';
+                    year2 = now.getFullYear()+1;
+                }else if(month2 < 10){
+                    month2 = '0'+month2;
+                }
+
+                return {from: year1+'-'+month1+'-01' , to: year2+'-'+month2+'-'+date2};
+
+            },
+
             _centerViewerToMap(center) {
                 const mapCenter = center || this.map.extent.getCenter();
                 const mapSRS = this.config.srs.split(':')[1];
                 const localCenter = utils.transformProj4js(mapCenter, mapSRS);
 
+                //GC: Create coordinate and date range variables used to keep the panorama in the current time setting instead of resetting it to the default
+                const coord = [localCenter.x, localCenter.y];
+                let dateRange = null;
+                if(this._timeTravel){
+                    dateRange = this._getDateRange(this._timeTravel);
+                }
+
                 // Manually fire these events as they are fired too early by the API,
                 // we can't listen to them yet.
-                this.query(`${localCenter.x},${localCenter.y}`);
-                //GC: changes the time travel setting back to default and loads default recordings when map is centered
-                //temporary until we find a way to make the query return a viewer with the current time settings
-                this._timeTravel = null;
-                this._loadRecordings();
+                this.query(`${localCenter.x},${localCenter.y}`, coord, dateRange);
             },
 
-            query(query) {
+            query(query, coord, range) {
                 const timeTravelVisible = this.config.timetravel !== undefined ? this.config.timetravel : false;
 
-                return StreetSmartApi.open(query, {
-                        viewerType: [this._viewerType],
-                        srs: this.config.srs,
-                        panoramaViewer: {
-                            closable: false,
-                            maximizable: true,
-                            timeTravelVisible,
-                            measureTypeButtonVisible: !this.config.saveMeasurements,
-                            measureTypeButtonStart: !this.config.saveMeasurements,
-                            measureTypeButtonToggle: !this.config.saveMeasurements,
+                //GC: opens the API with current time settings if the time travel variable is active
+                if(range){
+                    return StreetSmartApi.open(
+                        {
+                            coordinate: coord,
+                            dateRange: range,
                         },
-                    }
-                ).then(result => {
-                    const viewer = result.length ? result[0] : null;
-                    this._handleViewerChanged(viewer);
-                    this._handleConeChange();
-                });
+                        {
+                            viewerType: [this._viewerType],
+                            srs: this.config.srs,
+                            panoramaViewer: {
+                                closable: false,
+                                maximizable: true,
+                                timeTravelVisible,
+                                measureTypeButtonVisible: !this.config.saveMeasurements,
+                                measureTypeButtonStart: !this.config.saveMeasurements,
+                                measureTypeButtonToggle: !this.config.saveMeasurements,
+                            },
+                        }
+                    ).then(result => {
+                        const viewer = result.length ? result[0] : null;
+                        this._handleViewerChanged(viewer);
+                        this._handleConeChange();
+                    });
+                }else{
+                    return StreetSmartApi.open(query, {
+                            viewerType: [this._viewerType],
+                            srs: this.config.srs,
+                            panoramaViewer: {
+                                closable: false,
+                                maximizable: true,
+                                timeTravelVisible,
+                                measureTypeButtonVisible: !this.config.saveMeasurements,
+                                measureTypeButtonStart: !this.config.saveMeasurements,
+                                measureTypeButtonToggle: !this.config.saveMeasurements,
+                            },
+                        }
+                    ).then(result => {
+                        const viewer = result.length ? result[0] : null;
+                        this._handleViewerChanged(viewer);
+                        this._handleConeChange();
+                    });
+                }
+
             },
 
             setPanoramaViewerOrientation(orientation) {
