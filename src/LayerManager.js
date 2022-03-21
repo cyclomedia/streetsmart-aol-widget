@@ -37,6 +37,8 @@ define([
         constructor({ map, wkid, onRecordingLayerClick, addEventListener, removeEventListener, setPanoramaViewerOrientation, config, nls}) {
             this._recordingColor = new Color.fromString('#80B0FF');
             this._recordingColorDepth = new Color.fromString('#98C23C');
+            this._historicRecording = new Color.fromString('#FF8D29');
+            this._defaultColor = new Color.fromString('#D6D6D6');
 
             this.map = map;
             this.wkid = wkid;
@@ -75,10 +77,17 @@ define([
 
             recordingData.map((data) => {
                 const coord = new Point(data.xyz[0], data.xyz[1], this.srs);
+                //GC: created a new variable to show if the current recordings are historic or not
+                if(data.expiredAt){
+                    data.isHistoric = true;
+                }else{
+                    data.isHistoric = false;
+                }
 
                 const graphic = new Graphic(coord, null, {
                     recordingId: data.id,
                     hasDepthMap: data.hasDepthMap,
+                    isHistoric: data.isHistoric
                 });
                 this.recordingLayer.add(graphic);
             });
@@ -153,9 +162,36 @@ define([
                 },
                 featureSet: null
             };
-
-            const renderer = new UniqueValueRenderer(this._createRecordingSymbol(this._recordingColor), 'hasDepthMap');
-            renderer.addValue('true', this._createRecordingSymbol(this._recordingColorDepth));
+            //GC: added historic attribute to the render creator
+            const renderer = new UniqueValueRenderer(this._createRecordingSymbol(this._defaultColor), 'hasDepthMap', 'isHistoric', null, ':');
+            //GC: Shows recent recordings that were created with depth
+            renderer.addValue({
+                value: 'true:false',
+                symbol: this._createRecordingSymbol(this._recordingColorDepth),
+                label: "New Recording",
+                description: "Recent recordings that were created with depth"
+            });
+            //GC: only shows blue recordings if the point has no depth and is not historic
+            renderer.addValue({
+                value: 'false:false',
+                symbol: this._createRecordingSymbol(this._recordingColor),
+                label: "No Depth Recording",
+                description: "Recordings that were created with no depth"
+            });
+            //GC: added a new value that is only used when the historic attribute is true
+            renderer.addValue({
+                value: 'false:true',
+                symbol: this._createRecordingSymbol(this._historicRecording),
+                label: "Historic Recording",
+                description: "Archived recordings that were created previously"
+            });
+            //GC: shows historic recording even if the point has no depth
+            renderer.addValue({
+                value: 'true:true',
+                symbol: this._createRecordingSymbol(this._historicRecording),
+                label: "Historic Recording",
+                description: "Archived recordings that were created previously"
+            });
 
             const layer = new FeatureLayer(recordingCollection, { id: this._getRecordingLayerId()});
             layer.setRenderer(renderer);

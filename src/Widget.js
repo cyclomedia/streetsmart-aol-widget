@@ -328,6 +328,7 @@ require(REQUIRE_CONFIG, [], function () {
                 // Always make sure newViewer is set as newViewer can be undefined
                 // while this._panoramaViewer can be null
                 if (newViewer && newViewer !== this._panoramaViewer) {
+                    this.removeEventListener(this._timeTravelListener);
                     this.removeEventListener(this._viewChangeListener);
                     this.removeEventListener(this._imageChangeListener);
                     this.removeEventListener(this._featureClickListener);
@@ -493,10 +494,17 @@ require(REQUIRE_CONFIG, [], function () {
                 }
             },
 
+            //GC: additional function catch time travel change
+            _handleTimeChange(info) {
+                this._timeTravel = info.detail.date;
+                this._loadRecordings();
+            },
+
             _bindViewerDependantEventHandlers(options) {
                 const opts = Object.assign({}, options, { viewerOnly: false });
                 const panoramaEvents = StreetSmartApi.Events.panoramaViewer;
                 const viewerEvents = StreetSmartApi.Events.viewer;
+                this._timeTravelListener = this.addEventListener(this._panoramaViewer, panoramaEvents.TIME_TRAVEL_CHANGE, this._handleTimeChange.bind(this));
                 this._viewChangeListener = this.addEventListener(this._panoramaViewer, panoramaEvents.VIEW_CHANGE, this._handleConeChange.bind(this));
                 this._imageChangeListener = this.addEventListener(this._panoramaViewer, panoramaEvents.IMAGE_CHANGE, this._handleImageChange.bind(this));
                 this._featureClickListener = this.addEventListener(this._panoramaViewer, panoramaEvents.FEATURE_CLICK, this._handleFeatureClick.bind(this));
@@ -595,7 +603,8 @@ require(REQUIRE_CONFIG, [], function () {
                     return;
                 }
                 if (this.map.getScale() < this._zoomThreshold) {
-                    this._recordingClient.load().then((response) => {
+                    //GC: include the time travel variable if it was activated
+                    this._recordingClient.load(this._timeTravel).then((response) => {
                         this._layerManager.updateRecordings(response);
                     });
                 } else {
@@ -619,36 +628,106 @@ require(REQUIRE_CONFIG, [], function () {
                 }
             },
 
+            //GC: Added a new function to get the dateRange of the current time travel
+            _getDateRange(timeTravel){
+                const now = timeTravel;
+                let date2 = '31';
+                //Makes the end date 28 if the end month is February
+                if((now.getMonth()+1) === 1){
+                    date2 = '28';
+                }
+                //Makes the end date 30 if the end month is April, June, September, or November
+                if((now.getMonth()+1) === 3 || (now.getMonth()+1) === 5 || (now.getMonth()+1) === 8 || (now.getMonth()+1) === 10){
+                    date2 = '30';
+                }
+                //separate start and end dates by three months
+                let month1 = now.getMonth();
+                let month2 = now.getMonth()+2;
+                let year1 = now.getFullYear();
+                let year2 = now.getFullYear();
+
+                if(month1 === 0){
+                    month1 = '12';
+                    year1 = now.getFullYear()-1;
+                }else if(month1 < 10){
+                    month1 = '0'+month1;
+                }
+
+                if(month2 === 13){
+                    month2 = '01';
+                    year2 = now.getFullYear()+1;
+                }else if(month2 < 10){
+                    month2 = '0'+month2;
+                }
+
+                return {from: year1+'-'+month1+'-01' , to: year2+'-'+month2+'-'+date2};
+
+            },
+
             _centerViewerToMap(center) {
                 const mapCenter = center || this.map.extent.getCenter();
                 const mapSRS = this.config.srs.split(':')[1];
                 const localCenter = utils.transformProj4js(mapCenter, mapSRS);
 
+                //GC: Create coordinate and date range variables used to keep the panorama in the current time setting instead of resetting it to the default
+                const coord = [localCenter.x, localCenter.y];
+                let dateRange = null;
+                if(this._timeTravel){
+                    dateRange = this._getDateRange(this._timeTravel);
+                }
+
                 // Manually fire these events as they are fired too early by the API,
                 // we can't listen to them yet.
-                this.query(`${localCenter.x},${localCenter.y}`);
+                this.query(`${localCenter.x},${localCenter.y}`, coord, dateRange);
             },
 
-            query(query) {
+            query(query, coord, range) {
                 const timeTravelVisible = this.config.timetravel !== undefined ? this.config.timetravel : false;
 
-                return StreetSmartApi.open(query, {
-                        viewerType: [this._viewerType],
-                        srs: this.config.srs,
-                        panoramaViewer: {
-                            closable: false,
-                            maximizable: true,
-                            timeTravelVisible,
-                            measureTypeButtonVisible: !this.config.saveMeasurements,
-                            measureTypeButtonStart: !this.config.saveMeasurements,
-                            measureTypeButtonToggle: !this.config.saveMeasurements,
+                //GC: opens the API with current time settings if the time travel variable is active
+                if(range){
+                    return StreetSmartApi.open(
+                        {
+                            coordinate: coord,
+                            dateRange: range,
                         },
-                    }
-                ).then(result => {
-                    const viewer = result.length ? result[0] : null;
-                    this._handleViewerChanged(viewer);
-                    this._handleConeChange();
-                });
+                        {
+                            viewerType: [this._viewerType],
+                            srs: this.config.srs,
+                            panoramaViewer: {
+                                closable: false,
+                                maximizable: true,
+                                timeTravelVisible,
+                                measureTypeButtonVisible: !this.config.saveMeasurements,
+                                measureTypeButtonStart: !this.config.saveMeasurements,
+                                measureTypeButtonToggle: !this.config.saveMeasurements,
+                            },
+                        }
+                    ).then(result => {
+                        const viewer = result.length ? result[0] : null;
+                        this._handleViewerChanged(viewer);
+                        this._handleConeChange();
+                    });
+                }else{
+                    return StreetSmartApi.open(query, {
+                            viewerType: [this._viewerType],
+                            srs: this.config.srs,
+                            panoramaViewer: {
+                                closable: false,
+                                maximizable: true,
+                                timeTravelVisible,
+                                measureTypeButtonVisible: !this.config.saveMeasurements,
+                                measureTypeButtonStart: !this.config.saveMeasurements,
+                                measureTypeButtonToggle: !this.config.saveMeasurements,
+                            },
+                        }
+                    ).then(result => {
+                        const viewer = result.length ? result[0] : null;
+                        this._handleViewerChanged(viewer);
+                        this._handleConeChange();
+                    });
+                }
+
             },
 
             setPanoramaViewerOrientation(orientation) {
@@ -657,7 +736,7 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _determineZoomThreshold: function () {
-                // Excplcit zoom level replaced for zoom scale values for consistency.
+                // Explicit zoom level replaced for zoom scale values for consistency.
                 let zoomThreshold = 1200;
 
                 this._zoomThreshold = zoomThreshold;
@@ -682,6 +761,11 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             onClose() {
+                //GC: Removes the coverage layer in case it was not removed before zooming in first
+                if(this.map.getLayer("CycloramaCoverage")){
+                    this.map.removeLayer(this.map.getLayer("CycloramaCoverage"));
+                }
+
                 StreetSmartApi.destroy({ targetElement: this.panoramaViewerDiv });
                 this.loadingIndicator.classList.remove('hidden');
                 this.streetIndicator.innerHTML = '';
@@ -692,6 +776,7 @@ require(REQUIRE_CONFIG, [], function () {
                 this._selectedFeatureID = null;
                 this._measurementButtonOverwrideTimer = clearInterval(this._measurementButtonOverwrideTimer);
                 this._saveButtonOverwrideTimer = clearInterval(this._saveButtonOverwrideTimer);
+                this._timeTravel = null;
 
                 this._mapIdLayerId = {};
                 this._visibleLayers = {};
