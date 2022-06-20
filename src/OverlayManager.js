@@ -425,7 +425,7 @@ define([
                             } else if (arcgisFeatureSet.geometryType === 'esriGeometryPolyline') {
                                 const paths = fromFeature.geometry && fromFeature.geometry.paths;
 
-                                if (paths.length === 1) {
+                                if (paths.length >= 1) {
                                     const points = paths[0].slice(0);
 
                                     for (const point in points) {
@@ -434,28 +434,28 @@ define([
                                         const z = thisPoint && thisPoint.length === 3 && thisPoint[2];
                                         let updatePaths = updateFeature.geometry && updateFeature.geometry.paths;
 
-                                        if (updatePaths.length === 1 && updatePaths[0][point]) {
-                                            if (z) {
-                                                updatePaths[0][point][2] = z;
-                                            }
-
-                                            if (updateFeature.geometry.spatialReference.wkid != this.config.srs.split(':')[1]) {
-                                                const x = thisPoint && thisPoint.length >= 1 && thisPoint[0];
-                                                const y = thisPoint && thisPoint.length >= 2 && thisPoint[1]
-                                                changedSpatialReference = true;
-
-                                                if (x) {
-                                                    updatePaths[0][point][0] = x;
+                                        if (updatePaths.length >= 1) {
+                                            if (updatePaths[0][point]) {
+                                                if (z) {
+                                                    updatePaths[0][point][2] = z;
                                                 }
 
-                                                if (y) {
-                                                    updatePaths[0][point][1] = y;
+                                                if (updateFeature.geometry.spatialReference.wkid !== this.config.srs.split(':')[1]) {
+                                                    const x = thisPoint && thisPoint.length >= 1 && thisPoint[0];
+                                                    const y = thisPoint && thisPoint.length >= 2 && thisPoint[1]
+                                                    changedSpatialReference = true;
+
+                                                    if (x) {
+                                                        updatePaths[0][point][0] = x;
+                                                    }
+
+                                                    if (y) {
+                                                        updatePaths[0][point][1] = y;
+                                                    }
                                                 }
+                                            } else {
+                                                updatePaths[0][point] = thisPoint;
                                             }
-                                        }
-                                        else {
-                                            updatePaths = [[]];
-                                            updatePaths[0][point] = thisPoint;
                                         }
                                     }
                                 }
