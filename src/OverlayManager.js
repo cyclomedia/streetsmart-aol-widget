@@ -405,7 +405,7 @@ define([
                                     updateFeature.geometry.z = z;
                                 }
 
-                                if (!updateFeature.geometry.spatialReference || updateFeature.geometry.spatialReference.wkid != this.config.srs.split(':')[1]) {
+                                if (!updateFeature.geometry.spatialReference || updateFeature.geometry.spatialReference.wkid !== this.config.srs.split(':')[1]) {
                                     const x = fromFeature.geometry && fromFeature.geometry.x;
                                     const y = fromFeature.geometry && fromFeature.geometry.y;
                                     const spatialReference = featureSet.spatialReference;
@@ -425,7 +425,7 @@ define([
                             } else if (arcgisFeatureSet.geometryType === 'esriGeometryPolyline') {
                                 const paths = fromFeature.geometry && fromFeature.geometry.paths;
 
-                                if (paths.length === 1) {
+                                if (paths.length >= 1) {
                                     const points = paths[0].slice(0);
 
                                     for (const point in points) {
@@ -434,28 +434,29 @@ define([
                                         const z = thisPoint && thisPoint.length === 3 && thisPoint[2];
                                         let updatePaths = updateFeature.geometry && updateFeature.geometry.paths;
 
-                                        if (updatePaths.length === 1 && updatePaths[0][point]) {
-                                            if (z) {
-                                                updatePaths[0][point][2] = z;
-                                            }
-
-                                            if (updateFeature.geometry.spatialReference.wkid != this.config.srs.split(':')[1]) {
-                                                const x = thisPoint && thisPoint.length >= 1 && thisPoint[0];
-                                                const y = thisPoint && thisPoint.length >= 2 && thisPoint[1]
-                                                changedSpatialReference = true;
-
-                                                if (x) {
-                                                    updatePaths[0][point][0] = x;
+                                        //GC: updated code to fix shortened polylines
+                                        if (updatePaths.length >= 1) {
+                                            if (updatePaths[0][point]) {
+                                                if (z) {
+                                                    updatePaths[0][point][2] = z;
                                                 }
 
-                                                if (y) {
-                                                    updatePaths[0][point][1] = y;
+                                                if (updateFeature.geometry.spatialReference.wkid !== this.config.srs.split(':')[1]) {
+                                                    const x = thisPoint && thisPoint.length >= 1 && thisPoint[0];
+                                                    const y = thisPoint && thisPoint.length >= 2 && thisPoint[1]
+                                                    changedSpatialReference = true;
+
+                                                    if (x) {
+                                                        updatePaths[0][point][0] = x;
+                                                    }
+
+                                                    if (y) {
+                                                        updatePaths[0][point][1] = y;
+                                                    }
                                                 }
+                                            } else {
+                                                updatePaths[0][point] = thisPoint;
                                             }
-                                        }
-                                        else {
-                                            updatePaths = [[]];
-                                            updatePaths[0][point] = thisPoint;
                                         }
                                     }
                                 }
@@ -513,6 +514,35 @@ define([
             }
 
             arcgisFeatureSet.features = features;
+
+
+
+            //GC: supposed to iterate through the attributes, find the coded values and turn them to the new values
+            for (let i = 0; i < arcgisFeatureSet.features.length; i++) {
+                const attr = arcgisFeatureSet.features[i].attributes;
+                Object.entries(attr).forEach(entry => {
+                    const [key, value] = entry;
+                    //console.log(key, value);
+                    for (let j = 0; j < mapLayer._fields.length; j++) {
+                        if (mapLayer._fields[j].name === key){
+                            if (mapLayer._fields[j].domain) {
+                                for (let k = 0; k < mapLayer._fields[j].domain.codedValues.length; k++) {
+                                    if (mapLayer._fields[j].domain.codedValues[k].code === value) {
+                                        attr[key] = mapLayer._fields[j].domain.codedValues[k].name;
+                                    }
+                                }
+                            }
+                            var alias = mapLayer._fields[j].alias;
+                            //GC: Changes the field name to the alias in the attributes
+                            if(alias != key){
+                                Object.defineProperty(attr, alias, (Object.getOwnPropertyDescriptor(attr, key)));
+                                delete attr[key];
+                            }
+                        }
+                    }
+                });
+                arcgisFeatureSet.features[i].attributes = attr;
+            }
 
             const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet, undefined, dates);
 

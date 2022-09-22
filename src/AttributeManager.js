@@ -110,6 +110,8 @@ define([
         }
 
         showInfoOfFeature(feature){
+            //test variable
+            //const target = feature._layer._fields[0];
             if(!this.config.allowEditing) return this._showInfoWindowWithFeature(feature)
             const insp = this._constructNewInspector(feature.getLayer())
             this.map.infoWindow.clearFeatures();
