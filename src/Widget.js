@@ -11,10 +11,14 @@ const REQUIRE_CONFIG = {
         // 'react-dom': '/widgets/StreetSmart/packages/react-dom.production.min',
         // 'openlayers': '/widgets/StreetSmart/packages/ol.min',
         // 'lodash': '/widgets/StreetSmart/packages/lodash.min'
-        'react': 'https://unpkg.com/react@16.12.0/umd/react.production.min',
-        'react-dom': 'https://unpkg.com/react-dom@16.12.0/umd/react-dom.production.min',
-        'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol',
-        'lodash': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min'
+        // 'react': 'https://unpkg.com/react@16.12.0/umd/react.production.min',
+        // 'react-dom': 'https://unpkg.com/react-dom@16.12.0/umd/react-dom.production.min',
+        // 'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol',
+        // 'lodash': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min'
+        'react': 'https://sld.cyclomedia.com/react/react.production.min',
+        'react-dom': 'https://sld.cyclomedia.com/react/react-dom.production.min',
+        'openlayers': 'https://sld.cyclomedia.com/react/ol.min',
+        'lodash': 'https://sld.cyclomedia.com/react/lodash.min'
     }
 };
 
@@ -34,8 +38,9 @@ require(REQUIRE_CONFIG, [], function () {
         'esri/tasks/locator',
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
-        // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v22.3/StreetSmartApi.js',
+        //'https://streetsmart-staging.cyclomedia.com/api/v22.14/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v22.14/StreetSmartApi.js',
+        //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-4692/StreetSmartApi.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -183,9 +188,10 @@ require(REQUIRE_CONFIG, [], function () {
                 const decodedToken = atob(this.config.token).split(':');
 
                 const CONFIG = {
-                    targetElement: this.panoramaViewerDiv, // I have no idea where this comes from
+                    targetElement: this.panoramaViewerDiv,
                     username: decodedToken[0],
                     password: decodedToken[1],
+                    loginOauth: this.config.OAuth,
                     apiKey: this._apiKey,
                     srs: this.config.srs,
                     locale: this.config.locale,
@@ -250,8 +256,8 @@ require(REQUIRE_CONFIG, [], function () {
                 const idField = layer.objectIdField;
                 const wkid = layer.spatialReference.latestWkid  || layer.spatialReference.wkid
 
-                const meaurementType = geojsonUtils.EsriGeomTypes[layer.geometryType]
-                const typeToUse = meaurementType && meaurementType[0]
+                const measurementType = geojsonUtils.EsriGeomTypes[layer.geometryType]
+                const typeToUse = measurementType && measurementType[0]
 
                 if(typeToUse && this.config.allowEditing) {
                     this._selectedLayerID = layer.id;
@@ -466,8 +472,8 @@ require(REQUIRE_CONFIG, [], function () {
 
                     if(clickedLayer.type !== 'Feature Layer' || !clickedLayer.getEditCapabilities().canUpdate) return;
 
-                    const meaurementType = geojsonUtils.EsriGeomTypes[clickedLayer.geometryType]
-                    const typeToUse = meaurementType && meaurementType[0]
+                    const measurementType = geojsonUtils.EsriGeomTypes[clickedLayer.geometryType]
+                    const typeToUse = measurementType && measurementType[0]
 
                     if(typeToUse && this.config.allowEditing) {
                         this._selectedLayerID = clickedLayer.id;
@@ -766,7 +772,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this.map.removeLayer(this.map.getLayer("CycloramaCoverage"));
                 }
 
-                StreetSmartApi.destroy({ targetElement: this.panoramaViewerDiv });
+                StreetSmartApi.destroy({ targetElement: this.panoramaViewerDiv, loginOauth: this.config.OAuth });
                 this.loadingIndicator.classList.remove('hidden');
                 this.streetIndicator.innerHTML = '';
                 this._overlayManager.reset();
@@ -859,7 +865,7 @@ require(REQUIRE_CONFIG, [], function () {
                 // collapse the sidebar after a 10 frame delay,
                 // doing it directly throws an exception as the measurement mode hasn't started yet.
                 window.setTimeout(() => {
-                    this._panoramaViewer.toggleSidebarExpanded(false)
+                    this._panoramaViewer.toggleSidebarExpanded(true) //change to false to collapse sidebar
                     if(geojson){
                         StreetSmartApi.setActiveMeasurement(geojson)
                     }
@@ -910,7 +916,7 @@ require(REQUIRE_CONFIG, [], function () {
                         }
                     });
 
-                    StreetSmartApi.stopMeasurementMode();
+                    //StreetSmartApi.stopMeasurementMode();
                 }
             },
 
