@@ -45,9 +45,17 @@ define([
                 on(dom.byId('toggleAll'), 'click', function(){
                     require(["dojo/query", "dojo/NodeList-dom"], function(query){
                         query('input[type="checkbox"]').forEach(function(node){
-                            node.checked = dom.byId('toggleAll').checked;
+                            if(node.id !== "LoginWithOauth"){
+                                node.checked = dom.byId('toggleAll').checked;
+                            }
                         });
                     });
+                });
+                //GC: OAuth clicking event
+                on(dom.byId('LoginWithOauth'), 'click', function(){
+                    var LoginWithOauth = dom.byId('LoginWithOauth').checked;
+                    dom.byId('userName').disabled = LoginWithOauth;
+                    dom.byId('password').disabled = LoginWithOauth;
                 });
 
             },
@@ -71,6 +79,15 @@ define([
                         this.uPwdCyclomedia.value = decodedToken[1];
                     }
                 }
+
+                //GC: adding OAuth functionality
+                // if(this.config.OAuth){
+                //     this.uNameCyclomedia.disabled = true;
+                //     this.uPwdCyclomedia.disabled = true;
+                // }else{
+                //     this.uNameCyclomedia.disabled = false;
+                //     this.uPwdCyclomedia.disabled = false;
+                // }
 
                 if(this.config.agreement){
                     this.agreementCheck.value = this.config.agreement;
@@ -155,6 +172,7 @@ define([
 
             getConfig: function () {
                 this.config.locale = this.selectCyclomediaLocation.value;
+                this.config.OAuth = this.OAuthLogin.checked;
                 this.config.units = this.selectUnitToggle.value;
                 this.config.token = btoa(`${this.uNameCyclomedia.value}:${this.uPwdCyclomedia.value}`);
                 this.config.agreement = this.agreementCheck.checked;

@@ -333,3 +333,16 @@
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .measurement-floating-panel .warning span {
     color: #ec7a08 !important
 }
+
+th{
+    font-weight: bold;
+}
+
+.cmt .table-wrap th, .cmt .table-wrap td{
+    max-width: 250px;
+    word-break: normal !important;
+}
+
+.cmt .viewer .cmtNavBarPanel .attributeinfopanel .panel-heading{
+    overflow: auto;
+}
