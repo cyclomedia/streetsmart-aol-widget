@@ -39,7 +39,8 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         //'https://streetsmart-staging.cyclomedia.com/api/v22.14/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v22.14/StreetSmartApi.js',
+        //'https://streetsmart.cyclomedia.com/api/v22.14/StreetSmartApi.js',
+        'https://labs.cyclomedia.com/streetsmart-api/branch/bootstrap_upgrades/StreetSmartApi.js',
         //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-4692/StreetSmartApi.js',
         './utils',
         './RecordingClient',
@@ -880,7 +881,13 @@ require(REQUIRE_CONFIG, [], function () {
                         if (panel && panel.children.length !== 2) {
                             const button = panel.childNodes[0];
                             const clone = button.cloneNode(true);
-                            clone.childNodes[0].classList.remove('novaicon-navigation-down-3');
+
+                            // clone.childNodes[0].classList.remove('novaicon-navigation-down-3');
+
+                            clone.childNodes[0].classList.remove('expand-icon');
+                            clone.childNodes[0].classList.remove('expanded');
+                            clone.childNodes[0].classList.add('glyphicon');
+
                             clone.childNodes[0].classList.add('novaicon-data-download-2');
                             panel.insertBefore(clone, button);
                             clone.onclick = this._saveMeasurement.bind(this);
