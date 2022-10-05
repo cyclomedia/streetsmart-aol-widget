@@ -18,7 +18,6 @@ const REQUIRE_CONFIG = {
         'react': 'https://sld.cyclomedia.com/react/react.production.min',
         'react-dom': 'https://sld.cyclomedia.com/react/react-dom.production.min',
         'openlayers': 'https://sld.cyclomedia.com/react/ol.min',
-        'lodash': 'https://sld.cyclomedia.com/react/lodash.min'
     }
 };
 
@@ -39,8 +38,9 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
         //'https://streetsmart-staging.cyclomedia.com/api/v22.14/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v22.14/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v22.15/StreetSmartApi.js',
         //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-4692/StreetSmartApi.js',
+        'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -67,6 +67,7 @@ require(REQUIRE_CONFIG, [], function () {
         Query,
         webMercatorUtils,
         StreetSmartApi,
+        _,
         utils,
         RecordingClient,
         LayerManager,
