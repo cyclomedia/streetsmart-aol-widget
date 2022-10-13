@@ -37,8 +37,8 @@ require(REQUIRE_CONFIG, [], function () {
         'esri/tasks/locator',
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
-        //'https://streetsmart-staging.cyclomedia.com/api/v22.14/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v22.15/StreetSmartApi.js',
+        'https://streetsmart-staging.cyclomedia.com/api/v22.16/StreetSmartApi.js',
+        //'https://streetsmart.cyclomedia.com/api/v22.15/StreetSmartApi.js',
         //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-4692/StreetSmartApi.js',
         'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
@@ -222,8 +222,12 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _bindInitialMapHandlers() {
+                const measurementStarted = StreetSmartApi.Events.measurement.MEASUREMENT_STARTED;
                 const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED;
+                const measurementStopped = StreetSmartApi.Events.measurement.MEASUREMENT_STOPPED;
+                this.addEventListener(StreetSmartApi, measurementStarted, this._handleMeasurementStarted.bind(this));
                 this.addEventListener(StreetSmartApi, measurementChanged, this._handleMeasurementChanged.bind(this));
+                this.addEventListener(StreetSmartApi, measurementStopped, this._handleMeasurementStopped.bind(this));
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
                 this.addEventListener(this.map, 'pan-end', this._handleMapMovement.bind(this));
                 this.addEventListener(this.map, 'click', this._handleMapClick.bind(this));
@@ -278,6 +282,13 @@ require(REQUIRE_CONFIG, [], function () {
                 }
             },
 
+            _handleMeasurementStarted() {
+                if(this.config.showStreetName) {
+                    this.streetIndicatorContainer.classList.add('hidden');
+                    this.streetIndicatorHiddenDuringMeasurement = true;
+                }
+            },
+
             _handleMeasurementChanged(e) {
                 const {panoramaViewer, activeMeasurement} = e.detail;
                 const newViewer = panoramaViewer;
@@ -296,17 +307,14 @@ require(REQUIRE_CONFIG, [], function () {
                 if(!activeMeasurement && this.config.allowEditing){
                     this.map.infoWindow.hide()
                 }
+            },
 
+            _handleMeasurementStopped(e) {
                 if(this.config.showStreetName) {
-                    if (activeMeasurement) {
-                        this.streetIndicatorContainer.classList.add('hidden');
-                        this.streetIndicatorHiddenDuringMeasurement = true
-                    } else {
-                        if(this.streetIndicatorShouldBeVisible) {
-                            this.streetIndicatorContainer.classList.remove('hidden');
-                        }
-                        this.streetIndicatorHiddenDuringMeasurement = false
+                    if(this.streetIndicatorShouldBeVisible) {
+                        this.streetIndicatorContainer.classList.remove('hidden');
                     }
+                    this.streetIndicatorHiddenDuringMeasurement = false
                 }
             },
 
