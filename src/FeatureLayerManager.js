@@ -157,7 +157,7 @@ define([
                 options.content.updates = JSON.stringify(geomJson);
             }
 
-            let layerSaveRequest = esriRequest(options, { usePost: true });
+            let layerSaveRequest = esriRequest(options, { usePost: true, disableIdentityLookup: true });
 
             return layerSaveRequest.then(
                 (response) => {

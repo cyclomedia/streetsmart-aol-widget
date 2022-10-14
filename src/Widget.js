@@ -18,7 +18,7 @@ const REQUIRE_CONFIG = {
         'react': 'https://sld.cyclomedia.com/react/react.production.min',
         'react-dom': 'https://sld.cyclomedia.com/react/react-dom.production.min',
         'openlayers': 'https://sld.cyclomedia.com/react/ol.min',
-        'lodash': 'https://sld.cyclomedia.com/react/lodash.min'
+        //'lodash': 'https://sld.cyclomedia.com/react/lodash.min'
     }
 };
 
@@ -38,9 +38,10 @@ require(REQUIRE_CONFIG, [], function () {
         'esri/tasks/locator',
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
-        //'https://streetsmart-staging.cyclomedia.com/api/v22.14/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v22.14/StreetSmartApi.js',
-        //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-4692/StreetSmartApi.js',
+        //'https://labs.cyclomedia.com/streetsmart-api/branch/develop/StreetSmartApi.js',
+        //'https://streetsmart-staging.cyclomedia.com/api/v22.16/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v22.15/StreetSmartApi.js',
+        'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -67,6 +68,7 @@ require(REQUIRE_CONFIG, [], function () {
         Query,
         webMercatorUtils,
         StreetSmartApi,
+        _,
         utils,
         RecordingClient,
         LayerManager,
@@ -225,8 +227,17 @@ require(REQUIRE_CONFIG, [], function () {
                 this.addEventListener(StreetSmartApi, measurementChanged, this._handleMeasurementChanged.bind(this));
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
                 this.addEventListener(this.map, 'pan-end', this._handleMapMovement.bind(this));
+                this.addEventListener(this.map, 'zoom-end', this._handleMapMovement.bind(this)); //GC: added new event that handles zooms when centered is on
                 this.addEventListener(this.map, 'click', this._handleMapClick.bind(this));
-                this._sidePanelManager.bindEventListeners()
+                this._sidePanelManager.bindEventListeners();
+                //GC: additional coverage layer event
+                this.addEventListener(this.map, 'zoom-end', (zoomEvent) => {
+                    if(this.map.getLayer("CycloramaCoverage") && (this.map.getScale() < this._zoomThreshold)){
+                        this.map.getLayer("CycloramaCoverage").hide();
+                    }else{
+                        this.map.getLayer("CycloramaCoverage").show();
+                    }
+                });
             },
 
             _handleMapClick(e) {
@@ -267,7 +278,13 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _handleMapMovement(e){
-                const diff = e.delta.x + e.delta.y;
+                let diff = null;
+                //catch for pan-end and zoom-end event
+                if(e.delta){
+                    diff = e.delta.x + e.delta.y;
+                }else if(e.anchor){
+                    diff = e.anchor.x + e.anchor.y;
+                }
                 if(!this._disableLinkToMap && this.config.linkMapMove === true && !this._panoramaViewer.props.activeMeasurement) {
                     if(diff) {
                         this._centerViewerToMap(e.extent.getCenter());
@@ -743,7 +760,12 @@ require(REQUIRE_CONFIG, [], function () {
 
             _determineZoomThreshold: function () {
                 // Explicit zoom level replaced for zoom scale values for consistency.
-                let zoomThreshold = 1200;
+                //let zoomThreshold = 1200;
+                //GC: creates default scale level if it hasn't been made yet
+                if(!this.config.scale){
+                    this.config.scale = 1130;
+                }
+                let zoomThreshold = Number(this.config.scale);
 
                 this._zoomThreshold = zoomThreshold;
                 return zoomThreshold;
@@ -881,6 +903,9 @@ require(REQUIRE_CONFIG, [], function () {
                             const button = panel.childNodes[0];
                             const clone = button.cloneNode(true);
                             clone.childNodes[0].classList.remove('novaicon-navigation-down-3');
+                            // clone.childNodes[0].classList.remove('expand-icon');
+                            // clone.childNodes[0].classList.remove('expanded');
+                            // clone.childNodes[0].classList.add('glyphicon');
                             clone.childNodes[0].classList.add('novaicon-data-download-2');
                             panel.insertBefore(clone, button);
                             clone.onclick = this._saveMeasurement.bind(this);
@@ -915,7 +940,7 @@ require(REQUIRE_CONFIG, [], function () {
                             });
                         }
                     });
-
+                    //don't allow measurement mode to close after saving
                     //StreetSmartApi.stopMeasurementMode();
                 }
             },

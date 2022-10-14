@@ -34,6 +34,14 @@
                 <option value="ft">${nls.unitsFeet}</option>
             </select>
         </div>
+        <div class="settingsForm">
+            <div class="settingsLabel">Open Display Scale</div>
+            <select class="settingSelect" id="displayScale" data-dojo-attach-point="selectScaleToggle" data-dojo-type="dijit/form/Select">
+                <option value="1130" selected="selected">1:1130 (default)</option>
+                <option value="2258">1:2258 (Far)</option>
+                <option value="4415">1:4415 (Farther)</option>
+            </select>
+        </div>
         <hr/>
         <div class="settingsForm">
             <div class="settingsLabel">${nls.toggleAll}</div>

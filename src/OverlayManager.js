@@ -146,6 +146,10 @@ define([
                 } else {
                     let geojson = this.createGeoJsonForFeature({mapLayer});
                     const sld = new SLD(mapLayer, geojson);
+                    //GC: finds <Null> values inside of xml and replaces it so it doesn't return an html error
+                    if(sld.xml.includes("<Null>")){
+                        sld.xml = sld.xml.replace("<Null>", "Null");
+                    }
                     geojson = this.applyDefaultCaseIfNeeded(geojson, sld);
                     if(sld.xml === undefined){
                         return;
@@ -515,8 +519,6 @@ define([
 
             arcgisFeatureSet.features = features;
 
-
-
             //GC: supposed to iterate through the attributes, find the coded values and turn them to the new values
             for (let i = 0; i < arcgisFeatureSet.features.length; i++) {
                 const attr = arcgisFeatureSet.features[i].attributes;
@@ -533,7 +535,7 @@ define([
                                 }
                             }
                             var alias = mapLayer._fields[j].alias;
-                            //GC: Changes the field name to the alias in the attributes
+                            //GC: Changes the field name to the alias in the attributes if they are not the same
                             if(alias != key){
                                 Object.defineProperty(attr, alias, (Object.getOwnPropertyDescriptor(attr, key)));
                                 delete attr[key];
