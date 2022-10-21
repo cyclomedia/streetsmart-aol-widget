@@ -34,7 +34,7 @@ define([
     WebTiledLayer
 ) {
     return class LayerManager {
-        constructor({ map, wkid, onRecordingLayerClick, addEventListener, removeEventListener, setPanoramaViewerOrientation, config, nls}) {
+        constructor({ map, wkid, onRecordingLayerClick, addEventListener, removeEventListener, setPanoramaViewerOrientation, config, nls, widget}) {
             this._recordingColor = new Color.fromString('#80B0FF');
             this._recordingColorDepth = new Color.fromString('#98C23C');
             this._historicRecording = new Color.fromString('#FF8D29');
@@ -44,6 +44,7 @@ define([
             this.wkid = wkid;
             this.nls = nls;
             this.config = config;
+            this.widget = widget;
             this.addEventListener = addEventListener;
             this.removeEventListener = removeEventListener;
             this.setPanoramaViewerOrientation = setPanoramaViewerOrientation;
@@ -60,6 +61,7 @@ define([
             this.addEventListener(this.viewingConeLayer, 'mouse-down', this.startConeInteraction.bind(this));
             this.map.addLayer(this.measureLayer);
             this.map.addLayer(this.coverageLayer);
+            this._layerVisibilityChange();
         }
 
         removeLayers() {
@@ -70,6 +72,26 @@ define([
             this.map.removeLayer(this.viewingConeLayer);
             this.map.removeLayer(this.measureLayer);
             this.map.removeLayer(this.coverageLayer);
+        }
+        //GC: created new function that listens to visibility change from the layer list
+        _layerVisibilityChange() {
+            //for loop looking through layer list and adding event listener for every layer
+            const mapLayers = _.values(this.map._layers);
+            for (let i = 0; i < mapLayers.length; i++) {
+                this.addEventListener(mapLayers[i], 'visibility-change', (layer) => {
+                    var overlayID = this.widget._mapIdLayerId;
+                    if(layer.target.id === "Cyclorama Recording Layer"){
+                        this.widget._panoramaViewer.toggleRecordingsVisible(layer.visible);
+                    }else{
+                        //only works if using overlay ID and not layer ID
+                        this.widget._panoramaViewer.toggleOverlay({
+                            id: overlayID[layer.target.id],
+                            visible: !layer.visible
+                        });
+                    }
+
+                });
+            }
         }
 
         updateRecordings(recordingData) {

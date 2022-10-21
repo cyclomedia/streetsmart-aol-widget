@@ -40,7 +40,7 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/geometry/webMercatorUtils",
         //'https://labs.cyclomedia.com/streetsmart-api/branch/develop/StreetSmartApi.js',
         //'https://streetsmart-staging.cyclomedia.com/api/v22.16/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v22.15/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v22.16/StreetSmartApi.js',
         'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
         './RecordingClient',
@@ -129,6 +129,7 @@ require(REQUIRE_CONFIG, [], function () {
                     config: this.config,
                     nls: this.nls,
                     removeEventListener: this.removeEventListener.bind(this),
+                    widget: this,
                 });
 
                 this._measurementHandler = new MeasurementHandler({
@@ -223,8 +224,12 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _bindInitialMapHandlers() {
+                const measurementStarted = StreetSmartApi.Events.measurement.MEASUREMENT_STARTED;
                 const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED;
+                const measurementStopped = StreetSmartApi.Events.measurement.MEASUREMENT_STOPPED;
+                this.addEventListener(StreetSmartApi, measurementStarted, this._handleMeasurementStarted.bind(this));
                 this.addEventListener(StreetSmartApi, measurementChanged, this._handleMeasurementChanged.bind(this));
+                this.addEventListener(StreetSmartApi, measurementStopped, this._handleMeasurementStopped.bind(this));
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
                 this.addEventListener(this.map, 'pan-end', this._handleMapMovement.bind(this));
                 this.addEventListener(this.map, 'zoom-end', this._handleMapMovement.bind(this)); //GC: added new event that handles zooms when centered is on
@@ -294,6 +299,13 @@ require(REQUIRE_CONFIG, [], function () {
                 }
             },
 
+            _handleMeasurementStarted() {
+                if(this.config.showStreetName) {
+                    this.streetIndicatorContainer.classList.add('hidden');
+                    this.streetIndicatorHiddenDuringMeasurement = true;
+                }
+            },
+
             _handleMeasurementChanged(e) {
                 const {panoramaViewer, activeMeasurement} = e.detail;
                 const newViewer = panoramaViewer;
@@ -303,26 +315,23 @@ require(REQUIRE_CONFIG, [], function () {
 
                 if (this.config.saveMeasurements) {
                     this._measurementDetails = activeMeasurement;
-                    if(!activeMeasurement){
+                    if (!activeMeasurement) {
                         this._selectedFeatureID = null;
                     }
                 }
                 this._measurementHandler.draw(e);
 
-                if(!activeMeasurement && this.config.allowEditing){
+                if (!activeMeasurement && this.config.allowEditing) {
                     this.map.infoWindow.hide()
                 }
+            },
 
+            _handleMeasurementStopped(e) {
                 if(this.config.showStreetName) {
-                    if (activeMeasurement) {
-                        this.streetIndicatorContainer.classList.add('hidden');
-                        this.streetIndicatorHiddenDuringMeasurement = true
-                    } else {
-                        if(this.streetIndicatorShouldBeVisible) {
-                            this.streetIndicatorContainer.classList.remove('hidden');
-                        }
-                        this.streetIndicatorHiddenDuringMeasurement = false
+                    if(this.streetIndicatorShouldBeVisible) {
+                        this.streetIndicatorContainer.classList.remove('hidden');
                     }
+                    this.streetIndicatorHiddenDuringMeasurement = false
                 }
             },
 
@@ -355,7 +364,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this.removeEventListener(this._viewChangeListener);
                     this.removeEventListener(this._imageChangeListener);
                     this.removeEventListener(this._featureClickListener);
-                    this.removeEventListener(this._layerTogleListener);
+                    this.removeEventListener(this._overlayToggleListener);
                     this._panoramaViewer = newViewer;
                     this._bindViewerDependantEventHandlers({ viewerOnly: true});
                 }
@@ -500,9 +509,25 @@ require(REQUIRE_CONFIG, [], function () {
 
                 }
             },
-
+            //GC: syncs overlay visibility change with layer list visibility
             _handleLayerVisibilityChange(info) {
                 const {layerId, visibility} = info.detail;
+                const mapLayers = _.values(this.map._layers);
+                const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
+                const overlayID = this._mapIdLayerId;
+
+                //since cyclorama recordings are not part of the feature layer list, it has to be checked here
+                if(layerId === "cyclorama-recordings"){
+                    this.map.getLayer("Cyclorama Recording Layer").setVisibility(visibility);
+                }
+
+                //loops through the feature layers to find the one that matches the overlayID label and switch visibility
+                for (let i = 0; i < featureLayers.length; i++) {
+                    //checks if the overlayID exists in current view and overlayID equals current layer ID
+                    if(overlayID[featureLayers[i].id] && overlayID[featureLayers[i].id] === layerId){
+                        featureLayers[i].setVisibility(visibility);
+                    }
+                }
 
                 if(layerId=== this.streetNameLayerID && this.config.showStreetName && !this.streetIndicatorHiddenDuringMeasurement ) {
                     this.streetIndicatorShouldBeVisible = visibility
@@ -531,7 +556,7 @@ require(REQUIRE_CONFIG, [], function () {
                 this._viewChangeListener = this.addEventListener(this._panoramaViewer, panoramaEvents.VIEW_CHANGE, this._handleConeChange.bind(this));
                 this._imageChangeListener = this.addEventListener(this._panoramaViewer, panoramaEvents.IMAGE_CHANGE, this._handleImageChange.bind(this));
                 this._featureClickListener = this.addEventListener(this._panoramaViewer, panoramaEvents.FEATURE_CLICK, this._handleFeatureClick.bind(this));
-                this._layerTogleListener = this.addEventListener(this._panoramaViewer, viewerEvents.LAYER_VISIBILITY_CHANGE, this._handleLayerVisibilityChange.bind(this));
+                this._overlayToggleListener = this.addEventListener(this._panoramaViewer, viewerEvents.LAYER_VISIBILITY_CHANGE, this._handleLayerVisibilityChange.bind(this));
                 this._panoramaViewer.showAttributePanelOnFeatureClick(false);
                 if (!opts.viewerOnly) {
                     this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));

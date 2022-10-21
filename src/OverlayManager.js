@@ -67,7 +67,7 @@ define([
             this.isQueueLoading = false;
             this.reloadQueueOnFinish = false;
             //  Can be used to listen to visibility changes in the layer list.
-            // this._bindLayerChangeListeners();
+            //this._bindLayerChangeListeners();
         }
 
         addStreetNameLayer() {
