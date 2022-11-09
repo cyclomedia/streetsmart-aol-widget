@@ -315,7 +315,7 @@ label {
 }
 
 .dart-panel #panoramaViewerDiv #cmt .measurement-navbar *,
-.dart-panel #panoramaViewerDiv #cmt .btn-viewer-icn:not(:hover) .glyphicon,
+.dart-panel #panoramaViewerDiv #cmt .btn-viewer-icn:not(:hover):not(:focus) .glyphicon,
 .dart-panel .jimu-widget-frame.jimu-container .cmt .cmtViewerPanel .panel-body .btn-secondary-right span,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar  .btn.btn-default *,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .cmt-navbar.measurement-navbar *,
