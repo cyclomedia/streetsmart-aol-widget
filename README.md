@@ -40,8 +40,8 @@ i.e.: 16.1.0 = year 2016, major version 1, patch 0.
 We also make use of:
 
 Street Smart API:
-*	api.version: 22.14
-*	api.location: [Street Smart API](https://streetsmart.cyclomedia.com/api/v22.14/StreetSmartAPI.js)
+*	api.version: 22.16
+*	api.location: [Street Smart API](https://streetsmart.cyclomedia.com/api/v22.16/StreetSmartAPI.js)
 
 ## Authors
 

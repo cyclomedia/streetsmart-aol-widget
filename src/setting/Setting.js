@@ -52,11 +52,11 @@ define([
                     });
                 });
                 //GC: OAuth clicking event
-                on(dom.byId('LoginWithOauth'), 'click', function(){
-                    var LoginWithOauth = dom.byId('LoginWithOauth').checked;
-                    dom.byId('userName').disabled = LoginWithOauth;
-                    dom.byId('password').disabled = LoginWithOauth;
-                });
+                // on(dom.byId('LoginWithOauth'), 'click', function(){
+                //     var LoginWithOauth = dom.byId('LoginWithOauth').checked;
+                //     dom.byId('userName').disabled = LoginWithOauth;
+                //     dom.byId('password').disabled = LoginWithOauth;
+                // });
 
             },
 
@@ -180,7 +180,7 @@ define([
 
             getConfig: function () {
                 this.config.locale = this.selectCyclomediaLocation.value;
-                this.config.OAuth = this.OAuthLogin.checked;
+                // this.config.OAuth = this.OAuthLogin.checked;
                 this.config.units = this.selectUnitToggle.value;
                 this.config.scale = this.selectScaleToggle.value;
                 this.config.token = btoa(`${this.uNameCyclomedia.value}:${this.uPwdCyclomedia.value}`);

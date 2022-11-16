@@ -29,21 +29,26 @@ define([
          * @param targetSrs srs to transform the point to
          * @returns {Point} the (original) transformed point
          */
-        transformProj4js: function(sourceGeom, targetSrs, backupSRS) {
+        transformProj4js: function(nls, sourceGeom, targetSrs, backupSRS) {
             //NB: Only works with points.
 
             //No transformation needed if source SRS == target SRS
+            //GC: added a backup SRS for the latestWkid in case targetSRS doesn't match
+            //Covers all cases for finding matching SRS to avoid the projection method
+            //these will return a new saved measurement
             if (sourceGeom.spatialReference.wkid === targetSrs) {
-                //this will return a new saved measurement
                 return sourceGeom;
             }else if(sourceGeom.spatialReference.wkid === backupSRS) {
-                //GC: added a backup SRS for the latestWkid
-                //this will return a new saved measurement
+                return sourceGeom;
+            }else if(sourceGeom.spatialReference.latestWkid && sourceGeom.spatialReference.latestWkid === targetSrs) {
+                return sourceGeom;
+            }else if(sourceGeom.spatialReference.latestWkid && sourceGeom.spatialReference.latestWkid === backupSRS) {
                 return sourceGeom;
             }
 
             var sourceEpsg = "EPSG:" + sourceGeom.spatialReference.wkid;
             var destEpsg = "EPSG:" + targetSrs;
+            //creating latest esri web mercator SRS
             if (sourceEpsg === "EPSG:102100") {
                 sourceEpsg = "EPSG:3857";
             }
@@ -51,16 +56,23 @@ define([
                 destEpsg = "EPSG:3857";
             }
 
-            var source = this.proj4(sourceEpsg);
-            //var dest = this.proj4(destEpsg);
-            //GC: looks for an error exception if the proj4 function cannot find the destination projection
-            //if error is caught, then the destination projection is the same as the source projection
+            //GC: looks for an error exception if the proj4 function cannot find the source or destination projection
+            //if error is caught, then the projection method is called to end the widget
+            try{
+                var source = this.proj4(sourceEpsg);
+            }
+            catch(err){
+                //var dest = source;
+                alert(nls.srsAlert);
+                var source = this.proj4(sourceEpsg);
+            }
+
             try{
                 var dest = this.proj4(destEpsg);
             }
             catch(err){
                 //var dest = source;
-                alert("Editable layer SRS (Spatial Reference System) does not match Street Smart SRS: Please make them match to save measurements.");
+                alert(nls.srsAlert);
                 var dest = this.proj4(destEpsg);
             }
 

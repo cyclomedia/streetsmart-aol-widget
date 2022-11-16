@@ -38,8 +38,8 @@ require(REQUIRE_CONFIG, [], function () {
         'esri/tasks/locator',
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
-        //'https://labs.cyclomedia.com/streetsmart-api/branch/develop/StreetSmartApi.js',
-        //'https://streetsmart-staging.cyclomedia.com/api/v22.16/StreetSmartApi.js',
+        //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-5219/StreetSmartApi.js',
+        //'https://streetsmart-staging.cyclomedia.com/api/v22.18/StreetSmartApi.js',
         'https://streetsmart.cyclomedia.com/api/v22.16/StreetSmartApi.js',
         'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
@@ -136,7 +136,8 @@ require(REQUIRE_CONFIG, [], function () {
                     wkid: this.wkid,
                     map: this.map,
                     layer: this._layerManager.measureLayer,
-                    StreetSmartApi: StreetSmartApi
+                    StreetSmartApi: StreetSmartApi,
+                    nls: this.nls,
                 });
 
                 this._sidePanelManager = new SidePanelManager({
@@ -157,7 +158,8 @@ require(REQUIRE_CONFIG, [], function () {
                     widget: this,
                     map: this.map,
                     wkid: this.wkid,
-                    StreetSmartApi: StreetSmartApi
+                    StreetSmartApi: StreetSmartApi,
+                    nls: this.nls,
                 });
 
                 this._attributeManager = new Attributemanager({
@@ -246,8 +248,24 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _handleMapClick(e) {
-                const mapFeature = e.graphic
-                if(!mapFeature) {
+                const mapFeature = e.graphic;
+                const coverMap = this.map.getLayer("CycloramaCoverage");
+                //GC: checks if the coverage map is visible to display cycloramas even when zoomed out
+                if(coverMap && coverMap.visible === true){
+                    const point = e.mapPoint;
+                    const mapSRS = parseInt(this.config.srs.split(':')[1]);
+                    const localPoint = utils.transformProj4js(this.nls, point, mapSRS);
+
+                    //GC: Create coordinate and date range variables used to keep the panorama in the current time setting instead of resetting it to the default
+                    const coord = [localPoint.x, localPoint.y];
+                    let dateRange = null;
+                    if(this._timeTravel){
+                        dateRange = this._getDateRange(this._timeTravel);
+                    }
+
+                    this.query(`${localPoint.x},${localPoint.y}`, coord, dateRange);
+                    return
+                }else if(!mapFeature) {
                     return
                 }
 
@@ -624,7 +642,7 @@ require(REQUIRE_CONFIG, [], function () {
 
                     const coord = new Point(x, y, this._layerManager.srs);
                     // Transform local SRS to Web Mercator:
-                    const coordLocal = utils.transformProj4js(coord, this.map.spatialReference.wkid);
+                    const coordLocal = utils.transformProj4js(this.nls, coord, this.map.spatialReference.wkid, this.map.spatialReference.latestWkid);
                     this.map.centerAt(coordLocal);
                     this._disableLinkToMap = true;
                 }
@@ -633,7 +651,7 @@ require(REQUIRE_CONFIG, [], function () {
                 const xyz = rec.xyz;
                 const srs = rec.srs;
                 const point = new Point(xyz[0], xyz[1], new SpatialReference(Number(srs.split(':')[1])));
-                const location = utils.transformProj4js(point, 102100);
+                const location = utils.transformProj4js(this.nls, point, 102100);
                 this._locator.locationToAddress(location, 0, (result) => {
                     const el = this.streetIndicator;
                     if(el){
@@ -714,8 +732,8 @@ require(REQUIRE_CONFIG, [], function () {
 
             _centerViewerToMap(center) {
                 const mapCenter = center || this.map.extent.getCenter();
-                const mapSRS = this.config.srs.split(':')[1];
-                const localCenter = utils.transformProj4js(mapCenter, mapSRS);
+                const mapSRS = parseInt(this.config.srs.split(':')[1]);
+                const localCenter = utils.transformProj4js(this.nls, mapCenter, mapSRS);
 
                 //GC: Create coordinate and date range variables used to keep the panorama in the current time setting instead of resetting it to the default
                 const coord = [localCenter.x, localCenter.y];
@@ -804,13 +822,15 @@ require(REQUIRE_CONFIG, [], function () {
 
             onOpen() {
                 const zoomLevel = this.map.getScale();
+                //GC: turn on Street Smart regardless of zoom level
+                this._initApi();
 
                 // Only open when the current zoom scale is close enough to the ground.
-                if (zoomLevel < this._zoomThreshold) {
-                    this._initApi();
-                } else {
-                    this._openApiWhenZoomedIn();
-                }
+                // if (zoomLevel < this._zoomThreshold) {
+                //     this._initApi();
+                // } else {
+                //     this._openApiWhenZoomedIn();
+                // }
             },
 
             onClose() {
@@ -877,7 +897,7 @@ require(REQUIRE_CONFIG, [], function () {
 
                 const sPoint = new ScreenPoint(mapRelativePixels.x, mapRelativePixels.y);
                 const mPoint = this.map.toMap(sPoint);
-                const vPoint = utils.transformProj4js(mPoint, this.wkid);
+                const vPoint = utils.transformProj4js(this.nls, mPoint, this.wkid);
 
                 this.query(`${vPoint.x},${vPoint.y}`);
             },
@@ -978,7 +998,7 @@ require(REQUIRE_CONFIG, [], function () {
 
                 if (data.selectResult) {
                     const searchedPoint = data.selectResult.result.feature.geometry;
-                    const searchedPtLocal = utils.transformProj4js(searchedPoint, this.wkid);
+                    const searchedPtLocal = utils.transformProj4js(this.nls, searchedPoint, this.wkid);
                     this.query((`${searchedPtLocal.x},${searchedPtLocal.y}`));
                 }
             },

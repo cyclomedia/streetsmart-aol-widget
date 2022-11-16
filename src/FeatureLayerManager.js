@@ -21,11 +21,12 @@ define([
     'use strict';
 
     return class FeatureLayerManager {
-        constructor({ map, wkid, StreetSmartApi, widget }) {
+        constructor({ map, wkid, StreetSmartApi, widget, nls }) {
             this.widget = widget;
             this.map = map;
             this.wkid = wkid;
             this.StreetSmartApi = StreetSmartApi;
+            this.nls = nls;
         }
 
         _saveMeasurementsToLayer(layer, measurementEvent, editID){
@@ -51,7 +52,7 @@ define([
                     return null;
                 }
                 const pointViewer = new Point(coord[0], coord[1], new SpatialReference({ wkid: this.wkid }));
-                const coordMap = utils.transformProj4js(pointViewer, layerWkid, latestWkid);
+                const coordMap = utils.transformProj4js(this.nls, pointViewer, layerWkid, latestWkid);
                 return [coordMap.x, coordMap.y, coord[2]];
             })
         }
@@ -157,7 +158,7 @@ define([
                 options.content.updates = JSON.stringify(geomJson);
             }
 
-            let layerSaveRequest = esriRequest(options, { usePost: true, disableIdentityLookup: true });
+            let layerSaveRequest = esriRequest(options, { usePost: true});
 
             return layerSaveRequest.then(
                 (response) => {
@@ -166,6 +167,10 @@ define([
                     return response
                 }, function(error){
                     console.log("error" + error);
+                    //GC: warning message in case the feature is not z enabled so measurement cannot be saved
+                    if(layer.hasZ === false){
+                        alert(this.nls.zAlert);
+                    }
                 });
         }
     }

@@ -273,6 +273,8 @@ define([
                   </Stroke>`
             }
             if(symbol.color) {
+                //GC: added transparency to the overlays using the opacity property
+                symbol.color.a = this.mapLayer.opacity;
                 fill =  `<Fill>
                             <SvgParameter name="fill">${symbol.color.toHex()}</SvgParameter>
                             <SvgParameter name="fill-opacity">${symbol.color.a}</SvgParameter>

@@ -314,7 +314,7 @@ define([
             const viewerColor = new Color.fromArray(panoramaViewer.getViewerColor());
             const coord = new Point(x, y, this.srs);
             // Transform local SRS to Web Mercator:
-            const coordLocal = utils.transformProj4js(coord, this.map.spatialReference.wkid);
+            const coordLocal = utils.transformProj4js(this.nls, coord, this.map.spatialReference.wkid, this.map.spatialReference.latestWkid);
 
             // Street Smart API returns orientation in degrees.
             let { yaw, hFov } = panoramaViewer.getOrientation();
