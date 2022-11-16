@@ -282,8 +282,14 @@
 .esriAttributeInspector .atiButtons .saveButton {
     margin: 0 5px 0 0 ;
 }
-/* dashboard theme fixes*/
 
+#cmt .btn-container {
+    padding: 0;
+    margin-inline: unset;
+    width: unset;
+}
+
+/* dashboard theme fixes*/
 label {
     color: #545454;
 }
@@ -298,7 +304,8 @@ label {
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar .measurement-dropdown:hover .btn.btn-default,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar .measurement-dropdown:hover .btn.btn-default *,
 .dart-panel #panoramaViewerDiv #cmt .measurement-navbar button:hover,
-.dart-panel #panoramaViewerDiv #cmt .measurement-navbar button:hover .glyphicon
+.dart-panel #panoramaViewerDiv #cmt .measurement-navbar button:hover .glyphicon,
+.dart-panel #panoramaViewerDiv #cmt .imageControls button .glyphicon
 {
     color: white !important;
 }
