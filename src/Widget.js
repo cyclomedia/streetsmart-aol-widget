@@ -27,7 +27,7 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/geometry/webMercatorUtils",
         //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-5219/StreetSmartApi.js',
         //'https://streetsmart-staging.cyclomedia.com/api/v22.18/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v22.16/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v22.18/StreetSmartApi.js',
         'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
         './RecordingClient',
@@ -575,8 +575,10 @@ require(REQUIRE_CONFIG, [], function () {
                         const measurementButton = document.getElementsByClassName('glyphicon novaicon-ruler-1')[0];
                         if (measurementButton && measurementButton.parentNode.onclick !== clickHandler) {
                             const button = measurementButton.parentNode;
+                            this.oldButton = button;
                             const new_element = button.cloneNode(true);
                             new_element.onclick = clickHandler;
+                            this.newButton = new_element;
                             button.parentNode.replaceChild(new_element, button);
                         }
                     };
@@ -888,8 +890,19 @@ require(REQUIRE_CONFIG, [], function () {
 
                 this.query(`${vPoint.x},${vPoint.y}`);
             },
+
+            replaceMeasurementButton(oldButton, newButton) {
+                const measurementButton = document.getElementsByClassName('glyphicon novaicon-ruler-1')[0];
+
+                if (measurementButton) {
+                    const button = measurementButton.parentNode;
+                    button.parentNode.replaceChild(oldButton, newButton);
+                }
+            },
+
             //GC: Added additional measurement options
             startMeasurement(type, geojson){
+                this.replaceMeasurementButton(this.oldButton, this.newButton);
                 let geometry;
                 switch (type) {
                     case 'POINT':
@@ -934,10 +947,10 @@ require(REQUIRE_CONFIG, [], function () {
                         if (panel && panel.children.length !== 2) {
                             const button = panel.childNodes[0];
                             const clone = button.cloneNode(true);
-                            clone.childNodes[0].classList.remove('novaicon-navigation-down-3');
-                            // clone.childNodes[0].classList.remove('expand-icon');
-                            // clone.childNodes[0].classList.remove('expanded');
-                            // clone.childNodes[0].classList.add('glyphicon');
+                            // clone.childNodes[0].classList.remove('novaicon-navigation-down-3');
+                            clone.childNodes[0].classList.remove('expand-icon');
+                            clone.childNodes[0].classList.remove('expanded');
+                            clone.childNodes[0].classList.add('glyphicon');
                             clone.childNodes[0].classList.add('novaicon-data-download-2');
                             panel.insertBefore(clone, button);
                             clone.onclick = this._saveMeasurement.bind(this);
