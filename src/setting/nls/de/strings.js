@@ -19,6 +19,10 @@
        linkMapMove: 'Karte und Panorama binden',
        saveMeasurements: 'Messungen speichern',
        allowEditing: 'Attributbearbeitung',
+       recordings: 'Anzeigeskala für Aufzeichnungen',
+       display1: "1:1130 (Ursprünglich)",
+       display2: "1:2258 (Weit)",
+       display3: "1:4415 (Weiter)",
 
        navigation: "Navigation",
        navigationButtons: 'Navigations-Schaltflächen',
