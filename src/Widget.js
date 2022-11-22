@@ -577,6 +577,7 @@ require(REQUIRE_CONFIG, [], function () {
                             const button = measurementButton.parentNode;
                             this.oldButton = button;
                             const new_element = button.cloneNode(true);
+                            this.newButton = new_element;
                             new_element.onclick = clickHandler;
                             this.newButton = new_element;
                             button.parentNode.replaceChild(new_element, button);
