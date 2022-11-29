@@ -25,7 +25,7 @@ require(REQUIRE_CONFIG, [], function () {
         'esri/tasks/locator',
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
-        //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-5219/StreetSmartApi.js',
+        //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-4660/StreetSmartApi.js',
         //'https://streetsmart-staging.cyclomedia.com/api/v22.18/StreetSmartApi.js',
         'https://streetsmart.cyclomedia.com/api/v22.18/StreetSmartApi.js',
         'https://sld.cyclomedia.com/react/lodash.min.js',
@@ -184,6 +184,7 @@ require(REQUIRE_CONFIG, [], function () {
                     username: decodedToken[0],
                     password: decodedToken[1],
                     loginOauth: this.config.OAuth,
+                    clientID: this.config.clientID,
                     apiKey: this._apiKey,
                     srs: this.config.srs,
                     locale: this.config.locale,
@@ -216,9 +217,11 @@ require(REQUIRE_CONFIG, [], function () {
                 const measurementStarted = StreetSmartApi.Events.measurement.MEASUREMENT_STARTED;
                 const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED;
                 const measurementStopped = StreetSmartApi.Events.measurement.MEASUREMENT_STOPPED;
+                const measurementSaved = StreetSmartApi.Events.measurement.MEASUREMENT_SAVED;
                 this.addEventListener(StreetSmartApi, measurementStarted, this._handleMeasurementStarted.bind(this));
                 this.addEventListener(StreetSmartApi, measurementChanged, this._handleMeasurementChanged.bind(this));
                 this.addEventListener(StreetSmartApi, measurementStopped, this._handleMeasurementStopped.bind(this));
+                this.addEventListener(StreetSmartApi, measurementSaved, this._saveMeasurement.bind(this));
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
                 this.addEventListener(this.map, 'pan-end', this._handleMapMovement.bind(this));
                 this.addEventListener(this.map, 'zoom-end', this._handleMapMovement.bind(this)); //GC: added new event that handles zooms when centered is on
@@ -904,26 +907,30 @@ require(REQUIRE_CONFIG, [], function () {
             startMeasurement(type, geojson){
                 this.replaceMeasurementButton(this.oldButton, this.newButton);
                 let geometry;
+                let saveButton = true;
+                if(this._selectedLayerID == null){
+                    saveButton = false;
+                }
                 switch (type) {
                     case 'POINT':
                         geometry = StreetSmartApi.MeasurementGeometryType.POINT;
-                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry, showSaveMeasurementButton: saveButton });
                         break;
                     case 'LINE':
                         geometry = StreetSmartApi.MeasurementGeometryType.LINESTRING;
-                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry, showSaveMeasurementButton: saveButton });
                         break;
                     case 'POLYGON':
                         geometry = StreetSmartApi.MeasurementGeometryType.POLYGON;
-                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry, showSaveMeasurementButton: saveButton });
                         break;
                     case 'ORTHOGONAL':
                         geometry = StreetSmartApi.MeasurementGeometryType.ORTHOGONAL;
-                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry, showSaveMeasurementButton: saveButton });
                         break;
                     case 'HEIGHT':
                         geometry = StreetSmartApi.MeasurementGeometryType.HEIGHT;
-                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry, showSaveMeasurementButton: true });
                         break;
                     default:
                         console.error('API ERROR: unknown measurement geometry type. Could be undefined');
@@ -937,37 +944,15 @@ require(REQUIRE_CONFIG, [], function () {
                         StreetSmartApi.setActiveMeasurement(geojson)
                     }
                 }, 160)
-
-                // if we need to save measurements overwrite the default click behaviour.
-                if(this.config.saveMeasurements && !this._saveButtonOverwrideTimer && this._selectedLayerID) {
-                    const clickHandler = this._handleMeasurementPanelToggle.bind(this);
-                    // only supports one viewer, having multiple viewers will break this.
-                    const placeSaveButton = () => {
-                        const panel = document.getElementsByClassName('floating-panel-controls')[0];
-                        if (panel && panel.children.length !== 2) {
-                            const button = panel.childNodes[0];
-                            const clone = button.cloneNode(true);
-                            // clone.childNodes[0].classList.remove('novaicon-navigation-down-3');
-                            clone.childNodes[0].classList.remove('expand-icon');
-                            clone.childNodes[0].classList.remove('expanded');
-                            clone.childNodes[0].classList.add('glyphicon');
-                            clone.childNodes[0].classList.add('novaicon-data-download-2');
-                            panel.insertBefore(clone, button);
-                            clone.onclick = this._saveMeasurement.bind(this);
-                        }
-                    };
-
-                    this._saveButtonOverwrideTimer = setInterval(placeSaveButton, 50);
-                } else if(this._saveButtonOverwrideTimer && !this._selectedLayerID ) {
-                    this._saveButtonOverwrideTimer = clearInterval(this._saveButtonOverwrideTimer);
-                }
             },
 
             _rerender(){
                 this._overlayManager.addOverlaysToViewer();
             },
 
-            _saveMeasurement() {
+            _saveMeasurement(e) {
+                const {activeMeasurement, panoramaViewer} = e.detail;
+                //this._measurementDetails = activeMeasurement;
                 const layer = this.map.getLayer(this._selectedLayerID);
                 if(layer) {
                     const editID = this._selectedFeatureID
