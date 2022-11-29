@@ -2,19 +2,10 @@ const REQUIRE_CONFIG = {
     async: true,
     locale: 'en',
     paths: {
-        //use the first set of paths for ESRI portal/AGOL, use the second set of paths for Developer's Edition of WAB
-        // 'react': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/react.production.min',
-        // 'react-dom': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/react-dom.production.min',
-        // 'openlayers': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/ol.min',
-        // 'lodash': 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/packages/lodash.min'
-        // 'react': '/widgets/StreetSmart/packages/react.production.min',
-        // 'react-dom': '/widgets/StreetSmart/packages/react-dom.production.min',
-        // 'openlayers': '/widgets/StreetSmart/packages/ol.min',
-        // 'lodash': '/widgets/StreetSmart/packages/lodash.min'
-        'react': 'https://unpkg.com/react@16.12.0/umd/react.production.min',
-        'react-dom': 'https://unpkg.com/react-dom@16.12.0/umd/react-dom.production.min',
-        'openlayers': 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol',
-        'lodash': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min'
+        'react': 'https://sld.cyclomedia.com/react/react.production.min',
+        'react-dom': 'https://sld.cyclomedia.com/react/react-dom.production.min',
+        'openlayers': 'https://sld.cyclomedia.com/react/ol.min',
+        //'lodash': 'https://sld.cyclomedia.com/react/lodash.min'
     }
 };
 
@@ -34,8 +25,10 @@ require(REQUIRE_CONFIG, [], function () {
         'esri/tasks/locator',
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
-        // 'http://localhost:8081/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v22.3/StreetSmartApi.js',
+        //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-4660/StreetSmartApi.js',
+        //'https://streetsmart-staging.cyclomedia.com/api/v22.18/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v22.18/StreetSmartApi.js',
+        'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
         './RecordingClient',
         './LayerManager',
@@ -62,6 +55,7 @@ require(REQUIRE_CONFIG, [], function () {
         Query,
         webMercatorUtils,
         StreetSmartApi,
+        _,
         utils,
         RecordingClient,
         LayerManager,
@@ -122,13 +116,15 @@ require(REQUIRE_CONFIG, [], function () {
                     config: this.config,
                     nls: this.nls,
                     removeEventListener: this.removeEventListener.bind(this),
+                    widget: this,
                 });
 
                 this._measurementHandler = new MeasurementHandler({
                     wkid: this.wkid,
                     map: this.map,
                     layer: this._layerManager.measureLayer,
-                    StreetSmartApi: StreetSmartApi
+                    StreetSmartApi: StreetSmartApi,
+                    nls: this.nls,
                 });
 
                 this._sidePanelManager = new SidePanelManager({
@@ -149,7 +145,8 @@ require(REQUIRE_CONFIG, [], function () {
                     widget: this,
                     map: this.map,
                     wkid: this.wkid,
-                    StreetSmartApi: StreetSmartApi
+                    StreetSmartApi: StreetSmartApi,
+                    nls: this.nls,
                 });
 
                 this._attributeManager = new Attributemanager({
@@ -183,9 +180,11 @@ require(REQUIRE_CONFIG, [], function () {
                 const decodedToken = atob(this.config.token).split(':');
 
                 const CONFIG = {
-                    targetElement: this.panoramaViewerDiv, // I have no idea where this comes from
+                    targetElement: this.panoramaViewerDiv,
                     username: decodedToken[0],
                     password: decodedToken[1],
+                    loginOauth: this.config.OAuth,
+                    clientID: this.config.clientID,
                     apiKey: this._apiKey,
                     srs: this.config.srs,
                     locale: this.config.locale,
@@ -215,17 +214,48 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _bindInitialMapHandlers() {
+                const measurementStarted = StreetSmartApi.Events.measurement.MEASUREMENT_STARTED;
                 const measurementChanged = StreetSmartApi.Events.measurement.MEASUREMENT_CHANGED;
+                const measurementStopped = StreetSmartApi.Events.measurement.MEASUREMENT_STOPPED;
+                const measurementSaved = StreetSmartApi.Events.measurement.MEASUREMENT_SAVED;
+                this.addEventListener(StreetSmartApi, measurementStarted, this._handleMeasurementStarted.bind(this));
                 this.addEventListener(StreetSmartApi, measurementChanged, this._handleMeasurementChanged.bind(this));
+                this.addEventListener(StreetSmartApi, measurementStopped, this._handleMeasurementStopped.bind(this));
+                this.addEventListener(StreetSmartApi, measurementSaved, this._saveMeasurement.bind(this));
                 this.addEventListener(this.map, 'extent-change', this._handleExtentChange.bind(this));
                 this.addEventListener(this.map, 'pan-end', this._handleMapMovement.bind(this));
+                this.addEventListener(this.map, 'zoom-end', this._handleMapMovement.bind(this)); //GC: added new event that handles zooms when centered is on
                 this.addEventListener(this.map, 'click', this._handleMapClick.bind(this));
-                this._sidePanelManager.bindEventListeners()
+                this._sidePanelManager.bindEventListeners();
+                //GC: additional coverage layer event
+                this.addEventListener(this.map, 'zoom-end', (zoomEvent) => {
+                    if(this.map.getLayer("CycloramaCoverage") && (this.map.getScale() < this._zoomThreshold)){
+                        this.map.getLayer("CycloramaCoverage").hide();
+                    }else{
+                        this.map.getLayer("CycloramaCoverage").show();
+                    }
+                });
             },
 
             _handleMapClick(e) {
-                const mapFeature = e.graphic
-                if(!mapFeature) {
+                const mapFeature = e.graphic;
+                const coverMap = this.map.getLayer("CycloramaCoverage");
+                //GC: checks if the coverage map is visible to display cycloramas even when zoomed out
+                if(coverMap && coverMap.visible === true){
+                    const point = e.mapPoint;
+                    const mapSRS = parseInt(this.config.srs.split(':')[1]);
+                    const localPoint = utils.transformProj4js(this.nls, point, mapSRS);
+
+                    //GC: Create coordinate and date range variables used to keep the panorama in the current time setting instead of resetting it to the default
+                    const coord = [localPoint.x, localPoint.y];
+                    let dateRange = null;
+                    if(this._timeTravel){
+                        dateRange = this._getDateRange(this._timeTravel);
+                    }
+
+                    this.query(`${localPoint.x},${localPoint.y}`, coord, dateRange);
+                    return
+                }else if(!mapFeature) {
                     return
                 }
 
@@ -250,8 +280,8 @@ require(REQUIRE_CONFIG, [], function () {
                 const idField = layer.objectIdField;
                 const wkid = layer.spatialReference.latestWkid  || layer.spatialReference.wkid
 
-                const meaurementType = geojsonUtils.EsriGeomTypes[layer.geometryType]
-                const typeToUse = meaurementType && meaurementType[0]
+                const measurementType = geojsonUtils.EsriGeomTypes[layer.geometryType]
+                const typeToUse = measurementType && measurementType[0]
 
                 if(typeToUse && this.config.allowEditing) {
                     this._selectedLayerID = layer.id;
@@ -261,13 +291,26 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _handleMapMovement(e){
-                const diff = e.delta.x + e.delta.y;
+                let diff = null;
+                //catch for pan-end and zoom-end event
+                if(e.delta){
+                    diff = e.delta.x + e.delta.y;
+                }else if(e.anchor){
+                    diff = e.anchor.x + e.anchor.y;
+                }
                 if(!this._disableLinkToMap && this.config.linkMapMove === true && !this._panoramaViewer.props.activeMeasurement) {
                     if(diff) {
                         this._centerViewerToMap(e.extent.getCenter());
                     }
                 }else if(this._disableLinkToMap) {
                     this._disableLinkToMap = false;
+                }
+            },
+
+            _handleMeasurementStarted() {
+                if(this.config.showStreetName) {
+                    this.streetIndicatorContainer.classList.add('hidden');
+                    this.streetIndicatorHiddenDuringMeasurement = true;
                 }
             },
 
@@ -280,26 +323,23 @@ require(REQUIRE_CONFIG, [], function () {
 
                 if (this.config.saveMeasurements) {
                     this._measurementDetails = activeMeasurement;
-                    if(!activeMeasurement){
+                    if (!activeMeasurement) {
                         this._selectedFeatureID = null;
                     }
                 }
                 this._measurementHandler.draw(e);
 
-                if(!activeMeasurement && this.config.allowEditing){
+                if (!activeMeasurement && this.config.allowEditing) {
                     this.map.infoWindow.hide()
                 }
+            },
 
+            _handleMeasurementStopped(e) {
                 if(this.config.showStreetName) {
-                    if (activeMeasurement) {
-                        this.streetIndicatorContainer.classList.add('hidden');
-                        this.streetIndicatorHiddenDuringMeasurement = true
-                    } else {
-                        if(this.streetIndicatorShouldBeVisible) {
-                            this.streetIndicatorContainer.classList.remove('hidden');
-                        }
-                        this.streetIndicatorHiddenDuringMeasurement = false
+                    if(this.streetIndicatorShouldBeVisible) {
+                        this.streetIndicatorContainer.classList.remove('hidden');
                     }
+                    this.streetIndicatorHiddenDuringMeasurement = false
                 }
             },
 
@@ -332,7 +372,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this.removeEventListener(this._viewChangeListener);
                     this.removeEventListener(this._imageChangeListener);
                     this.removeEventListener(this._featureClickListener);
-                    this.removeEventListener(this._layerTogleListener);
+                    this.removeEventListener(this._overlayToggleListener);
                     this._panoramaViewer = newViewer;
                     this._bindViewerDependantEventHandlers({ viewerOnly: true});
                 }
@@ -466,8 +506,8 @@ require(REQUIRE_CONFIG, [], function () {
 
                     if(clickedLayer.type !== 'Feature Layer' || !clickedLayer.getEditCapabilities().canUpdate) return;
 
-                    const meaurementType = geojsonUtils.EsriGeomTypes[clickedLayer.geometryType]
-                    const typeToUse = meaurementType && meaurementType[0]
+                    const measurementType = geojsonUtils.EsriGeomTypes[clickedLayer.geometryType]
+                    const typeToUse = measurementType && measurementType[0]
 
                     if(typeToUse && this.config.allowEditing) {
                         this._selectedLayerID = clickedLayer.id;
@@ -477,9 +517,25 @@ require(REQUIRE_CONFIG, [], function () {
 
                 }
             },
-
+            //GC: syncs overlay visibility change with layer list visibility
             _handleLayerVisibilityChange(info) {
                 const {layerId, visibility} = info.detail;
+                const mapLayers = _.values(this.map._layers);
+                const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
+                const overlayID = this._mapIdLayerId;
+
+                //since cyclorama recordings are not part of the feature layer list, it has to be checked here
+                if(layerId === "cyclorama-recordings"){
+                    this.map.getLayer("Cyclorama Recording Layer").setVisibility(visibility);
+                }
+
+                //loops through the feature layers to find the one that matches the overlayID label and switch visibility
+                for (let i = 0; i < featureLayers.length; i++) {
+                    //checks if the overlayID exists in current view and overlayID equals current layer ID
+                    if(overlayID[featureLayers[i].id] && overlayID[featureLayers[i].id] === layerId){
+                        featureLayers[i].setVisibility(visibility);
+                    }
+                }
 
                 if(layerId=== this.streetNameLayerID && this.config.showStreetName && !this.streetIndicatorHiddenDuringMeasurement ) {
                     this.streetIndicatorShouldBeVisible = visibility
@@ -508,7 +564,7 @@ require(REQUIRE_CONFIG, [], function () {
                 this._viewChangeListener = this.addEventListener(this._panoramaViewer, panoramaEvents.VIEW_CHANGE, this._handleConeChange.bind(this));
                 this._imageChangeListener = this.addEventListener(this._panoramaViewer, panoramaEvents.IMAGE_CHANGE, this._handleImageChange.bind(this));
                 this._featureClickListener = this.addEventListener(this._panoramaViewer, panoramaEvents.FEATURE_CLICK, this._handleFeatureClick.bind(this));
-                this._layerTogleListener = this.addEventListener(this._panoramaViewer, viewerEvents.LAYER_VISIBILITY_CHANGE, this._handleLayerVisibilityChange.bind(this));
+                this._overlayToggleListener = this.addEventListener(this._panoramaViewer, viewerEvents.LAYER_VISIBILITY_CHANGE, this._handleLayerVisibilityChange.bind(this));
                 this._panoramaViewer.showAttributePanelOnFeatureClick(false);
                 if (!opts.viewerOnly) {
                     this.addEventListener(this.map, 'zoom-end', this._handleConeChange.bind(this));
@@ -522,8 +578,10 @@ require(REQUIRE_CONFIG, [], function () {
                         const measurementButton = document.getElementsByClassName('glyphicon novaicon-ruler-1')[0];
                         if (measurementButton && measurementButton.parentNode.onclick !== clickHandler) {
                             const button = measurementButton.parentNode;
+                            this.oldButton = button;
                             const new_element = button.cloneNode(true);
                             new_element.onclick = clickHandler;
+                            this.newButton = new_element;
                             button.parentNode.replaceChild(new_element, button);
                         }
                     };
@@ -576,7 +634,7 @@ require(REQUIRE_CONFIG, [], function () {
 
                     const coord = new Point(x, y, this._layerManager.srs);
                     // Transform local SRS to Web Mercator:
-                    const coordLocal = utils.transformProj4js(coord, this.map.spatialReference.wkid);
+                    const coordLocal = utils.transformProj4js(this.nls, coord, this.map.spatialReference.wkid, this.map.spatialReference.latestWkid);
                     this.map.centerAt(coordLocal);
                     this._disableLinkToMap = true;
                 }
@@ -585,7 +643,7 @@ require(REQUIRE_CONFIG, [], function () {
                 const xyz = rec.xyz;
                 const srs = rec.srs;
                 const point = new Point(xyz[0], xyz[1], new SpatialReference(Number(srs.split(':')[1])));
-                const location = utils.transformProj4js(point, 102100);
+                const location = utils.transformProj4js(this.nls, point, 102100);
                 this._locator.locationToAddress(location, 0, (result) => {
                     const el = this.streetIndicator;
                     if(el){
@@ -666,8 +724,8 @@ require(REQUIRE_CONFIG, [], function () {
 
             _centerViewerToMap(center) {
                 const mapCenter = center || this.map.extent.getCenter();
-                const mapSRS = this.config.srs.split(':')[1];
-                const localCenter = utils.transformProj4js(mapCenter, mapSRS);
+                const mapSRS = parseInt(this.config.srs.split(':')[1]);
+                const localCenter = utils.transformProj4js(this.nls, mapCenter, mapSRS);
 
                 //GC: Create coordinate and date range variables used to keep the panorama in the current time setting instead of resetting it to the default
                 const coord = [localCenter.x, localCenter.y];
@@ -737,7 +795,12 @@ require(REQUIRE_CONFIG, [], function () {
 
             _determineZoomThreshold: function () {
                 // Explicit zoom level replaced for zoom scale values for consistency.
-                let zoomThreshold = 1200;
+                //let zoomThreshold = 1200;
+                //GC: creates default scale level if it hasn't been made yet
+                if(!this.config.scale){
+                    this.config.scale = 1130;
+                }
+                let zoomThreshold = Number(this.config.scale);
 
                 this._zoomThreshold = zoomThreshold;
                 return zoomThreshold;
@@ -751,13 +814,15 @@ require(REQUIRE_CONFIG, [], function () {
 
             onOpen() {
                 const zoomLevel = this.map.getScale();
+                //GC: turn on Street Smart regardless of zoom level
+                this._initApi();
 
                 // Only open when the current zoom scale is close enough to the ground.
-                if (zoomLevel < this._zoomThreshold) {
-                    this._initApi();
-                } else {
-                    this._openApiWhenZoomedIn();
-                }
+                // if (zoomLevel < this._zoomThreshold) {
+                //     this._initApi();
+                // } else {
+                //     this._openApiWhenZoomedIn();
+                // }
             },
 
             onClose() {
@@ -766,7 +831,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this.map.removeLayer(this.map.getLayer("CycloramaCoverage"));
                 }
 
-                StreetSmartApi.destroy({ targetElement: this.panoramaViewerDiv });
+                StreetSmartApi.destroy({ targetElement: this.panoramaViewerDiv, loginOauth: this.config.OAuth });
                 this.loadingIndicator.classList.remove('hidden');
                 this.streetIndicator.innerHTML = '';
                 this._overlayManager.reset();
@@ -824,33 +889,48 @@ require(REQUIRE_CONFIG, [], function () {
 
                 const sPoint = new ScreenPoint(mapRelativePixels.x, mapRelativePixels.y);
                 const mPoint = this.map.toMap(sPoint);
-                const vPoint = utils.transformProj4js(mPoint, this.wkid);
+                const vPoint = utils.transformProj4js(this.nls, mPoint, this.wkid);
 
                 this.query(`${vPoint.x},${vPoint.y}`);
             },
+
+            replaceMeasurementButton(oldButton, newButton) {
+                const measurementButton = document.getElementsByClassName('glyphicon novaicon-ruler-1')[0];
+
+                if (measurementButton) {
+                    const button = measurementButton.parentNode;
+                    button.parentNode.replaceChild(oldButton, newButton);
+                }
+            },
+
             //GC: Added additional measurement options
             startMeasurement(type, geojson){
+                this.replaceMeasurementButton(this.oldButton, this.newButton);
                 let geometry;
+                let saveButton = true;
+                if(this._selectedLayerID == null){
+                    saveButton = false;
+                }
                 switch (type) {
                     case 'POINT':
                         geometry = StreetSmartApi.MeasurementGeometryType.POINT;
-                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry, showSaveMeasurementButton: saveButton });
                         break;
                     case 'LINE':
                         geometry = StreetSmartApi.MeasurementGeometryType.LINESTRING;
-                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry, showSaveMeasurementButton: saveButton });
                         break;
                     case 'POLYGON':
                         geometry = StreetSmartApi.MeasurementGeometryType.POLYGON;
-                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry, showSaveMeasurementButton: saveButton });
                         break;
                     case 'ORTHOGONAL':
                         geometry = StreetSmartApi.MeasurementGeometryType.ORTHOGONAL;
-                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry, showSaveMeasurementButton: saveButton });
                         break;
                     case 'HEIGHT':
                         geometry = StreetSmartApi.MeasurementGeometryType.HEIGHT;
-                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry });
+                        StreetSmartApi.startMeasurementMode(this._panoramaViewer, { geometry, showSaveMeasurementButton: true });
                         break;
                     default:
                         console.error('API ERROR: unknown measurement geometry type. Could be undefined');
@@ -859,39 +939,20 @@ require(REQUIRE_CONFIG, [], function () {
                 // collapse the sidebar after a 10 frame delay,
                 // doing it directly throws an exception as the measurement mode hasn't started yet.
                 window.setTimeout(() => {
-                    this._panoramaViewer.toggleSidebarExpanded(false)
+                    this._panoramaViewer.toggleSidebarExpanded(true) //change to false to collapse sidebar
                     if(geojson){
                         StreetSmartApi.setActiveMeasurement(geojson)
                     }
                 }, 160)
-
-                // if we need to save measurements overwrite the default click behaviour.
-                if(this.config.saveMeasurements && !this._saveButtonOverwrideTimer && this._selectedLayerID) {
-                    const clickHandler = this._handleMeasurementPanelToggle.bind(this);
-                    // only supports one viewer, having multiple viewers will break this.
-                    const placeSaveButton = () => {
-                        const panel = document.getElementsByClassName('floating-panel-controls')[0];
-                        if (panel && panel.children.length !== 2) {
-                            const button = panel.childNodes[0];
-                            const clone = button.cloneNode(true);
-                            clone.childNodes[0].classList.remove('novaicon-navigation-down-3');
-                            clone.childNodes[0].classList.add('novaicon-data-download-2');
-                            panel.insertBefore(clone, button);
-                            clone.onclick = this._saveMeasurement.bind(this);
-                        }
-                    };
-
-                    this._saveButtonOverwrideTimer = setInterval(placeSaveButton, 50);
-                } else if(this._saveButtonOverwrideTimer && !this._selectedLayerID ) {
-                    this._saveButtonOverwrideTimer = clearInterval(this._saveButtonOverwrideTimer);
-                }
             },
 
             _rerender(){
                 this._overlayManager.addOverlaysToViewer();
             },
 
-            _saveMeasurement() {
+            _saveMeasurement(e) {
+                const {activeMeasurement, panoramaViewer} = e.detail;
+                //this._measurementDetails = activeMeasurement;
                 const layer = this.map.getLayer(this._selectedLayerID);
                 if(layer) {
                     const editID = this._selectedFeatureID
@@ -909,8 +970,8 @@ require(REQUIRE_CONFIG, [], function () {
                             });
                         }
                     });
-
-                    StreetSmartApi.stopMeasurementMode();
+                    //don't allow measurement mode to close after saving
+                    //StreetSmartApi.stopMeasurementMode();
                 }
             },
 
@@ -922,7 +983,7 @@ require(REQUIRE_CONFIG, [], function () {
 
                 if (data.selectResult) {
                     const searchedPoint = data.selectResult.result.feature.geometry;
-                    const searchedPtLocal = utils.transformProj4js(searchedPoint, this.wkid);
+                    const searchedPtLocal = utils.transformProj4js(this.nls, searchedPoint, this.wkid);
                     this.query((`${searchedPtLocal.x},${searchedPtLocal.y}`));
                 }
             },

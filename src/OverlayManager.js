@@ -67,7 +67,7 @@ define([
             this.isQueueLoading = false;
             this.reloadQueueOnFinish = false;
             //  Can be used to listen to visibility changes in the layer list.
-            // this._bindLayerChangeListeners();
+            //this._bindLayerChangeListeners();
         }
 
         addStreetNameLayer() {
@@ -146,6 +146,10 @@ define([
                 } else {
                     let geojson = this.createGeoJsonForFeature({mapLayer});
                     const sld = new SLD(mapLayer, geojson);
+                    //GC: finds <Null> values inside of xml and replaces it so it doesn't return an html error
+                    if(sld.xml.includes("<Null>")){
+                        sld.xml = sld.xml.replace("<Null>", "Null");
+                    }
                     geojson = this.applyDefaultCaseIfNeeded(geojson, sld);
                     if(sld.xml === undefined){
                         return;
@@ -405,7 +409,7 @@ define([
                                     updateFeature.geometry.z = z;
                                 }
 
-                                if (!updateFeature.geometry.spatialReference || updateFeature.geometry.spatialReference.wkid != this.config.srs.split(':')[1]) {
+                                if (!updateFeature.geometry.spatialReference || updateFeature.geometry.spatialReference.wkid !== this.config.srs.split(':')[1]) {
                                     const x = fromFeature.geometry && fromFeature.geometry.x;
                                     const y = fromFeature.geometry && fromFeature.geometry.y;
                                     const spatialReference = featureSet.spatialReference;
@@ -434,6 +438,7 @@ define([
                                         const z = thisPoint && thisPoint.length === 3 && thisPoint[2];
                                         let updatePaths = updateFeature.geometry && updateFeature.geometry.paths;
 
+                                        //GC: updated code to fix shortened polylines
                                         if (updatePaths.length >= 1) {
                                             if (updatePaths[0][point]) {
                                                 if (z) {
@@ -513,6 +518,33 @@ define([
             }
 
             arcgisFeatureSet.features = features;
+
+            //GC: supposed to iterate through the attributes, find the coded values and turn them to the new values
+            for (let i = 0; i < arcgisFeatureSet.features.length; i++) {
+                const attr = arcgisFeatureSet.features[i].attributes;
+                Object.entries(attr).forEach(entry => {
+                    const [key, value] = entry;
+                    //console.log(key, value);
+                    for (let j = 0; j < mapLayer._fields.length; j++) {
+                        if (mapLayer._fields[j].name === key){
+                            if (mapLayer._fields[j].domain) {
+                                for (let k = 0; k < mapLayer._fields[j].domain.codedValues.length; k++) {
+                                    if (mapLayer._fields[j].domain.codedValues[k].code === value) {
+                                        attr[key] = mapLayer._fields[j].domain.codedValues[k].name;
+                                    }
+                                }
+                            }
+                            var alias = mapLayer._fields[j].alias;
+                            //GC: Changes the field name to the alias in the attributes if they are not the same
+                            if(alias != key){
+                                Object.defineProperty(attr, alias, (Object.getOwnPropertyDescriptor(attr, key)));
+                                delete attr[key];
+                            }
+                        }
+                    }
+                });
+                arcgisFeatureSet.features[i].attributes = attr;
+            }
 
             const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet, undefined, dates);
 

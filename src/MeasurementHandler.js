@@ -36,12 +36,13 @@ define([
     utils,
 ) {
     return class MeasurementHandler {
-        constructor({ map, wkid, measureChange, layer, StreetSmartApi }) {
+        constructor({ map, wkid, measureChange, layer, StreetSmartApi, nls }) {
             this.map = map;
             this.wkid = wkid;
             this.measureChange = measureChange;
             this.layer = layer;
             this.StreetSmartApi = StreetSmartApi;
+            this.nls = nls;
         }
 
         draw(measurementEvent) {
@@ -94,6 +95,7 @@ define([
 
         _transformPoints(coords) {
             const mapWkid = this.map.spatialReference.wkid;
+            const latestWkid = this.map.spatialReference.latestWkid;
 
             return coords.map(coord => {
                 // Ignore incomplete forward intersection:
@@ -101,7 +103,7 @@ define([
                     return null;
                 }
                 const pointViewer = new Point(coord[0], coord[1], new SpatialReference({ wkid: this.wkid }));
-                const coordMap = utils.transformProj4js(pointViewer, mapWkid);
+                const coordMap = utils.transformProj4js(this.nls, pointViewer, mapWkid, latestWkid);
                 return [coordMap.x, coordMap.y];
             })
         }

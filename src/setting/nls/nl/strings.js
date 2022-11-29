@@ -19,6 +19,10 @@
        linkMapMove: 'Centreer cyclorama in kaart',
        saveMeasurements: 'Bewaar metingen',
        allowEditing: 'Attributen aanpassen',
+       recordings: 'Opnames Toon schaal',
+       display1: "1:1130 (standaard)",
+       display2: "1:2258 (Ver)",
+       display3: "1:4415 (Verder)",
 
        navigation: "Navigatie",
        navigationButtons: 'Navigatie Knoppen',
@@ -32,6 +36,6 @@
        zoomoutButton: 'Zoom-out Knop',
 
        typeSrs: "Typ of selecteer SRS",
-       version: "Street Smart Widget voor Web AppBuilder @ versie 22.3.0",
+       version: "Street Smart Widget voor Web AppBuilder @ versie 22.4.0",
    })
 );

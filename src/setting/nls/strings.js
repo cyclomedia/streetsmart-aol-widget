@@ -19,6 +19,11 @@ define({
       linkMapMove: 'Center panorama in map',
       saveMeasurements: 'Save Measurements',
       allowEditing: 'Attribute editing',
+      recordings: 'Recordings Display Scale',
+      display1: "1:1130 (default)",
+      display2: "1:2258 (Far)",
+      display3: "1:4415 (Farther)",
+
 
       navigation: "Navigation",
       navigationButtons: 'Navigation Buttons',
@@ -34,7 +39,7 @@ define({
       zoomoutButton: 'Zoom-out Button',
 
       typeSrs: "Type or Select SRS",
-      version: "Street Smart Widget for Web AppBuilder @ version 22.3.0",
+      version: "Street Smart Widget for Web AppBuilder @ version 22.4.0",
   }),
   "de": true,
   "nl": true,

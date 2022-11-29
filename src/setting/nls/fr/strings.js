@@ -19,6 +19,10 @@
        linkMapMove: 'Centrer la carte sur le cyclorama',
        saveMeasurements: 'Sauvegarder les mesures',
        allowEditing: 'Édition d\'attribut',
+       recordings: 'Échelle d\'affichage des enregistrements',
+       display1: "1:1130 (défaut)",
+       display2: "1:2258 (Loin)",
+       display3: "1:4415 (Plus loin)",
 
        navigation: "Navigation",
        navigationButtons: 'Boutons Navigation',
@@ -32,6 +36,6 @@
        zoomoutButton: 'Bouton Zoom-out',
 
        typeSrs: "Tapez ou sélectionnez SRS",
-       version: "Street Smart Widget pour Web AppBuilder @ version 22.3.0",
+       version: "Street Smart Widget pour Web AppBuilder @ version 22.4.0",
    })
 );

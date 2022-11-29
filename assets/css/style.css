@@ -21,8 +21,8 @@
     background-color: white;
     transition: width 0.5s ease-out;
     z-index: 15;
-    overflow: hidden;
-    overflow-y: auto;
+    overflow: auto;
+    /*overflow-y: auto;*/
 }
 
 .cmt-widget #sidePanel.slide-out-panel{
@@ -235,10 +235,11 @@
     border :  none !important;
 }
 
+/*GC: Editing the street name styling so it fits within the widget better*/
 .cmt-widget .street-indicator{
-    right: 0;
+    right: 50px;
     position: absolute;
-    top: 10px;
+    top: 5px;
     color: white;
     z-index: 2;
     left: 0;
@@ -246,6 +247,8 @@
     text-align: center;
     display: flex;
     justify-content: center;
+    margin-left: 170px;
+    margin-right: 10px;
 }
 
 .cmt-widget.street-indicator span {
@@ -283,7 +286,13 @@
     margin: 0 5px 0 0 ;
 }
 
-.dart-panel .jimu-widget-frame.jimu-container .cmt *,
+/*.dart-panel .jimu-widget-frame.jimu-container .cmt *,*/
+/*!* dart theme fixes *!*/
+label {
+    color: #545454;
+}
+
+/*!* dart theme fixes *!*/
 .dart-panel .jimu-widget-frame.jimu-container .cmt .cmtViewerPanel .panel-body .btn-secondary-right:hover span,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt.viewer .cmtNavBarPanel .nav-stacked>li a,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .panel-default .panel-heading,
@@ -292,10 +301,14 @@
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar.expandable-navbar .btn.btn-default:focus *,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar .measurement-dropdown .dropdown-menu li:hover a>span,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar .measurement-dropdown:hover .btn.btn-default,
-.dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar .measurement-dropdown:hover .btn.btn-default *{
+.dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar .measurement-dropdown:hover .btn.btn-default *,
+.dart-panel #panoramaViewerDiv #cmt .measurement-navbar button:hover,
+.dart-panel #panoramaViewerDiv #cmt .measurement-navbar button:hover .glyphicon
+{
     color: white !important;
 }
 
+.dart-panel #panoramaViewerDiv #cmt .nav-tabs > li a,
 .dart-panel .jimu-widget-frame.jimu-container .cmt .cmtViewerPanel .panel-body .slider-tick-label,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .dropdown-menu>li>a,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .cmtImageInformationPanel .tab-content *,
@@ -306,6 +319,8 @@
     color: #005293 !important;
 }
 
+.dart-panel #panoramaViewerDiv #cmt .measurement-navbar *,
+.dart-panel #panoramaViewerDiv #cmt .btn-viewer-icn:not(:hover):not(:focus) .glyphicon,
 .dart-panel .jimu-widget-frame.jimu-container .cmt .cmtViewerPanel .panel-body .btn-secondary-right span,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar  .btn.btn-default *,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .cmt-navbar.measurement-navbar *,
@@ -322,14 +337,34 @@
     color: #bcbdbc !important;
 }
 
-.dart-panel .jimu-widget-frame.jimu-container .cmt .cmtViewerPanel .panel-body label.control-label,
-.dart-panel .jimu-widget-frame.jimu-container .cmt .layerpanel .checkbox span{
+.dart-panel #cmt .measurement-select-modal .btn-modal__wrapper,
+.dart-panel #cmt .share-modal .btn-modal__wrapper,
+.dart-panel #panoramaViewerDiv #cmt label,
+.dart-panel #measurementPanel *:not(button),
+.dart-panel #measurementPanel .close-button,
+.dart-panel #cmt .sidebar-panel-container *,
+.dart-panel #cmt .cmtViewerPanel .card-body *,
+.dart-panel #cmt .layerpanel .checkbox span {
     color: #666 !important;
 }
 .dart-panel .jimu-widget-frame.jimu-container .timetravel .travelDate span {
     color: #2c3e50 !important;
 }
 
+.dart-panel #panoramaViewerDiv .nav-link.active,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .measurement-floating-panel .warning span {
     color: #ec7a08 !important
+}
+
+th{
+    font-weight: bold;
+}
+
+.cmt .table-wrap th, .cmt .table-wrap td{
+    max-width: 250px;
+    word-break: normal !important;
+}
+
+.cmt .viewer .cmtNavBarPanel .attributeinfopanel .panel-heading{
+    overflow: auto;
 }

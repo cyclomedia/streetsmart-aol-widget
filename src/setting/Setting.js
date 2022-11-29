@@ -45,10 +45,18 @@ define([
                 on(dom.byId('toggleAll'), 'click', function(){
                     require(["dojo/query", "dojo/NodeList-dom"], function(query){
                         query('input[type="checkbox"]').forEach(function(node){
-                            node.checked = dom.byId('toggleAll').checked;
+                            if(node.id !== "LoginWithOauth"){
+                                node.checked = dom.byId('toggleAll').checked;
+                            }
                         });
                     });
                 });
+                //GC: OAuth clicking event
+                // on(dom.byId('LoginWithOauth'), 'click', function(){
+                //     var LoginWithOauth = dom.byId('LoginWithOauth').checked;
+                //     dom.byId('userName').disabled = LoginWithOauth;
+                //     dom.byId('password').disabled = LoginWithOauth;
+                // });
 
             },
 
@@ -64,11 +72,28 @@ define([
                     this.selectUnitToggle.set("value", this.config.units);
                 }
 
+                if(this.config.scale){
+                    this.selectScaleToggle.set("value", this.config.scale);
+                }
+
                 if(this.config.token){
                     const decodedToken = atob(this.config.token).split(':');
                     if (decodedToken) {
                         this.uNameCyclomedia.value = decodedToken[0];
                         this.uPwdCyclomedia.value = decodedToken[1];
+                    }
+                }
+
+                //GC: adding OAuth functionality
+                if(this.config.OAuth){
+                    this.OAuthLogin.value = this.config.OAuth;
+                    if(this.config.OAuth === true) {
+                        this.OAuthLogin.checked = true;
+                        this.uNameCyclomedia.disabled = true;
+                        this.uPwdCyclomedia.disabled = true;
+                    }else{
+                        this.uNameCyclomedia.disabled = false;
+                        this.uPwdCyclomedia.disabled = false;
                     }
                 }
 
@@ -155,7 +180,9 @@ define([
 
             getConfig: function () {
                 this.config.locale = this.selectCyclomediaLocation.value;
+                // this.config.OAuth = this.OAuthLogin.checked;
                 this.config.units = this.selectUnitToggle.value;
+                this.config.scale = this.selectScaleToggle.value;
                 this.config.token = btoa(`${this.uNameCyclomedia.value}:${this.uPwdCyclomedia.value}`);
                 this.config.agreement = this.agreementCheck.checked;
                 this.config.saveMeasurements = this.saveMeasurementsEnabled.checked;
