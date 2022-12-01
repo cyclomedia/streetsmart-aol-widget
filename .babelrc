@@ -1,19 +1,18 @@
 {
   "presets": [
-    ["env", {
+    ["@babel/preset-env", {
       "loose": true,
       "modules": false,
       "targets": {
         "browsers": ["last 5 versions"]
       }
     }],
-    "react"
+    "@babel/react"
   ],
   "sourceMaps": true,
   "plugins": [
-    ["transform-strict-mode", {
-      "strict": false
-    }]
+    ["@babel/plugin-transform-strict-mode", { "strict": false }],
+    "@babel/plugin-transform-classes"
   ],
   "minified": true
 }
