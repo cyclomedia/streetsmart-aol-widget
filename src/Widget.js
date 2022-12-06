@@ -88,8 +88,8 @@ require(REQUIRE_CONFIG, [], function () {
             _visibleLayers: {},
 
             // Initial construction, might not be added to DOM yet.
-            postCreate() {
-                this.inherited(arguments);
+            postCreate: function postCreate() {
+                this.inherited(postCreate, arguments);
 
                 this.wkid = parseInt(this.config.srs.split(':')[1]);
                 this.streetIndicatorShouldBeVisible = true
@@ -162,8 +162,8 @@ require(REQUIRE_CONFIG, [], function () {
                 this._determineZoomThreshold();
             },
 
-            startup() {
-                this.inherited(arguments);
+            startup: function startup() {
+                this.inherited(startup, arguments);
             },
 
             _handleRecordingClick(event) {
