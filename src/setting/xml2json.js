@@ -104,16 +104,16 @@ function _getChildInfo(children) {
     for (let i = 0; i < children.length; i++) {
         const child = children[i];
         var eachChildInfo = {
-            tagName: this._getTagName(child),
-            content: this._getContent(child),
-            attr: this._getAllAttr(child),
+            tagName: _getTagName(child),
+            content: _getContent(child),
+            attr: _getAllAttr(child),
             isParent: false,
             hasAttr: child.hasAttributes()
         };
-        var subChildren = this._getChildren(child);
+        var subChildren = _getChildren(child);
         if (subChildren.length !== 0) {
             eachChildInfo.isParent = true;
-            eachChildInfo.children = this._getChildInfo(subChildren);
+            eachChildInfo.children = _getChildInfo(subChildren);
         }
         resultArr.push(eachChildInfo);
     }
