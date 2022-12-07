@@ -286,8 +286,13 @@
     margin: 0 5px 0 0 ;
 }
 
-/*.dart-panel .jimu-widget-frame.jimu-container .cmt *,*/
-/*!* dart theme fixes *!*/
+#cmt .btn-container {
+    padding: 0;
+    margin-inline: unset;
+    width: unset;
+}
+
+/* dashboard theme fixes*/
 label {
     color: #545454;
 }
@@ -303,7 +308,8 @@ label {
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar .measurement-dropdown:hover .btn.btn-default,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar .measurement-dropdown:hover .btn.btn-default *,
 .dart-panel #panoramaViewerDiv #cmt .measurement-navbar button:hover,
-.dart-panel #panoramaViewerDiv #cmt .measurement-navbar button:hover .glyphicon
+.dart-panel #panoramaViewerDiv #cmt .measurement-navbar button:hover .glyphicon,
+.dart-panel #panoramaViewerDiv #cmt .imageControls button .glyphicon
 {
     color: white !important;
 }
@@ -320,7 +326,7 @@ label {
 }
 
 .dart-panel #panoramaViewerDiv #cmt .measurement-navbar *,
-.dart-panel #panoramaViewerDiv #cmt .btn-viewer-icn:not(:hover):not(:focus) .glyphicon,
+.dart-panel #panoramaViewerDiv #cmt .btn-viewer-icn:not(:hover) .glyphicon,
 .dart-panel .jimu-widget-frame.jimu-container .cmt .cmtViewerPanel .panel-body .btn-secondary-right span,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar  .btn.btn-default *,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .cmt-navbar.measurement-navbar *,
