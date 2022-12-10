@@ -59,5 +59,9 @@
       "email": "gcastaneda@cyclomedia.com",
       "url": "https://github.com/gcastaneda-cm"
     }
-  ]
+  ],
+  "overrides": {
+    "unset-value": "^2.0.1",
+    "glob-parent": "^6.0.2"
+  }
 }
