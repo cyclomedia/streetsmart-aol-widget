@@ -27,7 +27,7 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/geometry/webMercatorUtils",
         //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-4660/StreetSmartApi.js',
         //'https://streetsmart-staging.cyclomedia.com/api/v22.18/StreetSmartApi.js',
-        'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-5310-release-22.20.0/StreetSmartApi.js',
+        'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-5342/StreetSmartApi.js',
         //'https://streetsmart.cyclomedia.com/api/v22.18/StreetSmartApi.js',
         'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
@@ -179,13 +179,19 @@ require(REQUIRE_CONFIG, [], function () {
                 }
 
                 const decodedToken = atob(this.config.token).split(':');
+                const clientId = '935D52F9-DAC2-4D55-8109-88A1CB546ED2';
+                const redirectUri = 'widgets/StreetSmart/redirect';
+                const redirectLogin = `${redirectUri}/login.html`;
+                const redirectLogout = `${redirectUri}/logout.html`;
 
                 const CONFIG = {
                     targetElement: this.panoramaViewerDiv,
                     username: decodedToken[0],
                     password: decodedToken[1],
                     loginOauth: this.config.OAuth,
-                    clientID: this.config.clientID,
+                    clientId: clientId,
+                    loginRedirectUri: redirectLogin,
+                    logoutRedirectUri: redirectLogout,
                     apiKey: this._apiKey,
                     srs: this.config.srs,
                     locale: this.config.locale,
@@ -203,9 +209,9 @@ require(REQUIRE_CONFIG, [], function () {
                     this._centerViewerToMap();
                     this.streetNameLayerID = this._overlayManager.addStreetNameLayer();
 
-                    const unitPrefs = _.get(StreetSmartApi, "Settings.UNIT_PREFERENCE")
+                    const unitPrefs = _.get(StreetSmartApi, "Settings.UNIT_PREFERENCE");
                     if(unitPrefs){
-                        const units = this.config.units || unitPrefs.DEFAULT
+                        const units = this.config.units || unitPrefs.DEFAULT;
                         if(Object.values(unitPrefs).includes(units)){
                             StreetSmartApi.Settings.setUnitPreference(units);
                         }
