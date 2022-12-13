@@ -71,7 +71,7 @@
     min-width: 20px;
     height: 20px;
     background-color: #eee;
-    border: 1px solid rgba(0,82,147,.8);
+    border: 1px solid hsla(210, 100%, 33%, 0.8);
     padding: 0;
     margin: 0 5px 0 0;
     justify-self: center;
@@ -90,7 +90,7 @@
     top: 1px;
     width: 5px;
     height: 11px;
-    border: solid rgba(0,82,147,.8);
+    border: solid hsla(210, 100%, 33%, 0.8);
     border-width: 0 3px 3px 0;
     -webkit-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
@@ -105,7 +105,7 @@
     border-bottom: 1px solid #dedede;
     font-family: sans-serif;
     background-color: white;
-    color: rgba(0,82,147,.8);
+    color: rgba(0, 84, 166,.8);
     display: flex;
     flex-direction: row;
     overflow: hidden;
@@ -117,7 +117,7 @@
 }
 
 .cmt-widget .layer-row.selected {
-    background-color: rgba(0,82,147,.8);
+    background-color: hsla(210, 100%, 33%, 0.8);
     color: white ;
 }
 
@@ -128,7 +128,7 @@
 }
 
 .cmt-widget .measurement-types-list{
-    color: rgba(0,82,147,.8);
+    color: hsla(210, 100%, 33%, 0.8);
     display: flex;
     flex-direction: column;
     margin: 9px;
@@ -157,10 +157,9 @@
     height: 50px;
     font-size: 28px;
     color: white;
-    background: #98c23c;
-    border: 1px solid #98c23c;
+    background: #0054a6;
+    border: 1px solid #0054a6;
     border-radius: 50%;
-    /*margin-right: 10px;*/
 }
 .cmt-widget button.measurement-button.glyphicon:disabled {
     opacity: 0.3;
@@ -237,45 +236,33 @@
 
 /*GC: Editing the street name styling so it fits within the widget better*/
 .cmt-widget .street-indicator{
-    right: 50px;
     position: absolute;
-    top: 5px;
-    color: white;
+    top:2px;
+    left: 160px;
     z-index: 2;
-    left: 0;
     font-size: 15px;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    margin-left: 170px;
-    margin-right: 10px;
 }
 
 .cmt-widget.street-indicator span {
-    color: #fff;
+    color: white;
     text-align: center;
     font-size: 15px;
-    font-family: Lato,Helvetica Neue,Helvetica,Arial,sans-serif;
     height: auto;
     margin: 0;
 }
 
 .cmt-widget .address-bar {
-    position: absolute;
-    margin: auto;
-    background-color: rgb(152, 194, 60);
-    padding: 2px;
-    border-radius: 5px;
-    pointer-events: none;
     display: flex;
+    align-items: center;
     justify-content: center;
+    background-color: rgba(65,65,65,.75);
+    min-height: 33px;
+    pointer-events: none;
+    color: white;
+    padding-inline: 8%;
+    width: 116%;
 }
 
-.cmt-widget .inner-address-bar {
-    padding: 3px;
-    border: 1px solid #fff;
-    border-radius: 3px;
-}
 
 .esriAttributeInspector .atiButtons .atiDeleteButton {
     width: auto;
@@ -299,6 +286,7 @@ label {
 
 /*!* dart theme fixes *!*/
 .dart-panel .jimu-widget-frame.jimu-container .cmt .cmtViewerPanel .panel-body .btn-secondary-right:hover span,
+.dart-panel #cmt .sidebar-panel-container .btn.btn-secondary:hover,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt.viewer .cmtNavBarPanel .nav-stacked>li a,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .panel-default .panel-heading,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .modal  .btn.btn-default *,
@@ -309,7 +297,7 @@ label {
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar .measurement-dropdown:hover .btn.btn-default *,
 .dart-panel #panoramaViewerDiv #cmt .measurement-navbar button:hover,
 .dart-panel #panoramaViewerDiv #cmt .measurement-navbar button:hover .glyphicon,
-.dart-panel #panoramaViewerDiv #cmt .imageControls button .glyphicon
+.dart-panel #panoramaViewerDiv #cmt .imageControls button:not(.panel-header-button) .glyphicon
 {
     color: white !important;
 }
@@ -322,17 +310,19 @@ label {
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .measurement-floating-panel *,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar .measurement-dropdown .dropdown-menu a>span,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv > div > div > div.measurement-select-modal.fade.in.modal > div > div > div.modal-body > div > div > div > span {
-    color: #005293 !important;
+    color: #0054a6 !important;
 }
 
+.dart-panel #panoramaViewerDiv .nav-link.active,
 .dart-panel #panoramaViewerDiv #cmt .measurement-navbar *,
-.dart-panel #panoramaViewerDiv #cmt .btn-viewer-icn:not(:hover) .glyphicon,
+.dart-panel #panoramaViewerDiv #cmt .btn-viewer-icn:not(:hover):not(.active-panel) .glyphicon,
 .dart-panel .jimu-widget-frame.jimu-container .cmt .cmtViewerPanel .panel-body .btn-secondary-right span,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar  .btn.btn-default *,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .cmt-navbar.measurement-navbar *,
 .dart-panel .jimu-widget-frame.jimu-container .cmt .window .recordingTimestamp .timetravelToggle:hover,
-.dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .windowcontrols button:hover * {
-    color: #98c23c !important;
+.dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .windowcontrols button:hover *,
+.dart-panel .panel-header-button:hover .glyphicon {
+    color: #0054a6 !important;
 }
 
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .measurement-panel-error-message p span {
@@ -357,7 +347,6 @@ label {
     color: #2c3e50 !important;
 }
 
-.dart-panel #panoramaViewerDiv .nav-link.active,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .measurement-floating-panel .warning span {
     color: #ec7a08 !important
 }

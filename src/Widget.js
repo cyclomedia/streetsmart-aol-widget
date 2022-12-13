@@ -81,7 +81,7 @@ require(REQUIRE_CONFIG, [], function () {
             _disableLinkToMap: false,
 
             // CM properties
-            _cmtTitleColor: '#98C23C',
+            _cmtTitleColor: '#0054a8',
             _apiKey: 'C3oda7I1S_49-rgV63wtWbgtOXcVe3gJWPAVWnAZK3whi7UxCjMNWzIJyv4Fmrcp',
 
             _mapIdLayerId: {},
