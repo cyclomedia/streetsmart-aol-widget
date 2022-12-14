@@ -179,7 +179,7 @@ require(REQUIRE_CONFIG, [], function () {
                 }
 
                 const decodedToken = atob(this.config.token).split(':');
-                const clientId = '935D52F9-DAC2-4D55-8109-88A1CB546ED2';
+                const clientId = 'D61AE220-A48A-42F1-81BF-8FA3313F01A4';
                 const redirectUri = 'widgets/StreetSmart/redirect';
                 const redirectLogin = `${redirectUri}/login.html`;
                 const redirectLogout = `${redirectUri}/logout.html`;
