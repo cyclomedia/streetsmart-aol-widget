@@ -236,11 +236,17 @@
 
 /*GC: Editing the street name styling so it fits within the widget better*/
 .cmt-widget .street-indicator{
+    right: 20px;
+    left: 140px;
+    top: 2px;
     position: absolute;
-    top:2px;
-    left: 160px;
+    color: white;
     z-index: 2;
     font-size: 15px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    margin-inline: 30px;
 }
 
 .cmt-widget.street-indicator span {
@@ -260,7 +266,6 @@
     pointer-events: none;
     color: white;
     padding-inline: 8%;
-    width: 116%;
 }
 
 
