@@ -33,10 +33,14 @@ const copyPackagejson = () => gulp.src(['package.json', 'package-lock.json'])
     .pipe(gulp.dest('dist/CyclomediaAOL_Widget/'))
     .pipe(gulp.dest(process.env.WIDGET_DIR));
 
+const copyFromNodeModules = () => gulp.src(['./node_modules/oidc-client-ts/dist/browser/oidc-client-ts.min.js'])
+    .pipe(gulp.dest('src/redirect/'))
+    .pipe(gulp.dest(process.env.WIDGET_DIR));
+
 // Also copy all non javascript files to the dist folder
 const copy = done => gulp.parallel(copySource, copyAssets, copyPackages, copyRedirect, copyPackagejson)(done);
 
-const main = done => gulp.series(babelify, copy)(done);
+const main = done => gulp.series(babelify, copyFromNodeModules, copy)(done);
 
 const watch = () => {
     livereload.listen();
