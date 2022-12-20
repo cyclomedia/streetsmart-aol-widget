@@ -82,15 +82,15 @@ require(REQUIRE_CONFIG, [], function () {
             _disableLinkToMap: false,
 
             // CM properties
-            _cmtTitleColor: '#98C23C',
+            _cmtTitleColor: '#0054a8',
             _apiKey: 'C3oda7I1S_49-rgV63wtWbgtOXcVe3gJWPAVWnAZK3whi7UxCjMNWzIJyv4Fmrcp',
 
             _mapIdLayerId: {},
             _visibleLayers: {},
 
             // Initial construction, might not be added to DOM yet.
-            postCreate() {
-                this.inherited(arguments);
+            postCreate: function postCreate() {
+                this.inherited(postCreate, arguments);
 
                 this.wkid = parseInt(this.config.srs.split(':')[1]);
                 this.streetIndicatorShouldBeVisible = true
@@ -163,8 +163,8 @@ require(REQUIRE_CONFIG, [], function () {
                 this._determineZoomThreshold();
             },
 
-            startup() {
-                this.inherited(arguments);
+            startup: function startup() {
+                this.inherited(startup, arguments);
             },
 
             _handleRecordingClick(event) {

@@ -16,8 +16,8 @@ define([
         return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
             baseClass: 'jimu-widget-streetsmartwidget-setting',
 
-            postCreate:function() {
-                this.inherited(arguments);
+            postCreate:function postCreate() {
+                this.inherited(postCreate, arguments);
                 this.getSrsData();
                 if(this.config) {
                     this.setConfig(this.config);
@@ -213,7 +213,7 @@ define([
 
                 let self = this;
                 let srsFinal = [];
-                const spatialReferences =  "https://atlas.cyclomedia.com/spatialreferences/SpatialReferences.xml";
+                const spatialReferences =  "https://atlasapi.cyclomedia.com/spatialreferences/SpatialReferences.xml";
 
 
                 dRequest(spatialReferences, {headers: {"X-Requested-With": null}})
