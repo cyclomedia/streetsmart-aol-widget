@@ -320,7 +320,7 @@ label {
 
 .dart-panel #panoramaViewerDiv .nav-link.active,
 .dart-panel #panoramaViewerDiv #cmt .measurement-navbar *,
-.dart-panel #panoramaViewerDiv #cmt .btn-viewer-icn:not(:hover):not(.active-panel) .glyphicon,
+.dart-panel #panoramaViewerDiv #cmt .btn-viewer-icn:not(:hover):not(.active-panel):not(:focus) .glyphicon,
 .dart-panel .jimu-widget-frame.jimu-container .cmt .cmtViewerPanel .panel-body .btn-secondary-right span,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar  .btn.btn-default *,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .cmt-navbar.measurement-navbar *,
@@ -367,4 +367,14 @@ th{
 
 .cmt .viewer .cmtNavBarPanel .attributeinfopanel .panel-heading{
     overflow: auto;
+}
+
+/* fixed size for navbar icons */
+.cmt-widget #cmt .btn-viewer-icn .glyphicon {
+    font-size: 24px;
+}
+
+/* show active tabs | reset opacity to 1 */
+.cmt-widget .show {
+    opacity: 1;
 }
