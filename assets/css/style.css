@@ -53,6 +53,10 @@
     font-size: 24px;
 }
 
+.cmt-widget #side-panel-close-button:hover{
+    cursor: pointer;
+}
+
 .cmt-widget #zoom-warning {
     position: absolute;
     top: 50%;
@@ -161,6 +165,11 @@
     border: 1px solid #0054a6;
     border-radius: 50%;
 }
+
+.cmt-widget button.measurement-button.glyphicon:hover{
+    cursor: pointer;
+}
+
 .cmt-widget button.measurement-button.glyphicon:disabled {
     opacity: 0.3;
     cursor: default;
@@ -371,7 +380,7 @@ th{
 
 /* fixed size for navbar icons */
 .cmt-widget #cmt .btn-viewer-icn .glyphicon {
-    font-size: 24px;
+    font-size: 22px;
 }
 
 /* show active tabs | reset opacity to 1 */
