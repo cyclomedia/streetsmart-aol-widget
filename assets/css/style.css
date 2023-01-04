@@ -368,14 +368,19 @@ label {
 th{
     font-weight: bold;
 }
-
-.cmt .table-wrap th, .cmt .table-wrap td{
+/* fixing object info table*/
+#cmt .table-wrap th, #cmt .table-wrap td{
     max-width: 250px;
     word-break: normal !important;
 }
 
-.cmt .viewer .cmtNavBarPanel .attributeinfopanel .panel-heading{
+#cmt .viewer .cmtNavBarPanel .attributeinfopanel .panel-heading{
     overflow: auto;
+}
+
+#cmt .viewer .cmtNavBarPanel .attributeinfopanel .panel-heading .card-title{
+    display: flex;
+    margin-bottom: 0px;
 }
 
 /* fixed size for navbar icons */
