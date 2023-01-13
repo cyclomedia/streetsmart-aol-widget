@@ -180,7 +180,18 @@ require(REQUIRE_CONFIG, [], function () {
 
                 const decodedToken = atob(this.config.token).split(':');
                 const clientId = 'D61AE220-A48A-42F1-81BF-8FA3313F01A4';
-                const redirectUri = 'widgets/StreetSmart/redirect';
+
+                // local running
+                // =================
+                // const redirectUri = 'widgets/StreetSmart/redirect';
+                // =================
+
+                // real environment
+                // =================
+                const redirectUri = 'StreetSmart/redirect';
+                const baseUriApi = 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget';
+                // =================
+
                 const redirectLogin = `${redirectUri}/login.html`;
                 const redirectLogout = `${redirectUri}/logout.html`;
 
@@ -192,6 +203,10 @@ require(REQUIRE_CONFIG, [], function () {
                     clientId: clientId,
                     loginRedirectUri: redirectLogin,
                     logoutRedirectUri: redirectLogout,
+
+                    // only real environment
+                    apiBaseUri: baseUriApi,
+
                     apiKey: this._apiKey,
                     srs: this.config.srs,
                     locale: this.config.locale,
