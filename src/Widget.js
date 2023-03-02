@@ -27,8 +27,8 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/geometry/webMercatorUtils",
         //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-4660/StreetSmartApi.js',
         //'https://streetsmart-staging.cyclomedia.com/api/v22.18/StreetSmartApi.js',
-        'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-5342/StreetSmartApi.js',
-        //'https://streetsmart.cyclomedia.com/api/v22.18/StreetSmartApi.js',
+        //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-5342/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v23.2/StreetSmartApi.js',
         'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
         './RecordingClient',
@@ -180,18 +180,7 @@ require(REQUIRE_CONFIG, [], function () {
 
                 const decodedToken = atob(this.config.token).split(':');
                 const clientId = 'D61AE220-A48A-42F1-81BF-8FA3313F01A4';
-
-                // local running
-                // =================
-                // const redirectUri = 'widgets/StreetSmart/redirect';
-                // =================
-
-                // real environment
-                // =================
-                const redirectUri = 'StreetSmart/redirect';
-                const baseUriApi = 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget';
-                // =================
-
+                const redirectUri = 'widgets/StreetSmart/redirect';
                 const redirectLogin = `${redirectUri}/login.html`;
                 const redirectLogout = `${redirectUri}/logout.html`;
 
@@ -203,10 +192,6 @@ require(REQUIRE_CONFIG, [], function () {
                     clientId: clientId,
                     loginRedirectUri: redirectLogin,
                     logoutRedirectUri: redirectLogout,
-
-                    // only real environment
-                    apiBaseUri: baseUriApi,
-
                     apiKey: this._apiKey,
                     srs: this.config.srs,
                     locale: this.config.locale,

@@ -395,9 +395,9 @@ define([
 
             for (const featureS in arcgisFeatureSet.features) {
                 const updateFeature = arcgisFeatureSet.features[featureS];
-                const objectId = updateFeature.attributes[mapLayer.objectIdField];
+                const objectId = updateFeature.attributes && updateFeature.attributes[mapLayer.objectIdField];
 
-                if (featureSet && featureSet.features) {
+                if (objectId && featureSet && featureSet.features) {
                     for (const featureZ in featureSet.features) {
                         const fromFeature = featureSet.features[featureZ];
 
@@ -514,7 +514,9 @@ define([
                     }
                 }
 
-                features.push(updateFeature);
+                if (objectId) {
+                    features.push(updateFeature);
+                }
             }
 
             arcgisFeatureSet.features = features;
