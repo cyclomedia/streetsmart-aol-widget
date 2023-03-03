@@ -971,7 +971,7 @@ require(REQUIRE_CONFIG, [], function () {
                             const featureId = changes.objectId
                             if (this._layerUpdateListener) this._layerUpdateListener.remove();
                             this._layerUpdateListener = this.addEventListener(layer, 'update-end', () => {
-                                this._rerender.bind(this)()
+//                                this._rerender.bind(this)()
                                 this._attributeManager.showInfoById(layer, featureId)
                                 if (this._layerUpdateListener) this._layerUpdateListener.remove();
                             });
