@@ -53,6 +53,10 @@
     font-size: 24px;
 }
 
+.cmt-widget #side-panel-close-button:hover{
+    cursor: pointer;
+}
+
 .cmt-widget #zoom-warning {
     position: absolute;
     top: 50%;
@@ -161,6 +165,11 @@
     border: 1px solid #0054a6;
     border-radius: 50%;
 }
+
+.cmt-widget button.measurement-button.glyphicon:hover{
+    cursor: pointer;
+}
+
 .cmt-widget button.measurement-button.glyphicon:disabled {
     opacity: 0.3;
     cursor: default;
@@ -320,7 +329,7 @@ label {
 
 .dart-panel #panoramaViewerDiv .nav-link.active,
 .dart-panel #panoramaViewerDiv #cmt .measurement-navbar *,
-.dart-panel #panoramaViewerDiv #cmt .btn-viewer-icn:not(:hover):not(.active-panel) .glyphicon,
+.dart-panel #panoramaViewerDiv #cmt .btn-viewer-icn:not(:hover):not(.active-panel):not(:focus) .glyphicon,
 .dart-panel .jimu-widget-frame.jimu-container .cmt .cmtViewerPanel .panel-body .btn-secondary-right span,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .navbar  .btn.btn-default *,
 .dart-panel .jimu-widget-frame.jimu-container #panoramaViewerDiv .cmt .cmt-navbar.measurement-navbar *,
@@ -359,12 +368,27 @@ label {
 th{
     font-weight: bold;
 }
-
-.cmt .table-wrap th, .cmt .table-wrap td{
+/* fixing object info table*/
+#cmt .table-wrap th, #cmt .table-wrap td{
     max-width: 250px;
     word-break: normal !important;
 }
 
-.cmt .viewer .cmtNavBarPanel .attributeinfopanel .panel-heading{
+#cmt .viewer .cmtNavBarPanel .attributeinfopanel .panel-heading{
     overflow: auto;
+}
+
+#cmt .viewer .cmtNavBarPanel .attributeinfopanel .panel-heading .card-title{
+    display: flex;
+    margin-bottom: 0px;
+}
+
+/* fixed size for navbar icons */
+.cmt-widget #cmt .btn-viewer-icn .glyphicon {
+    font-size: 22px;
+}
+
+/* show active tabs | reset opacity to 1 */
+.cmt-widget .show {
+    opacity: 1;
 }
