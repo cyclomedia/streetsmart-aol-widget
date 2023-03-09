@@ -28,7 +28,7 @@ require(REQUIRE_CONFIG, [], function () {
         //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-4660/StreetSmartApi.js',
         //'https://streetsmart-staging.cyclomedia.com/api/v22.18/StreetSmartApi.js',
         //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-5342/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v23.2/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v23.3/StreetSmartApi.js',
         'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
         './RecordingClient',
