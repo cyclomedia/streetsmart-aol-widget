@@ -480,7 +480,7 @@ require(REQUIRE_CONFIG, [], function () {
             _openApiWhenZoomedIn() {
                 this.zoomWarning.classList.remove('hidden');
                 //GC: show coverage map when widget first opens, even if zoomed out too far
-                const coverLayer = new WebTiledLayer("https://atlasapi.cyclomedia.com/webmercator/cycloramas/{z}/{x}/{y}.png", {
+                const coverLayer = new WebTiledLayer("https://atlas.cyclomedia.com/webmercator/cycloramas/{z}/{x}/{y}.png", {
                     "id": "CycloramaCoverage",
                     "maxScale": 5,
                     "opacity": 0.75

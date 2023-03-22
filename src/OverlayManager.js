@@ -401,7 +401,7 @@ define([
                     for (const featureZ in featureSet.features) {
                         const fromFeature = featureSet.features[featureZ];
 
-                        if (fromFeature && objectId === fromFeature.attributes[mapLayer.objectIdField]) {
+                        if (fromFeature && fromFeature.attributes && objectId === fromFeature.attributes[mapLayer.objectIdField]) {
                             if (arcgisFeatureSet.geometryType === 'esriGeometryPoint') {
                                 const z = fromFeature.geometry && fromFeature.geometry.z;
 

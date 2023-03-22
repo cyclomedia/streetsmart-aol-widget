@@ -253,7 +253,7 @@ define([
         }
         //GC: creating the cyclorama coverage map and adding it to the layer list
         _createCoverageLayer() {
-            const layer = new WebTiledLayer("https://atlasapi.cyclomedia.com/webmercator/cycloramas/{z}/{x}/{y}.png", {
+            const layer = new WebTiledLayer("https://atlas.cyclomedia.com/webmercator/cycloramas/{z}/{x}/{y}.png", {
                 "id": "CycloramaCoverage",
                 "maxScale": 5,
                 "opacity": 0.75
