@@ -16,6 +16,7 @@ define([
     'esri/symbols/TextSymbol',
     'esri/geometry/Polyline',
     './utils',
+    './GeoTransformClient'
 ], function (
     Color,
     on,
@@ -34,6 +35,7 @@ define([
     TextSymbol,
     Polyline,
     utils,
+    geoTransformClient
 ) {
     return class MeasurementHandler {
         constructor({ map, wkid, measureChange, layer, StreetSmartApi, nls }) {
@@ -56,7 +58,10 @@ define([
             if (!activeMeasurement || activeMeasurement.features.length === 0) {
                 return;
             }
-
+            //GC: add measurement layer to the map if it has been removed
+            if(!this.map.getLayer(this.layer.id)){
+                this.map.addLayer(this.layer);
+            }
             this.drawActiveMeasurement(activeMeasurement);
         }
 
@@ -104,6 +109,7 @@ define([
                 }
                 const pointViewer = new Point(coord[0], coord[1], new SpatialReference({ wkid: this.wkid }));
                 const coordMap = utils.transformProj4js(this.nls, pointViewer, mapWkid, latestWkid);
+                //const coordMap = geoTransformClient.requestGeoTransform(pointViewer.spatialReference.wkid, mapWkid, [pointViewer.x, pointViewer.y]);
                 return [coordMap.x, coordMap.y];
             })
         }

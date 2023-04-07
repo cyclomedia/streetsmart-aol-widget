@@ -7,6 +7,7 @@ define([
     'esri/geometry/ScreenPoint',
     'esri/SpatialReference',
     './utils',
+    './GeoTransformClient'
 ], function (
     on,
     dom,
@@ -16,7 +17,7 @@ define([
     ScreenPoint,
     SpatialReference,
     utils,
-
+    geoTransformClient
 ) {
     'use strict';
 
@@ -51,8 +52,10 @@ define([
                 if (_.includes(coord, null)) {
                     return null;
                 }
+                const mapWkid = this.map.spatialReference.wkid;
+                const latestWkid = this.map.spatialReference.latestWkid;
                 const pointViewer = new Point(coord[0], coord[1], new SpatialReference({ wkid: this.wkid }));
-                const coordMap = utils.transformProj4js(this.nls, pointViewer, layerWkid, latestWkid);
+                const coordMap = utils.transformProj4js(this.nls, pointViewer, mapWkid, latestWkid);
                 return [coordMap.x, coordMap.y, coord[2]];
             })
         }
@@ -67,13 +70,16 @@ define([
             const latestWkid = layer.spatialReference.latestWkid;
             const layerWkid = layer.spatialReference.wkid;
             const transformedCoords = this._transformPoints([coords], layerWkid, latestWkid);
+            const roundX = transformedCoords[0][0].toFixed(2);
+            const roundY = transformedCoords[0][1].toFixed(2);
+            const roundZ = transformedCoords[0][2].toFixed(2);
+            const mapWkid = this.map.spatialReference.wkid;
 
             const pointJson = [{"geometry":
                     {
-                        "x":transformedCoords[0][0],
-                        "y":transformedCoords[0][1],
-                        "z":zValue,
-                        "spatialReference":{"wkid":layerWkid}},
+                        "x":roundX,
+                        "y":roundY,
+                        "spatialReference":{"wkid":mapWkid}},
                 "attributes":{
                 [layer.objectIdField] : editID
                 }
@@ -160,16 +166,18 @@ define([
 
             let layerSaveRequest = esriRequest(options, { usePost: true});
 
+            let zAlert = this.nls.zAlert;
+
             return layerSaveRequest.then(
                 (response) => {
                     layer.refresh();
                     console.log("success" + JSON.stringify(response));
                     return response
                 }, function(error){
-                    console.log("error" + error);
+                    console.log(error);
                     //GC: warning message in case the feature is not z enabled so measurement cannot be saved
                     if(layer.hasZ === false){
-                        alert(this.nls.zAlert);
+                        alert(zAlert);
                     }
                 });
         }

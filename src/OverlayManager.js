@@ -66,6 +66,7 @@ define([
             this.requestID = 0;
             this.isQueueLoading = false;
             this.reloadQueueOnFinish = false;
+            this.graphicCount = false;
             //  Can be used to listen to visibility changes in the layer list.
             //this._bindLayerChangeListeners();
         }
@@ -154,12 +155,13 @@ define([
                     if(sld.xml === undefined){
                         return;
                     }
+                    var layerVisibility = mapLayer.visible;
                     const overlay = this.api.addOverlay({
                         // sourceSrs: 'EPSG:3857',  // Broken in API
                         name: mapLayer.name,
                         sldXMLtext: sld.xml,
                         geojson: geojson,
-                        visible: false
+                        visible: layerVisibility //GC: changing this to layer visibility so that overlays don't turn off after making edits
                     });
 
                     const oldId = this.widget._mapIdLayerId.hasOwnProperty(mapLayer.id) ?
@@ -234,7 +236,7 @@ define([
             }else if (this.reloadQueueOnFinish === false){
                 const {mapLayer} = request;
                 try {
-                    const wkid = result.spatialReference && result.spatialReference.wkid;
+                    const wkid = result.spatialReference && (result.spatialReference.latestWkid || result.spatialReference.wkid);
 
                     let info;
                     if (wkid && result.features.length) {
@@ -252,16 +254,21 @@ define([
                     }
 
                     const sld = new SLD(mapLayer, info);
+                    //GC: finds <Null> values inside of xml and replaces it so it doesn't return an html error
+                    if(sld.xml.includes("<Null>")){
+                        sld.xml = sld.xml.replace("<Null>", "Null");
+                    }
                     info = this.applyDefaultCaseIfNeeded(info, sld);
                     if(sld.xml === undefined){
                         return;
                     }
+                    var layerVisibility = mapLayer.visible;
                     const overlay = this.api.addOverlay({
-                        // sourceSrs: 'EPSG:3857',  // Broken in API
-                        name: mapLayer.name,
+                        // sourceSrs: 'EPSG:3857', Broken in API
+                        name: mapLayer._name,
                         sldXMLtext: sld.xml,
                         geojson: info,
-                        visible: false
+                        visible: layerVisibility //GC: changing this to layer visibility so that overlays don't turn off after making edits; used to be false
                     });
 
                     const oldId = this.widget._mapIdLayerId.hasOwnProperty(mapLayer.id) ?
@@ -280,9 +287,23 @@ define([
                     this.widget._visibleLayers[overlay.id] = layerVisible;
 
                     request.overlayID = overlay;
-                    this.widget._panoramaViewer.toggleOverlay({ id: overlay.id, visible: !layerVisible, name: mapLayer.name})
+                    this.widget._panoramaViewer.toggleOverlay({ id: overlay.id, visible: !layerVisible, name: mapLayer.name});
                     this.overlaysByName[mapLayer.name] = overlay.id;
                     this.overlays.push(overlay.id);
+
+                    //GC: checks if map layer has over 1000 features to switch visibility on the map
+                    //so the overlays load correctly
+                    if(mapLayer.graphics.length > 1000 && !this.graphicCount){
+                        //switches layer visibility on the basemap
+                        mapLayer.setVisibility(!layerVisible);
+                        mapLayer.setVisibility(layerVisible);
+                        //moves recording to a new point then back to original point to refresh the panorama and make overlays show up
+                        var coord = [this.widget._panoramaViewer.props.orientation.xyz[0], this.widget._panoramaViewer.props.orientation.xyz[1], this.widget._panoramaViewer.props.orientation.xyz[2]];
+                        var newCoord = [this.widget._panoramaViewer.props.orientation.xyz[0], this.widget._panoramaViewer.props.orientation.xyz[1]+50, this.widget._panoramaViewer.props.orientation.xyz[2]];
+                        this.widget._panoramaViewer.openByCoordinate(newCoord);
+                        this.widget._panoramaViewer.openByCoordinate(coord);
+                        this.graphicCount = true;
+                    }
 
                     let isBundleComplete = true;
                     for (const reg of requestBundle.req) {
@@ -316,7 +337,7 @@ define([
 
         _calcRecordingExtent() {
             const recording = this.widget._panoramaViewer.getRecording();
-            const featureRadius = 30; //might need to change to 99 radius
+            const featureRadius = 30; //might need to change to 99 radius, draw distance in meters
             const {xyz, srs} = recording;
             // needs support for feet.
             const ext = new Extent(xyz[0] - featureRadius, xyz[1] - featureRadius, xyz[0] + featureRadius, xyz[1] + featureRadius, new SpatialReference(srs.split(':')[1]) )
@@ -349,8 +370,7 @@ define([
             return feature.properties[sldCase.filter.attribute] === sldCase.filter.value;
         }
 
-        // Adds the SLD_DEFAULT_CASE when a feature
-        // matchs none if the special cases of the SLD
+        // Adds the SLD_DEFAULT_CASE when a feature matches none of the special cases of the SLD
         applyDefaultCaseIfNeeded(geojson, sld) {
             if (geojson.type === 'FeatureCollection' && sld.containsDefaultCase) {
                     const newFeatures = geojson.features.map((feature) => {
@@ -395,11 +415,12 @@ define([
 
             for (const featureS in arcgisFeatureSet.features) {
                 const updateFeature = arcgisFeatureSet.features[featureS];
-                const objectId = updateFeature.attributes[mapLayer.objectIdField];
+                //GC: fixes street address bug after api 23.2
+                const objectId = updateFeature.attributes && updateFeature.attributes[mapLayer.objectIdField];
 
-                if (featureSet && featureSet.features) {
-                    for (const featureZ in featureSet.features) {
-                        const fromFeature = featureSet.features[featureZ];
+                if (objectId && featureSet && featureSet.features) {
+                    for (let i = 0; i < featureSet.features.length; i++) {
+                        const fromFeature = featureSet.features[i];
 
                         if (fromFeature && objectId === fromFeature.attributes[mapLayer.objectIdField]) {
                             if (arcgisFeatureSet.geometryType === 'esriGeometryPoint') {
@@ -409,7 +430,8 @@ define([
                                     updateFeature.geometry.z = z;
                                 }
 
-                                if (!updateFeature.geometry.spatialReference || updateFeature.geometry.spatialReference.wkid !== this.config.srs.split(':')[1]) {
+                                if (!updateFeature.geometry.spatialReference || updateFeature.geometry.spatialReference.latestWkid != this.config.srs.split(':')[1] ||
+                                    updateFeature.geometry.spatialReference.wkid !== this.config.srs.split(':')[1]) {
                                     const x = fromFeature.geometry && fromFeature.geometry.x;
                                     const y = fromFeature.geometry && fromFeature.geometry.y;
                                     const spatialReference = featureSet.spatialReference;
@@ -445,7 +467,8 @@ define([
                                                     updatePaths[0][point][2] = z;
                                                 }
 
-                                                if (updateFeature.geometry.spatialReference.wkid !== this.config.srs.split(':')[1]) {
+                                                if ((updateFeature.geometry.spatialReference.latestWkid != this.config.srs.split(':')[1]) ||
+                                                    (updateFeature.geometry.spatialReference.wkid != this.config.srs.split(':')[1])) {
                                                     const x = thisPoint && thisPoint.length >= 1 && thisPoint[0];
                                                     const y = thisPoint && thisPoint.length >= 2 && thisPoint[1]
                                                     changedSpatialReference = true;
@@ -482,12 +505,13 @@ define([
                                         const z = thisPoint && thisPoint.length === 3 && thisPoint[2];
                                         const updateRings = updateFeature.geometry && updateFeature.geometry.rings;
 
-                                        if (updateRings.length > ring && updateRings[ring][point]) {
+                                        if (updateRings && updateRings.length > ring && updateRings[ring][point]) {
                                             if (z) {
                                                 updateRings[ring][point][2] = z;
                                             }
 
-                                            if (updateFeature.geometry.spatialReference.wkid != this.config.srs.split(':')[1]) {
+                                            if ((updateFeature.geometry.spatialReference.latestWkid != this.config.srs.split(':')[1]) ||
+                                                (updateFeature.geometry.spatialReference.wkid != this.config.srs.split(':')[1])) {
                                                 const x = thisPoint && thisPoint.length >= 1 && thisPoint[0];
                                                 const y = thisPoint && thisPoint.length >= 2 && thisPoint[1]
                                                 changedSpatialReference = true;
@@ -514,7 +538,9 @@ define([
                     }
                 }
 
-                features.push(updateFeature);
+                if (objectId) {
+                    features.push(updateFeature);
+                }
             }
 
             arcgisFeatureSet.features = features;
@@ -527,7 +553,7 @@ define([
                     //console.log(key, value);
                     for (let j = 0; j < mapLayer._fields.length; j++) {
                         if (mapLayer._fields[j].name === key){
-                            if (mapLayer._fields[j].domain) {
+                            if (mapLayer._fields[j].domain && mapLayer._fields[j].domain.codedValues) {
                                 for (let k = 0; k < mapLayer._fields[j].domain.codedValues.length; k++) {
                                     if (mapLayer._fields[j].domain.codedValues[k].code === value) {
                                         attr[key] = mapLayer._fields[j].domain.codedValues[k].name;
@@ -549,9 +575,9 @@ define([
             const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet, undefined, dates);
 
             // Make sure the panoramaviewer knows which srs this is in.
-            let wkidToUse = _.get(arcgisFeatureSet, 'features[0].geometry.spatialReference.wkid', null) || wkid;
+            let wkidToUse = _.get(arcgisFeatureSet, 'features[0].geometry.spatialReference.wkid', null) || (features[0].geometry.spatialReference.latestWkid) || wkid;
             if (wkidToUse) {
-                wkidToUse = wkidToUse === 102100 ? 3857 : wkidToUse;
+                wkidToUse = (wkidToUse === 102100) ? 3857 : wkidToUse;
                 const crs = {
                     type: 'EPSG',
                     properties: {

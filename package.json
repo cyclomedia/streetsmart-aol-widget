@@ -1,7 +1,7 @@
 {
   "name": "streetsmart-widget",
   "description": "Street Smart Widget for ArcGIS Online",
-  "version": "22.4.0",
+  "version": "23.1.0",
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {
@@ -63,5 +63,8 @@
   "overrides": {
     "unset-value": "^2.0.1",
     "glob-parent": "^6.0.2"
+  },
+  "dependencies": {
+    "@esri/arcgis-rest-request": "^4.1.2"
   }
 }

@@ -56,6 +56,7 @@ define([
                 //     var LoginWithOauth = dom.byId('LoginWithOauth').checked;
                 //     dom.byId('userName').disabled = LoginWithOauth;
                 //     dom.byId('password').disabled = LoginWithOauth;
+                //     //dom.byId('clientID').disabled = !LoginWithOauth;
                 // });
 
             },
@@ -85,17 +86,19 @@ define([
                 }
 
                 //GC: adding OAuth functionality
-                if(this.config.OAuth){
-                    this.OAuthLogin.value = this.config.OAuth;
-                    if(this.config.OAuth === true) {
-                        this.OAuthLogin.checked = true;
-                        this.uNameCyclomedia.disabled = true;
-                        this.uPwdCyclomedia.disabled = true;
-                    }else{
-                        this.uNameCyclomedia.disabled = false;
-                        this.uPwdCyclomedia.disabled = false;
-                    }
-                }
+                // if(this.config.OAuth){
+                //     this.OAuthLogin.value = this.config.OAuth;
+                //     if(this.config.OAuth === true) {
+                //         this.OAuthLogin.checked = true;
+                //         this.uNameCyclomedia.disabled = true;
+                //         this.uPwdCyclomedia.disabled = true;
+                //         //this.uClientID.disabled = false;
+                //     }else{
+                //         this.uNameCyclomedia.disabled = false;
+                //         this.uPwdCyclomedia.disabled = false;
+                //         //this.uClientID.disabled = true;
+                //     }
+                // }
 
                 if(this.config.agreement){
                     this.agreementCheck.value = this.config.agreement;
@@ -173,14 +176,13 @@ define([
                     if(bv.MEASURE !== undefined) this.measureButtonEnable.checked = !!bv.MEASURE;
                     if(bv.SAVE_IMAGE !== undefined) this.saveimageButtonEnable.checked = !!bv.SAVE_IMAGE;
                     if(bv.IMAGE_INFORMATION !== undefined) this.imageinformationButtonEnable.checked = !!bv.IMAGE_INFORMATION;
-                    if(bv.ZOOM_IN !== undefined) this.zoominButtonEnable.checked = !!bv.ZOOM_IN;
-                    if(bv.ZOOM_OUT !== undefined) this.zoomoutButtonEnable.checked = !!bv.ZOOM_OUT;
                 }
             },
 
             getConfig: function () {
                 this.config.locale = this.selectCyclomediaLocation.value;
-                // this.config.OAuth = this.OAuthLogin.checked;
+                // this.config.clientID = this.uClientID.value;
+                //this.config.OAuth = this.OAuthLogin.checked;
                 this.config.units = this.selectUnitToggle.value;
                 this.config.scale = this.selectScaleToggle.value;
                 this.config.token = btoa(`${this.uNameCyclomedia.value}:${this.uPwdCyclomedia.value}`);
@@ -203,8 +205,6 @@ define([
                     MEASURE: this.measureButtonEnable.checked,
                     SAVE_IMAGE: this.saveimageButtonEnable.checked,
                     IMAGE_INFORMATION: this.imageinformationButtonEnable.checked,
-                    ZOOM_IN: this.zoominButtonEnable.checked,
-                    ZOOM_OUT: this.zoomoutButtonEnable.checked,
                 };
                 return this.config;
             },
