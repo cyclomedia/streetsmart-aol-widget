@@ -25,9 +25,9 @@ require(REQUIRE_CONFIG, [], function () {
         'esri/tasks/locator',
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
-        //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-4660/StreetSmartApi.js',
-        //'https://streetsmart-staging.cyclomedia.com/api/v22.18/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v22.18/StreetSmartApi.js',
+        //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-5342/StreetSmartApi.js',
+        //'https://streetsmart-staging.cyclomedia.com/api/v23.3/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v23.1/StreetSmartApi.js',
         'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
         './RecordingClient',
@@ -38,7 +38,10 @@ require(REQUIRE_CONFIG, [], function () {
         './FeatureLayerManager',
         './AttributeManager',
         './arcgisToGeojson',
-        'esri/layers/WebTiledLayer'
+        'esri/layers/WebTiledLayer',
+        'https://unpkg.com/@esri/arcgis-rest-request@4.0.0/dist/bundled/request.umd.js',
+        'jimu/tokenUtils',
+        './GeoTransformClient'
     ], function (
         declare,
         on,
@@ -65,7 +68,10 @@ require(REQUIRE_CONFIG, [], function () {
         FeatureLayerManager,
         Attributemanager,
         geojsonUtils,
-        WebTiledLayer
+        WebTiledLayer,
+        requestModule,
+        tokenUtils,
+        geoTransformClient
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
@@ -158,6 +164,10 @@ require(REQUIRE_CONFIG, [], function () {
                     api: StreetSmartApi
                 });
 
+                this._geoTransformClient = new geoTransformClient({
+                    widget: this
+                });
+
                 this._applyWidgetStyle();
                 this._determineZoomThreshold();
             },
@@ -178,13 +188,70 @@ require(REQUIRE_CONFIG, [], function () {
                 }
 
                 const decodedToken = atob(this.config.token).split(':');
+                const clientId = 'D61AE220-A48A-42F1-81BF-8FA3313F01A4';
+
+                // local running
+                // =================
+                //const redirectUri = 'widgets/StreetSmart/redirect';
+                // =================
+
+                // real environment
+                // =================
+                const redirectUri = 'StreetSmart/redirect';
+                const baseUriApi = 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget';
+                // const baseUriApi = 'https://desktop-f0b26eb:3344/webappbuilder/apps/4/widgets';
+                // =================
+                // const redirectUri = 'react/redirect';
+                // const baseUriApi = 'https://sld.cyclomedia.com';
+
+                var credential = tokenUtils.getPortalCredential('https://streetsmart.maps.arcgis.com/home');
+                //var token = credential.token;
+                //var token = 'ign37GqeMjZUZ6C24DnCsezdoQbcganyRrntdzAvHgKOQ1QCivlQCwt1vy9T47dR5e0q8j6nmwV_dqPQcy8FmjqsLvagj6jJGksT2IFbRe-WQTufoypJcl4ThVxEoPX9uSRXchUtaTe9cVYhqPQoZipXQNDUZxBOJ8tpLIhhZVyXsDhnFbwCq1DZW3up_NeGbix1x1Rr2MDajI3rh6lko7X1qXVyxDbooNW-VjhPK1_BoYXSddr5RDb7oWRBcLkr';
+                //console.log(token);
+
+                //const redirectLogin = `${redirectUri}/login.html?token=`+token;
+                //const redirectLogout = `${redirectUri}/logout.html?token=`+token;
+                // const redirectLogin = `${redirectUri}/login.html`;
+                // const redirectLogout = `${redirectUri}/logout.html`;
+
+                //console.log(requestModule);
+
+                ///////////////////////////////////////////////////////////
+                //convert the encrypted platform cookie into a ArcGISIdentityManager
+                //import { platformSelf, ArcGISIdentityManager } from '@esri/arcgis-rest-request';
+
+                //const portal = 'https://www.arcgis.com/sharing/rest';
+                // const portal = 'https://streetsmart.maps.arcgis.com/home';
+                // const clientId2 = '0ef1ada896e844d49c2ee99626780f6b';
+                //
+                // // exchange esri_aopc cookie
+                // return requestModule.platformSelf(clientId2, 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/redirect/login.html', portal)
+                //     .then((response) => {
+                //         const currentTimestamp = new Date().getTime();
+                //         const tokenExpiresTimestamp = currentTimestamp + (response.expires_in * 1000);
+                //         // Construct the session and return it
+                //         return new requestModule.ArcGISIdentityManager({
+                //             portal,
+                //             clientId2,
+                //             username: response.username,
+                //             token: response.token,
+                //             tokenExpires: new Date(tokenExpiresTimestamp),
+                //             ssl: true
+                //         });
+                //     });
+                ///////////////////////////////////////////////////////
+
+
 
                 const CONFIG = {
                     targetElement: this.panoramaViewerDiv,
                     username: decodedToken[0],
                     password: decodedToken[1],
                     loginOauth: this.config.OAuth,
-                    clientID: this.config.clientID,
+                    clientId: clientId,
+                    // loginRedirectUri: redirectLogin,
+                    // logoutRedirectUri: redirectLogout,
+                    //apiBaseUri: baseUriApi,
                     apiKey: this._apiKey,
                     srs: this.config.srs,
                     locale: this.config.locale,
@@ -202,9 +269,9 @@ require(REQUIRE_CONFIG, [], function () {
                     this._centerViewerToMap();
                     this.streetNameLayerID = this._overlayManager.addStreetNameLayer();
 
-                    const unitPrefs = _.get(StreetSmartApi, "Settings.UNIT_PREFERENCE")
+                    const unitPrefs = _.get(StreetSmartApi, "Settings.UNIT_PREFERENCE");
                     if(unitPrefs){
-                        const units = this.config.units || unitPrefs.DEFAULT
+                        const units = this.config.units || unitPrefs.DEFAULT;
                         if(Object.values(unitPrefs).includes(units)){
                             StreetSmartApi.Settings.setUnitPreference(units);
                         }
@@ -341,6 +408,11 @@ require(REQUIRE_CONFIG, [], function () {
                     }
                     this.streetIndicatorHiddenDuringMeasurement = false
                 }
+                //GC: removes the measurement layer from the map every time measurement is stopped
+                //var lay = this.map.getLayer(this._layerManager.measureLayer.id);
+                if(this.map.getLayer(this._layerManager.measureLayer.id) && this._panoramaViewer && !this._panoramaViewer.animating){
+                    this.map.removeLayer(this._layerManager.measureLayer);
+                }
             },
 
             /**
@@ -439,8 +511,8 @@ require(REQUIRE_CONFIG, [], function () {
                     helperFunction( 'MEASURE');
                     helperFunction( 'SAVE_IMAGE');
                     helperFunction( 'IMAGE_INFORMATION');
-                    helperFunction( 'ZOOM_IN');
-                    helperFunction( 'ZOOM_OUT');
+                    // helperFunction( 'ZOOM_IN');
+                    // helperFunction( 'ZOOM_OUT');
                 }
             },
 
@@ -964,7 +1036,8 @@ require(REQUIRE_CONFIG, [], function () {
                             const featureId = changes.objectId
                             if (this._layerUpdateListener) this._layerUpdateListener.remove();
                             this._layerUpdateListener = this.addEventListener(layer, 'update-end', () => {
-                                this._rerender.bind(this)()
+                                //GC: stops layers from turning off after saving a measurement
+                                //this._rerender.bind(this)()
                                 this._attributeManager.showInfoById(layer, featureId)
                                 if (this._layerUpdateListener) this._layerUpdateListener.remove();
                             });
