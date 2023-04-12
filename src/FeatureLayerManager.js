@@ -46,16 +46,15 @@ define([
             return Promise.resolve(null)
         }
 
-        _transformPoints(coords, layerWkid, latestWkid) {
+        _transformPoints(coords, wkid, latestWkid) {
             return coords.map(coord => {
                 // Ignore incomplete forward intersection:
                 if (_.includes(coord, null)) {
                     return null;
                 }
-                const mapWkid = this.map.spatialReference.wkid;
-                const latestWkid = this.map.spatialReference.latestWkid;
                 const pointViewer = new Point(coord[0], coord[1], new SpatialReference({ wkid: this.wkid }));
-                const coordMap = utils.transformProj4js(this.nls, pointViewer, mapWkid, latestWkid);
+                //GC: use map wkid to make the measurement points on the map show up more accurately
+                const coordMap = utils.transformProj4js(this.nls, pointViewer, wkid, latestWkid);
                 return [coordMap.x, coordMap.y, coord[2]];
             })
         }
@@ -65,20 +64,22 @@ define([
             if (coords === null) {
                 return;
             }
-            const zValue = coords[2];
+            // const zValue = coords[2];
             //GC: allowing both SRS of the layer to match up with the SRS of the widget
-            const latestWkid = layer.spatialReference.latestWkid;
-            const layerWkid = layer.spatialReference.wkid;
-            const transformedCoords = this._transformPoints([coords], layerWkid, latestWkid);
+            // const latestWkid = layer.spatialReference.latestWkid;
+            // const layerWkid = layer.spatialReference.wkid;
+            const mapWkid = this.map.spatialReference.wkid;
+            const mapLatestWkid = this.map.spatialReference.latestWkid;
+            const transformedCoords = this._transformPoints([coords], mapWkid, mapLatestWkid);
             const roundX = transformedCoords[0][0].toFixed(2);
             const roundY = transformedCoords[0][1].toFixed(2);
             const roundZ = transformedCoords[0][2].toFixed(2);
-            const mapWkid = this.map.spatialReference.wkid;
 
             const pointJson = [{"geometry":
                     {
                         "x":roundX,
                         "y":roundY,
+                        "z":roundZ,
                         "spatialReference":{"wkid":mapWkid}},
                 "attributes":{
                 [layer.objectIdField] : editID
@@ -101,14 +102,16 @@ define([
                 return;
             }
             //GC: allowing both SRS of the layer to match up with the SRS of the widget
-            const latestWkid = layer.spatialReference.latestWkid;
-            const layerWkid = layer.spatialReference.wkid;
-            const transformedCoords = this._transformPoints(coords, layerWkid, latestWkid);
+            // const latestWkid = layer.spatialReference.latestWkid;
+            // const layerWkid = layer.spatialReference.wkid;
+            const mapWkid = this.map.spatialReference.wkid;
+            const mapLatestWkid = this.map.spatialReference.latestWkid;
+            const transformedCoords = this._transformPoints(coords, mapWkid, mapLatestWkid);
 
             const lineJson = [{"geometry":
                     {   "hasZ": true,
                         "paths":[transformedCoords],
-                        "spatialReference":{"wkid":layerWkid}},
+                        "spatialReference":{"wkid":mapWkid}},
                 "attributes":{
                     Measurement: measuredDistance
                 }
@@ -129,14 +132,16 @@ define([
                 return;
             }
             //GC: allowing both SRS of the layer to match up with the SRS of the widget
-            const latestWkid = layer.spatialReference.latestWkid;
-            const layerWkid = layer.spatialReference.wkid;
-            const transformedCoords = this._transformPoints(coords, layerWkid, latestWkid);
+            // const latestWkid = layer.spatialReference.latestWkid;
+            // const layerWkid = layer.spatialReference.wkid;
+            const mapWkid = this.map.spatialReference.wkid;
+            const mapLatestWkid = this.map.spatialReference.latestWkid;
+            const transformedCoords = this._transformPoints(coords, mapWkid, mapLatestWkid);
 
             const polyJson = [{"geometry":
                     {   "hasZ": true,
                         "rings":[transformedCoords],
-                        "spatialReference":{"wkid":layerWkid}},
+                        "spatialReference":{"wkid":mapWkid}},
                 "attributes":{
                     Measurement: polygonArea
                 }
