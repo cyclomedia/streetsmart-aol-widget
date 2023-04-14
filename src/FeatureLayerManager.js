@@ -64,13 +64,14 @@ define([
             if (coords === null) {
                 return;
             }
-            // const zValue = coords[2];
+            const zValue = coords[2];
+
             //GC: allowing both SRS of the layer to match up with the SRS of the widget
-            // const latestWkid = layer.spatialReference.latestWkid;
-            // const layerWkid = layer.spatialReference.wkid;
+            const layerWkid = layer.spatialReference.wkid;
+            const latestWkid = layer.spatialReference.latestWkid;
             const mapWkid = this.map.spatialReference.wkid;
             const mapLatestWkid = this.map.spatialReference.latestWkid;
-            const transformedCoords = this._transformPoints([coords], mapWkid, mapLatestWkid);
+            const transformedCoords = this._transformPoints([coords], layerWkid, latestWkid);
             const roundX = transformedCoords[0][0].toFixed(2);
             const roundY = transformedCoords[0][1].toFixed(2);
             const roundZ = transformedCoords[0][2].toFixed(2);
@@ -80,7 +81,7 @@ define([
                         "x":roundX,
                         "y":roundY,
                         "z":roundZ,
-                        "spatialReference":{"wkid":mapWkid}},
+                        "spatialReference":{"wkid":layerWkid}},
                 "attributes":{
                 [layer.objectIdField] : editID
                 }
@@ -102,16 +103,16 @@ define([
                 return;
             }
             //GC: allowing both SRS of the layer to match up with the SRS of the widget
-            // const latestWkid = layer.spatialReference.latestWkid;
-            // const layerWkid = layer.spatialReference.wkid;
-            const mapWkid = this.map.spatialReference.wkid;
-            const mapLatestWkid = this.map.spatialReference.latestWkid;
-            const transformedCoords = this._transformPoints(coords, mapWkid, mapLatestWkid);
+            const layerWkid = layer.spatialReference.wkid;
+            const latestWkid = layer.spatialReference.latestWkid;
+            // const mapWkid = this.map.spatialReference.wkid;
+            // const mapLatestWkid = this.map.spatialReference.latestWkid;
+            const transformedCoords = this._transformPoints(coords, layerWkid, latestWkid);
 
             const lineJson = [{"geometry":
                     {   "hasZ": true,
                         "paths":[transformedCoords],
-                        "spatialReference":{"wkid":mapWkid}},
+                        "spatialReference":{"wkid":layerWkid}},
                 "attributes":{
                     Measurement: measuredDistance
                 }
@@ -132,16 +133,16 @@ define([
                 return;
             }
             //GC: allowing both SRS of the layer to match up with the SRS of the widget
-            // const latestWkid = layer.spatialReference.latestWkid;
-            // const layerWkid = layer.spatialReference.wkid;
-            const mapWkid = this.map.spatialReference.wkid;
-            const mapLatestWkid = this.map.spatialReference.latestWkid;
-            const transformedCoords = this._transformPoints(coords, mapWkid, mapLatestWkid);
+            const layerWkid = layer.spatialReference.wkid;
+            const latestWkid = layer.spatialReference.latestWkid;
+            // const mapWkid = this.map.spatialReference.wkid;
+            // const mapLatestWkid = this.map.spatialReference.latestWkid;
+            const transformedCoords = this._transformPoints(coords, layerWkid, latestWkid);
 
             const polyJson = [{"geometry":
                     {   "hasZ": true,
                         "rings":[transformedCoords],
-                        "spatialReference":{"wkid":mapWkid}},
+                        "spatialReference":{"wkid":layerWkid}},
                 "attributes":{
                     Measurement: polygonArea
                 }
