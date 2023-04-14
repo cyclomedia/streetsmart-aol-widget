@@ -374,10 +374,29 @@ require(REQUIRE_CONFIG, [], function () {
                 }
             },
 
-            _handleMeasurementStarted() {
+            _handleMeasurementStarted(e) {
                 if(this.config.showStreetName) {
                     this.streetIndicatorContainer.classList.add('hidden');
                     this.streetIndicatorHiddenDuringMeasurement = true;
+                }
+
+                const {panoramaViewer, activeMeasurement} = e.detail;
+                const newViewer = panoramaViewer;
+                this._handleViewerChanged(newViewer);
+                this._measurementHandler.draw(e, true);
+                this.inMeasurement = !!activeMeasurement
+
+                if (this.config.saveMeasurements) {
+                    this._measurementDetails = activeMeasurement;
+                    if (!activeMeasurement) {
+                        this._selectedFeatureID = null;
+                    }
+                }
+
+                this._measurementHandler.draw(e, true);
+
+                if (!activeMeasurement && this.config.allowEditing) {
+                    this.map.infoWindow.hide()
                 }
             },
 
