@@ -69,8 +69,8 @@ define([
             //GC: allowing both SRS of the layer to match up with the SRS of the widget
             const layerWkid = layer.spatialReference.wkid;
             const latestWkid = layer.spatialReference.latestWkid;
-            const mapWkid = this.map.spatialReference.wkid;
-            const mapLatestWkid = this.map.spatialReference.latestWkid;
+            // const mapWkid = this.map.spatialReference.wkid;
+            // const mapLatestWkid = this.map.spatialReference.latestWkid;
             const transformedCoords = this._transformPoints([coords], layerWkid, latestWkid);
             const roundX = transformedCoords[0][0].toFixed(2);
             const roundY = transformedCoords[0][1].toFixed(2);
