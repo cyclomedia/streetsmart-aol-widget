@@ -16,6 +16,7 @@ define([
     'esri/symbols/TextSymbol',
     'esri/geometry/Polyline',
     './utils',
+    './GeoTransformClient'
 ], function (
     Color,
     on,
@@ -34,6 +35,7 @@ define([
     TextSymbol,
     Polyline,
     utils,
+    geoTransformClient
 ) {
     return class MeasurementHandler {
         constructor({ map, wkid, measureChange, layer, StreetSmartApi, nls }) {
@@ -45,7 +47,7 @@ define([
             this.nls = nls;
         }
 
-        draw(measurementEvent) {
+        draw(measurementEvent, noTransform) {
             if (!measurementEvent || !measurementEvent.detail) {
                 return;
             }
@@ -56,19 +58,22 @@ define([
             if (!activeMeasurement || activeMeasurement.features.length === 0) {
                 return;
             }
-
-            this.drawActiveMeasurement(activeMeasurement);
+            //GC: add measurement layer to the map if it has been removed
+            if(!this.map.getLayer(this.layer.id)){
+                this.map.addLayer(this.layer);
+            }
+            this.drawActiveMeasurement(activeMeasurement, noTransform);
         }
 
-        drawActiveMeasurement(activeMeasurement) {
+        drawActiveMeasurement(activeMeasurement, noTransform) {
             const geometryType = activeMeasurement.features[0].geometry.type;
             switch (geometryType) {
                 case 'Point':
-                    return this.drawPointMeasurement(activeMeasurement);
+                    return this.drawPointMeasurement(activeMeasurement, noTransform);
                 case 'LineString':
-                    return this.drawLineMeasurement(activeMeasurement);
+                    return this.drawLineMeasurement(activeMeasurement, noTransform);
                 case 'Polygon':
-                    return this.drawPolygonMeasurement(activeMeasurement);
+                    return this.drawPolygonMeasurement(activeMeasurement, noTransform);
             }
         }
 
@@ -104,6 +109,7 @@ define([
                 }
                 const pointViewer = new Point(coord[0], coord[1], new SpatialReference({ wkid: this.wkid }));
                 const coordMap = utils.transformProj4js(this.nls, pointViewer, mapWkid, latestWkid);
+                //const coordMap = geoTransformClient.requestGeoTransform(pointViewer.spatialReference.wkid, mapWkid, [pointViewer.x, pointViewer.y]);
                 return [coordMap.x, coordMap.y];
             })
         }
@@ -183,25 +189,25 @@ define([
             });
         }
 
-        drawPointMeasurement(activeMeasurement) {
+        drawPointMeasurement(activeMeasurement, noTransform) {
             const coords = activeMeasurement.features[0].geometry.coordinates;
             if (coords === null) {
                 return;
             }
 
-            const transformedCoords = this._transformPoints([coords]);
+            const transformedCoords = (noTransform && noTransform === true) ? [coords] : this._transformPoints([coords]);
 
             this._drawPoint(transformedCoords[0], 1);
         }
 
-        drawLineMeasurement(activeMeasurement){
+        drawLineMeasurement(activeMeasurement, noTransform){
             const coords = activeMeasurement.features[0].geometry.coordinates;
             const derivedData = activeMeasurement.features[0].properties.derivedData;
             if (coords === null) {
                 return;
             }
 
-            const transformedCoords = this._transformPoints(coords);
+            const transformedCoords = (noTransform && noTransform === true) ? coords : this._transformPoints(coords);
 
             this._drawLines(transformedCoords);
             this._drawLineLabels(transformedCoords, derivedData);
@@ -210,7 +216,7 @@ define([
             _.each(transformedCoords, (coord, i) => this._drawPoint(coord, i + 1));
         }
 
-        drawPolygonMeasurement(activeMeasurement) {
+        drawPolygonMeasurement(activeMeasurement, noTransform) {
             const coords = activeMeasurement.features[0].geometry.coordinates[0];
             const derivedData = activeMeasurement.features[0].properties.derivedData;
 
@@ -218,7 +224,7 @@ define([
                 return;
             }
 
-            const transformedCoords = this._transformPoints(coords);
+            const transformedCoords = (noTransform && noTransform === true) ? coords : this._transformPoints(coords);
             // The first and last coords are the same
             const uniqueCoords = _.clone(transformedCoords);
             uniqueCoords.pop();

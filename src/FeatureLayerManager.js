@@ -7,6 +7,7 @@ define([
     'esri/geometry/ScreenPoint',
     'esri/SpatialReference',
     './utils',
+    './GeoTransformClient'
 ], function (
     on,
     dom,
@@ -16,7 +17,7 @@ define([
     ScreenPoint,
     SpatialReference,
     utils,
-
+    geoTransformClient
 ) {
     'use strict';
 
@@ -45,14 +46,15 @@ define([
             return Promise.resolve(null)
         }
 
-        _transformPoints(coords, layerWkid, latestWkid) {
+        _transformPoints(coords, wkid, latestWkid) {
             return coords.map(coord => {
                 // Ignore incomplete forward intersection:
                 if (_.includes(coord, null)) {
                     return null;
                 }
                 const pointViewer = new Point(coord[0], coord[1], new SpatialReference({ wkid: this.wkid }));
-                const coordMap = utils.transformProj4js(this.nls, pointViewer, layerWkid, latestWkid);
+                //GC: use map wkid to make the measurement points on the map show up more accurately
+                const coordMap = utils.transformProj4js(this.nls, pointViewer, wkid, latestWkid);
                 return [coordMap.x, coordMap.y, coord[2]];
             })
         }
@@ -63,16 +65,22 @@ define([
                 return;
             }
             const zValue = coords[2];
+
             //GC: allowing both SRS of the layer to match up with the SRS of the widget
-            const latestWkid = layer.spatialReference.latestWkid;
             const layerWkid = layer.spatialReference.wkid;
+            const latestWkid = layer.spatialReference.latestWkid;
+            // const mapWkid = this.map.spatialReference.wkid;
+            // const mapLatestWkid = this.map.spatialReference.latestWkid;
             const transformedCoords = this._transformPoints([coords], layerWkid, latestWkid);
+            const roundX = transformedCoords[0][0].toFixed(2);
+            const roundY = transformedCoords[0][1].toFixed(2);
+            const roundZ = transformedCoords[0][2].toFixed(2);
 
             const pointJson = [{"geometry":
                     {
-                        "x":transformedCoords[0][0],
-                        "y":transformedCoords[0][1],
-                        "z":zValue,
+                        "x":roundX,
+                        "y":roundY,
+                        "z":roundZ,
                         "spatialReference":{"wkid":layerWkid}},
                 "attributes":{
                 [layer.objectIdField] : editID
@@ -95,8 +103,10 @@ define([
                 return;
             }
             //GC: allowing both SRS of the layer to match up with the SRS of the widget
-            const latestWkid = layer.spatialReference.latestWkid;
             const layerWkid = layer.spatialReference.wkid;
+            const latestWkid = layer.spatialReference.latestWkid;
+            // const mapWkid = this.map.spatialReference.wkid;
+            // const mapLatestWkid = this.map.spatialReference.latestWkid;
             const transformedCoords = this._transformPoints(coords, layerWkid, latestWkid);
 
             const lineJson = [{"geometry":
@@ -123,8 +133,10 @@ define([
                 return;
             }
             //GC: allowing both SRS of the layer to match up with the SRS of the widget
-            const latestWkid = layer.spatialReference.latestWkid;
             const layerWkid = layer.spatialReference.wkid;
+            const latestWkid = layer.spatialReference.latestWkid;
+            // const mapWkid = this.map.spatialReference.wkid;
+            // const mapLatestWkid = this.map.spatialReference.latestWkid;
             const transformedCoords = this._transformPoints(coords, layerWkid, latestWkid);
 
             const polyJson = [{"geometry":
@@ -160,16 +172,18 @@ define([
 
             let layerSaveRequest = esriRequest(options, { usePost: true});
 
+            let zAlert = this.nls.zAlert;
+
             return layerSaveRequest.then(
                 (response) => {
                     layer.refresh();
                     console.log("success" + JSON.stringify(response));
                     return response
                 }, function(error){
-                    console.log("error" + error);
+                    console.log(error);
                     //GC: warning message in case the feature is not z enabled so measurement cannot be saved
                     if(layer.hasZ === false){
-                        alert(this.nls.zAlert);
+                        alert(zAlert);
                     }
                 });
         }

@@ -58,8 +58,9 @@ define([
             this.inspector.on("delete", (evt) => {
                 evt.feature.getLayer().applyEdits(null, null, [evt.feature]);
                 this.map.infoWindow.hide();
-                this.widget._overlayManager.addOverlaysToViewer()
-                this.api.stopMeasurementMode()
+                //GC: delays the add overlay function because it was adding the overlays before it can be deleted from the map
+                window.setTimeout(() => {this.widget._overlayManager.addOverlaysToViewer();}, 1000);
+                this.api.stopMeasurementMode();
             });
 
             const saveButton = new Button({ label: this.nls.save, "class": "saveButton"},domConstruct.create("div"));
@@ -71,6 +72,7 @@ define([
                 this._applyUpdatesToLayer(layer, this.selectedFeature).then(() => {
                         this.widget._overlayManager.addOverlaysToViewer()
                 });
+                this.api.stopMeasurementMode();
             });
 
             this.inspector.on("attribute-change", (evt) => {

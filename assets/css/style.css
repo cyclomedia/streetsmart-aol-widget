@@ -270,9 +270,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-
+    /*background-color: rgba(65,65,65,.75);*/
+    /*min-height: 33px;*/
     pointer-events: none;
     color: white;
+    /*padding-inline: 8%;*/
 }
 
 .cmt-widget .inner-address-bar {
@@ -299,7 +301,7 @@
     width: unset;
 }
 
-/* sidebar color fix */
+/* dashboard theme sidebar color fix */
 .cmt-widget .sidebar-container{
     color: #545454;
 }

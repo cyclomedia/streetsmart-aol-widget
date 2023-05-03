@@ -23,7 +23,7 @@ define([
 
         // A mapLayer can render multiple symbols.
         // Each symbol represents a Rule in an SLD.
-        // Create a symbol and its correspondig filter per unique symbol.
+        // Create a symbol and its corresponding filter per unique symbol.
         generateCases() {
             const mapLayer = this.mapLayer;
             const renderer = mapLayer.renderer;
@@ -37,7 +37,17 @@ define([
                 }];
             }
             if (renderer instanceof UniqueValueRenderer) {
-                const attribute = renderer.attributeField;
+                var attribute = '';
+                //GC: use the alias instead of the name for the sld xml to show the correct symbology
+                for (let i = 0; i < mapLayer._fields.length; i++) {
+                    if (mapLayer._fields[i].name === renderer.attributeField && mapLayer._fields[i].alias){
+                        attribute = mapLayer._fields[i].alias;
+                    }
+                }
+                if(attribute === ''){
+                    attribute = renderer.attributeField;
+                }
+                //const attribute = renderer.attributeField;
 
                 const specialCases = renderer.infos.map((uniqueValue) => {
                     const symbol = _.cloneDeep(uniqueValue.symbol);
@@ -265,7 +275,7 @@ define([
         _createStrokeAndFill(symbol) {
             let stroke = '';
             let fill = '';
-            if (symbol.outline) {
+            if (symbol.outline && symbol.outline.color) {
                 stroke = `<Stroke>
                     <SvgParameter name="stroke">${symbol.outline.color.toHex()}</SvgParameter>
                     <SvgParameter name="stroke-opacity">${symbol.outline.color.a}</SvgParameter>

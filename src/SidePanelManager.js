@@ -69,6 +69,8 @@ define(['react', 'react-dom', './Components/sidePanel'], function (react, reactD
                 newValue = stance;
             }
 
+            //document.getElementById('streetSmartApi').appendChild(this._sidePanelContainer);
+
             if(newValue){
                 this.showSidepanel();
             }else{
