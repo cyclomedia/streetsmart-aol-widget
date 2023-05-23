@@ -25,9 +25,10 @@ require(REQUIRE_CONFIG, [], function () {
         'esri/tasks/locator',
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
+        //'https://labs.cyclomedia.com/streetsmart-api/branch/api_CSP_header_test/StreetSmartApi.js',
         //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-5342/StreetSmartApi.js',
         //'https://streetsmart-staging.cyclomedia.com/api/v23.3/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v23.1/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v23.6/StreetSmartApi.js',
         'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
         './RecordingClient',
@@ -197,8 +198,9 @@ require(REQUIRE_CONFIG, [], function () {
 
                 // real environment
                 // =================
-                const redirectUri = 'StreetSmart/redirect';
-                const baseUriApi = 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget';
+                //const redirectUri = 'StreetSmart/redirect';
+                const redirectUri = 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/redirect';
+                //const baseUriApi = 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget';
                 // const baseUriApi = 'https://desktop-f0b26eb:3344/webappbuilder/apps/4/widgets';
                 // =================
                 // const redirectUri = 'react/redirect';
@@ -206,11 +208,11 @@ require(REQUIRE_CONFIG, [], function () {
 
                 var credential = tokenUtils.getPortalCredential('https://streetsmart.maps.arcgis.com/home');
                 //var token = credential.token;
-                //var token = 'ign37GqeMjZUZ6C24DnCsezdoQbcganyRrntdzAvHgKOQ1QCivlQCwt1vy9T47dR5e0q8j6nmwV_dqPQcy8FmjqsLvagj6jJGksT2IFbRe-WQTufoypJcl4ThVxEoPX9uSRXchUtaTe9cVYhqPQoZipXQNDUZxBOJ8tpLIhhZVyXsDhnFbwCq1DZW3up_NeGbix1x1Rr2MDajI3rh6lko7X1qXVyxDbooNW-VjhPK1_BoYXSddr5RDb7oWRBcLkr';
+                var token = 'Qw7xzEaj0t3QwYpUurqMvPPFOpNVd61Jx1Z81pjBe0vp1MUBgl8xgPreRxiIN09I-eeiEwrQf92IojMBBi9I4g8s8_SabXn0Mw5ausR3ggTC7eTeU7B8fJtigrN4pmC065Ghry2kJGxkyTD3sZHcHwNZ4y6bVDubEQH7u-t6UQzlcN2srhgEwZQgYlgAf-EKrRS8C5F3hc6ZnFuI4FQ8gUfYsLS5sqP5q-jP9NCclA4.';
                 //console.log(token);
 
-                //const redirectLogin = `${redirectUri}/login.html?token=`+token;
-                //const redirectLogout = `${redirectUri}/logout.html?token=`+token;
+                const redirectLogin = `${redirectUri}/login.html?token=`+token;
+                const redirectLogout = `${redirectUri}/logout.html?token=`+token;
                 // const redirectLogin = `${redirectUri}/login.html`;
                 // const redirectLogout = `${redirectUri}/logout.html`;
 
@@ -249,8 +251,8 @@ require(REQUIRE_CONFIG, [], function () {
                     password: decodedToken[1],
                     loginOauth: this.config.OAuth,
                     clientId: clientId,
-                    // loginRedirectUri: redirectLogin,
-                    // logoutRedirectUri: redirectLogout,
+                    loginRedirectUri: redirectLogin,
+                    logoutRedirectUri: redirectLogout,
                     //apiBaseUri: baseUriApi,
                     apiKey: this._apiKey,
                     srs: this.config.srs,

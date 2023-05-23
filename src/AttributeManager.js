@@ -43,7 +43,8 @@ define([
                 },
                 handleAs: "json"
             };
-            options.content.updates = JSON.stringify({attributes: feature.attributes});
+            //GC: added [] to support editing features inside of Postgres and Oracle databases
+            options.content.updates = JSON.stringify([{attributes: feature.attributes}]);
             if (token) options.content.token = token;
 
             return esriRequest(options, { usePost: true });
