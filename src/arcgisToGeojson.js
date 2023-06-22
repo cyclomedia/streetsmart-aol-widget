@@ -269,24 +269,29 @@ define([], function () {
             geojson.features = [];
 
             // Handling for different representations of previously unsupported polylines.
-            if(arcgis.features.length === 1 && arcgis.features[0].geometry.paths ) {
-
-                if(arcgis.features[0].geometry.paths.length === 1 && arcgis.features[0].geometry.paths[0].length > 1) {
-                    for (let i = 0; i < arcgis.features[0].geometry.paths.length; i++) {
-
-                        const artificialPath = {attributes:arcgis.features[0].attributes, geometry:{paths:[arcgis.features[0].geometry.paths[0][i]]}};
-                        const feature = arcgisToGeoJSON(artificialPath, idAttribute, dates);
-
-                        if (feature && feature.properties) {
-                            geojson.features.push(feature);
+            if (arcgis.features.length === 1 && arcgis.features[0].geometry.paths) {
+                if (arcgis.features[0].geometry.paths.length === 1 && arcgis.features[0].geometry.paths[0].length > 1) {
+                    const artificialPath = {
+                        attributes: arcgis.features[0].attributes,
+                        geometry: {
+                            paths: [arcgis.features[0].geometry.paths[0]]
                         }
+                    };
+
+                    const feature = arcgisToGeoJSON(artificialPath, idAttribute, dates);
+
+                    if (feature && feature.properties) {
+                        geojson.features.push(feature);
                     }
                 }
                 else {
-
                     for (let i = 0; i < arcgis.features[0].geometry.paths.length; i++) {
-
-                        const artificialPath = {attributes:arcgis.features[0].attributes, geometry:{paths:[arcgis.features[0].geometry.paths[i]]}};
+                        const artificialPath = {
+                            attributes: arcgis.features[0].attributes,
+                            geometry: {
+                                paths: [arcgis.features[0].geometry.paths[i]]
+                            }
+                        };
                         const feature = arcgisToGeoJSON(artificialPath, idAttribute, dates);
 
                         if (feature && feature.properties) {
@@ -296,13 +301,9 @@ define([], function () {
                 }
             }
             else {
-
                 for (let i = 0; i < arcgis.features.length; i++) {
-
-                    if(arcgis.features[i].geometry && arcgis.features[i].geometry.paths && arcgis.features[i].geometry.paths.length > 1) {
-
+                    if (arcgis.features[i].geometry && arcgis.features[i].geometry.paths && arcgis.features[i].geometry.paths.length > 1) {
                         for (let j = 0; j < arcgis.features[i].geometry.paths.length; j++) {
-
                             const artificialPath = {attributes:arcgis.features[i].attributes, geometry:{paths:[arcgis.features[i].geometry.paths[j]]}};
                             const feature = arcgisToGeoJSON(artificialPath, idAttribute, dates);
 
@@ -312,7 +313,6 @@ define([], function () {
                         }
                     }
                     else {
-
                         const feature = arcgisToGeoJSON(arcgis.features[i], idAttribute, dates);
 
                         if (feature && feature.properties) {
@@ -326,6 +326,7 @@ define([], function () {
         if (typeof arcgis.x === 'number' && typeof arcgis.y === 'number') {
             geojson.type = 'Point';
             geojson.coordinates = [arcgis.x, arcgis.y];
+
             if (typeof arcgis.z === 'number') {
                 geojson.coordinates.push(arcgis.z);
             }
@@ -354,10 +355,11 @@ define([], function () {
             geojson.type = 'Feature';
             geojson.geometry = (arcgis.geometry) ? arcgisToGeoJSON(arcgis.geometry, undefined, dates) : null;
             geojson.properties = (arcgis.attributes) ? shallowClone(arcgis.attributes) : null;
+
             if (arcgis.attributes) {
                 try {
-                    for(const key in arcgis.attributes) {
-                        if(dates && dates.includes(key)){
+                    for (const key in arcgis.attributes) {
+                        if(dates && dates.includes(key)) {
                             geojson.properties[key] = new Date(arcgis.attributes[key]).toDateString()
                         }
                     }
