@@ -27,8 +27,8 @@ require(REQUIRE_CONFIG, [], function () {
         "esri/geometry/webMercatorUtils",
         //'https://labs.cyclomedia.com/streetsmart-api/branch/api_CSP_header_test/StreetSmartApi.js',
         //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-5342/StreetSmartApi.js',
-        //'https://streetsmart-staging.cyclomedia.com/api/v23.3/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v23.6/StreetSmartApi.js',
+        //'https://streetsmart-staging.cyclomedia.com/api/v23.8/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v23.7/StreetSmartApi.js',
         'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
         './RecordingClient',
@@ -206,9 +206,9 @@ require(REQUIRE_CONFIG, [], function () {
                 // const redirectUri = 'react/redirect';
                 // const baseUriApi = 'https://sld.cyclomedia.com';
 
-                var credential = tokenUtils.getPortalCredential('https://streetsmart.maps.arcgis.com/home');
+                //var credential = tokenUtils.getPortalCredential('https://streetsmart.maps.arcgis.com/home');
                 //var token = credential.token;
-                var token = 'Qw7xzEaj0t3QwYpUurqMvPPFOpNVd61Jx1Z81pjBe0vp1MUBgl8xgPreRxiIN09I-eeiEwrQf92IojMBBi9I4g8s8_SabXn0Mw5ausR3ggTC7eTeU7B8fJtigrN4pmC065Ghry2kJGxkyTD3sZHcHwNZ4y6bVDubEQH7u-t6UQzlcN2srhgEwZQgYlgAf-EKrRS8C5F3hc6ZnFuI4FQ8gUfYsLS5sqP5q-jP9NCclA4.';
+                var token = 't9NkLTuzHwrhd6L8Y8PP_sFBKbn_OOW0tM0okS8HJ0vwFodGlGI5xlYRF01WxayjSqepOc0cJC5m93IVqVUCfpC7N_2uHC4m9CcUAa9lAYK191-FSi9qDqt8HssanXd6k_0pmlyUkS8RO6nwL_M8FC46Hr0yeRfBEJEn0b_tjzOyTnhEHG4cXDjYdaj1CIH741_EWDusni-21dfMYb3PNZygzwVeuELC9a5ltuOHgZQ.';
                 //console.log(token);
 
                 const redirectLogin = `${redirectUri}/login.html?token=`+token;
@@ -697,12 +697,19 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _handleConeChange() {
-                //GC: Checks if cycloramas are found in the area and creates an alert message while closing the widget if no recordings were found
+                //GC: Checks if cycloramas are found in the area
                 if(this._panoramaViewer){
                     this._layerManager.updateViewingCone(this._panoramaViewer);
                 }else{
+                    //creates an alert message while allowing the user to click on the coverage map to select a valid area
                     alert(this.nls.recordingAlert);
-                    PanelManager.getInstance().closePanel(this.id + "_panel");
+                    const coverLayer = new WebTiledLayer("https://atlas.cyclomedia.com/webmercator/cycloramas/{z}/{x}/{y}.png", {
+                        "id": "CycloramaCoverage",
+                        "maxScale": 5,
+                        "opacity": 0.75
+                    });
+                    this.map.addLayer(coverLayer);
+                    //PanelManager.getInstance().closePanel(this.id + "_panel");
                 }
 
             },
