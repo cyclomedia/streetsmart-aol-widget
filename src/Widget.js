@@ -25,9 +25,10 @@ require(REQUIRE_CONFIG, [], function () {
         'esri/tasks/locator',
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
+        //'https://labs.cyclomedia.com/streetsmart-api/branch/api_CSP_header_test/StreetSmartApi.js',
         //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-5342/StreetSmartApi.js',
-        //'https://streetsmart-staging.cyclomedia.com/api/v23.3/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v23.1/StreetSmartApi.js',
+        //'https://streetsmart-staging.cyclomedia.com/api/v23.8/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v23.7/StreetSmartApi.js',
         'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
         './RecordingClient',
@@ -197,20 +198,21 @@ require(REQUIRE_CONFIG, [], function () {
 
                 // real environment
                 // =================
-                const redirectUri = 'StreetSmart/redirect';
-                const baseUriApi = 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget';
+                //const redirectUri = 'StreetSmart/redirect';
+                const redirectUri = 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget/StreetSmart/redirect';
+                //const baseUriApi = 'https://www.arcgis.com/sharing/rest/content/items/0ef1ada896e844d49c2ee99626780f6b/resources/wabwidget';
                 // const baseUriApi = 'https://desktop-f0b26eb:3344/webappbuilder/apps/4/widgets';
                 // =================
                 // const redirectUri = 'react/redirect';
                 // const baseUriApi = 'https://sld.cyclomedia.com';
 
-                var credential = tokenUtils.getPortalCredential('https://streetsmart.maps.arcgis.com/home');
+                //var credential = tokenUtils.getPortalCredential('https://streetsmart.maps.arcgis.com/home');
                 //var token = credential.token;
-                //var token = 'ign37GqeMjZUZ6C24DnCsezdoQbcganyRrntdzAvHgKOQ1QCivlQCwt1vy9T47dR5e0q8j6nmwV_dqPQcy8FmjqsLvagj6jJGksT2IFbRe-WQTufoypJcl4ThVxEoPX9uSRXchUtaTe9cVYhqPQoZipXQNDUZxBOJ8tpLIhhZVyXsDhnFbwCq1DZW3up_NeGbix1x1Rr2MDajI3rh6lko7X1qXVyxDbooNW-VjhPK1_BoYXSddr5RDb7oWRBcLkr';
+                var token = 't9NkLTuzHwrhd6L8Y8PP_sFBKbn_OOW0tM0okS8HJ0vwFodGlGI5xlYRF01WxayjSqepOc0cJC5m93IVqVUCfpC7N_2uHC4m9CcUAa9lAYK191-FSi9qDqt8HssanXd6k_0pmlyUkS8RO6nwL_M8FC46Hr0yeRfBEJEn0b_tjzOyTnhEHG4cXDjYdaj1CIH741_EWDusni-21dfMYb3PNZygzwVeuELC9a5ltuOHgZQ.';
                 //console.log(token);
 
-                //const redirectLogin = `${redirectUri}/login.html?token=`+token;
-                //const redirectLogout = `${redirectUri}/logout.html?token=`+token;
+                const redirectLogin = `${redirectUri}/login.html?token=`+token;
+                const redirectLogout = `${redirectUri}/logout.html?token=`+token;
                 // const redirectLogin = `${redirectUri}/login.html`;
                 // const redirectLogout = `${redirectUri}/logout.html`;
 
@@ -249,8 +251,8 @@ require(REQUIRE_CONFIG, [], function () {
                     password: decodedToken[1],
                     loginOauth: this.config.OAuth,
                     clientId: clientId,
-                    // loginRedirectUri: redirectLogin,
-                    // logoutRedirectUri: redirectLogout,
+                    loginRedirectUri: redirectLogin,
+                    logoutRedirectUri: redirectLogout,
                     //apiBaseUri: baseUriApi,
                     apiKey: this._apiKey,
                     srs: this.config.srs,
@@ -695,12 +697,19 @@ require(REQUIRE_CONFIG, [], function () {
             },
 
             _handleConeChange() {
-                //GC: Checks if cycloramas are found in the area and creates an alert message while closing the widget if no recordings were found
+                //GC: Checks if cycloramas are found in the area
                 if(this._panoramaViewer){
                     this._layerManager.updateViewingCone(this._panoramaViewer);
                 }else{
+                    //creates an alert message while allowing the user to click on the coverage map to select a valid area
                     alert(this.nls.recordingAlert);
-                    PanelManager.getInstance().closePanel(this.id + "_panel");
+                    const coverLayer = new WebTiledLayer("https://atlas.cyclomedia.com/webmercator/cycloramas/{z}/{x}/{y}.png", {
+                        "id": "CycloramaCoverage",
+                        "maxScale": 5,
+                        "opacity": 0.75
+                    });
+                    this.map.addLayer(coverLayer);
+                    //PanelManager.getInstance().closePanel(this.id + "_panel");
                 }
 
             },

@@ -32,7 +32,7 @@ to Firefox and click on the icon in the ArcGIS tab to enable livereload.
 
 ## Versioning
 
-Current version: **23.1.1**
+Current version: **23.1.2**
 
 We use YEAR.MAJOR.PATCH versioning.
 i.e.: 16.1.0 = year 2016, major version 1, patch 0.

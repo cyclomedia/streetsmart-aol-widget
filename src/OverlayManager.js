@@ -575,7 +575,7 @@ define([
             const geojson = geoJsonUtils.arcgisToGeoJSON(arcgisFeatureSet, undefined, dates);
 
             // Make sure the panoramaviewer knows which srs this is in.
-            let wkidToUse = _.get(arcgisFeatureSet, 'features[0].geometry.spatialReference.wkid', null) || (features[0]?.geometry?.spatialReference?.latestWkid) || wkid;
+            let wkidToUse = _.get(arcgisFeatureSet, 'features[0].geometry.spatialReference.wkid', null) || wkid;
             if (wkidToUse) {
                 wkidToUse = (wkidToUse === 102100) ? 3857 : wkidToUse;
                 const crs = {
