@@ -138,10 +138,7 @@ define([
             const extent = this._calcRecordingExtent();
             const requestBundle = {ID, extent, req: []};
             _.each(featureLayers, (mapLayer) => {
-                if(mapLayer.hasZ && mapLayer.version > 10.8) {
-                    const requestObj = {mapLayer, overlayID: null};
-                    requestBundle.req.push(requestObj);
-                } else if (!mapLayer.hasZ && mapLayer.graphics.length === 0 && mapLayer.visible === false){
+                if(/*(mapLayer.hasZ && mapLayer.version > 10.8) || */(!mapLayer.hasZ && mapLayer.graphics.length === 0 && mapLayer.visible === false)) {
                     const requestObj = {mapLayer, overlayID: null};
                     requestBundle.req.push(requestObj);
                 } else {

@@ -255,7 +255,7 @@ define([
         _createCoverageLayer() {
             const layer = new WebTiledLayer("https://atlas.cyclomedia.com/webmercator/cycloramas/{z}/{x}/{y}.png", {
                 "id": "CycloramaCoverage",
-                "maxScale": 5,
+                "maxScale": this.widget._zoomThreshold,
                 "opacity": 0.75
             });
 
