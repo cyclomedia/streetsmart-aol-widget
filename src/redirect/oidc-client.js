@@ -5775,7 +5775,7 @@ module.exports = {
       return step(0, [entry.k, entry.v]);
     }, IS_MAP ? 'entries' : 'values', !IS_MAP, true);
 
-    // add [@@species], 23.1.2.2, 23.2.2.2
+    // add [@@species], 23.1.3.2, 23.2.2.2
     setSpecies(NAME);
   }
 };

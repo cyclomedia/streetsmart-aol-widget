@@ -28,7 +28,7 @@ require(REQUIRE_CONFIG, [], function () {
         //'https://labs.cyclomedia.com/streetsmart-api/branch/api_CSP_header_test/StreetSmartApi.js',
         //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-5342/StreetSmartApi.js',
         //'https://streetsmart-staging.cyclomedia.com/api/v23.8/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v23.7/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v23.8/StreetSmartApi.js',
         'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
         './RecordingClient',
@@ -99,7 +99,8 @@ require(REQUIRE_CONFIG, [], function () {
                 this.inherited(postCreate, arguments);
 
                 this.wkid = parseInt(this.config.srs.split(':')[1]);
-                this.streetIndicatorShouldBeVisible = true
+                this.streetIndicatorShouldBeVisible = true;
+                this._determineZoomThreshold();
 
                 utils.setProj4(CM.Proj4.getProj4());
 
@@ -170,7 +171,6 @@ require(REQUIRE_CONFIG, [], function () {
                 });
 
                 this._applyWidgetStyle();
-                this._determineZoomThreshold();
             },
 
             startup: function startup() {
@@ -263,7 +263,7 @@ require(REQUIRE_CONFIG, [], function () {
                         database: 'Nokia'
                     }
                 };
-
+                //add login alert message here
                 return StreetSmartApi.init(CONFIG).then(() => {
                     this.loadingIndicator.classList.add('hidden');
                     this._bindInitialMapHandlers();
@@ -296,13 +296,9 @@ require(REQUIRE_CONFIG, [], function () {
                 this.addEventListener(this.map, 'zoom-end', this._handleMapMovement.bind(this)); //GC: added new event that handles zooms when centered is on
                 this.addEventListener(this.map, 'click', this._handleMapClick.bind(this));
                 this._sidePanelManager.bindEventListeners();
-                //GC: additional coverage layer event
+                //GC: changes coverage layer visibility scale based on zoom level
                 this.addEventListener(this.map, 'zoom-end', (zoomEvent) => {
-                    if(this.map.getLayer("CycloramaCoverage") && (this.map.getScale() < this._zoomThreshold)){
-                        this.map.getLayer("CycloramaCoverage").hide();
-                    }else{
-                        this.map.getLayer("CycloramaCoverage").show();
-                    }
+                    this.map.getLayer("CycloramaCoverage").maxScale = this._zoomThreshold;
                 });
             },
 
@@ -334,7 +330,8 @@ require(REQUIRE_CONFIG, [], function () {
                 const wm = WidgetManager.getInstance();
                 const editWidgets = wm.getWidgetsByName('Edit');
 
-                if (editWidgets.length === 0) {
+                //GC: Allow pop-ups to open correctly while the widget is open
+                if (editWidgets.length === 0 && mapFeature._sourceLayer._editable === true) {
                     this._attributeManager.showInfoOfFeature(mapFeature);
                 }
 
@@ -344,7 +341,8 @@ require(REQUIRE_CONFIG, [], function () {
                 const extent = mapFeature.geometry.getExtent && mapFeature.geometry.getExtent();
                 const centroid = (extent && extent.getCenter()) || mapFeature.geometry;
                 const featureWkid = centroid.spatialReference.latestWkid || centroid.spatialReference.wkid
-                this._panoramaViewer.lookAtCoordinate([centroid.x, centroid.y], `EPSG:${featureWkid}`);
+                //GC: Stop the cyclorama from changing recordings when clicking on the map
+                //this._panoramaViewer.lookAtCoordinate([centroid.x, centroid.y], `EPSG:${featureWkid}`);
 
                 const idField = layer.objectIdField;
                 const wkid = layer.spatialReference.latestWkid  || layer.spatialReference.wkid
@@ -434,6 +432,8 @@ require(REQUIRE_CONFIG, [], function () {
                 if(this.map.getLayer(this._layerManager.measureLayer.id) && this._panoramaViewer && !this._panoramaViewer.animating){
                     this.map.removeLayer(this._layerManager.measureLayer);
                 }
+                //GC: Fix creating features bug when selecting another feature first
+                this._selectedFeatureID = null;
             },
 
             /**
@@ -481,7 +481,7 @@ require(REQUIRE_CONFIG, [], function () {
                         ? wkid
                         : (mapFeature.geometry.spatialReference.latestWkid || mapFeature.geometry.spatialReference.wkid);
                     if (newWkid != this.config.srs.split(':')[1]) return;
-
+                    //GC: finds Object ID for the selected feature
                     this._selectedFeatureID = feature.properties[idField];
                     if (feature && feature.geometry && feature.geometry.type === 'Point' && (wkid != this.config.srs.split(':')[1])) {
                         feature.geometry.coordinates = [feature.geometry.coordinates[0], feature.geometry.coordinates[1], res.features[0].geometry.z];
@@ -641,6 +641,9 @@ require(REQUIRE_CONFIG, [], function () {
                 else {
                     this._visibleLayers[layerId] = visibility;
                 }
+                const imageId = this._panoramaViewer.getRecording().id;
+                // this._panoramaViewer.openByImageId("WE5X7A5A");
+                // this._panoramaViewer.openByImageId(imageId);
             },
 
             //GC: additional function catch time travel change

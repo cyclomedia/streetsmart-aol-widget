@@ -80,6 +80,8 @@ define(['react', 'react-dom', './Components/sidePanel'], function (react, reactD
 
         showSidepanel(){
             this._sidePanelContainer.classList.remove('slide-out-panel');
+            //GC: refreshes side panel everytime it is opened
+            this.render();
         }
 
         hideSidePanel(){
