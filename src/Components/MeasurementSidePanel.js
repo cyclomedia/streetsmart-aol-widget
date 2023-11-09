@@ -15,10 +15,11 @@ define(['react', './Layer', '../arcgisToGeojson'], function (React, Layer, geoUt
 
             for (const id of ids){
                 const layer = map.getLayer(id);
-
+                //GC: Make sure the layer is visible before adding it to the measurement list
                 if(
                     layer.type === 'Feature Layer' &&
                     layer.isEditable() === true &&
+                    layer.visible &&
                     layer.getEditCapabilities().canCreate) {
                     list.push(layer);
                 }
