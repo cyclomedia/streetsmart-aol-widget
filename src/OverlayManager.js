@@ -141,7 +141,7 @@ define([
                 if((mapLayer.hasZ && mapLayer.version > 10.8) || (!mapLayer.hasZ && mapLayer.graphics.length === 0 && mapLayer.visible === false)) {
                     const requestObj = {mapLayer, overlayID: null};
                     requestBundle.req.push(requestObj);
-                } else {else {
+                } else {
                     let geojson = this.createGeoJsonForFeature({mapLayer});
                     const sld = new SLD(mapLayer, geojson);
                     //GC: finds <Null> values inside of xml and replaces it so it doesn't return an html error
@@ -411,6 +411,7 @@ define([
             let changedSpatialReference = false;
 
             for (const featureS in arcgisFeatureSet.features) {
+                // if(featureS && featureS.geometry){}
                 const updateFeature = arcgisFeatureSet.features[featureS];
                 //GC: fixes street address bug after api 23.2
                 const objectId = updateFeature.attributes && updateFeature.attributes[mapLayer.objectIdField];
