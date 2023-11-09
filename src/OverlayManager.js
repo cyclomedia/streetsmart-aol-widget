@@ -138,13 +138,10 @@ define([
             const extent = this._calcRecordingExtent();
             const requestBundle = {ID, extent, req: []};
             _.each(featureLayers, (mapLayer) => {
-                if(mapLayer.hasZ && mapLayer.version > 10.8) {
+                if((mapLayer.hasZ && mapLayer.version > 10.8) || (!mapLayer.hasZ && mapLayer.graphics.length === 0 && mapLayer.visible === false)) {
                     const requestObj = {mapLayer, overlayID: null};
                     requestBundle.req.push(requestObj);
-                } else if (!mapLayer.hasZ && mapLayer.graphics.length === 0 && mapLayer.visible === false){
-                    const requestObj = {mapLayer, overlayID: null};
-                    requestBundle.req.push(requestObj);
-                } else {
+                } else {else {
                     let geojson = this.createGeoJsonForFeature({mapLayer});
                     const sld = new SLD(mapLayer, geojson);
                     //GC: finds <Null> values inside of xml and replaces it so it doesn't return an html error

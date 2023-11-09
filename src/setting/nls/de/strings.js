@@ -23,6 +23,7 @@
        display1: "1:1130 (Ursprünglich)",
        display2: "1:2258 (Weit)",
        display3: "1:4415 (Weiter)",
+       coverage: "Street Smart Deckschicht",
 
        navigation: "Navigation",
        navigationButtons: 'Navigations-Schaltflächen',
@@ -36,6 +37,6 @@
        zoomoutButton: 'Zoom-out Schaltfläche',
 
        typeSrs: "EPSG-Code eingeben oder Referenzsystem auswählen",
-       version: "Street Smart Widget für Web AppBuilder @ Version 23.1.2",
+       version: "Street Smart Widget für Web AppBuilder @ Version 23.1.5",
    })
 );

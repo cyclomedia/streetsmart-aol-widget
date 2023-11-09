@@ -23,6 +23,7 @@
        display1: "1:1130 (défaut)",
        display2: "1:2258 (Loin)",
        display3: "1:4415 (Plus loin)",
+       coverage: "Street Smart Couche de couverture",
 
        navigation: "Navigation",
        navigationButtons: 'Boutons Navigation',
@@ -36,6 +37,6 @@
        zoomoutButton: 'Bouton Zoom-out',
 
        typeSrs: "Tapez ou sélectionnez SRS",
-       version: "Street Smart Widget pour Web AppBuilder @ version 23.1.2",
+       version: "Street Smart Widget pour Web AppBuilder @ version 23.1.5",
    })
 );

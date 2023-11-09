@@ -16,7 +16,8 @@ define([
     'esri/symbols/TextSymbol',
     'esri/geometry/Polyline',
     './utils',
-    './GeoTransformClient'
+    './GeoTransformClient',
+    "./arcgisToGeojson"
 ], function (
     Color,
     on,
@@ -35,7 +36,8 @@ define([
     TextSymbol,
     Polyline,
     utils,
-    geoTransformClient
+    geoTransformClient,
+    geojsonUtils
 ) {
     return class MeasurementHandler {
         constructor({ map, wkid, measureChange, layer, StreetSmartApi, nls }) {
@@ -45,6 +47,15 @@ define([
             this.layer = layer;
             this.StreetSmartApi = StreetSmartApi;
             this.nls = nls;
+        }
+
+        clear(feature) {
+            // Just draw everything again
+            this.layer.clear();
+
+            const wkid = this.wkid;
+            const measurementInfo = geojsonUtils.createFeatureCollection([feature], wkid);
+            this.StreetSmartApi.setActiveMeasurement(measurementInfo);
         }
 
         draw(measurementEvent, noTransform) {

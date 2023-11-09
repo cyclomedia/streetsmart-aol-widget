@@ -23,6 +23,7 @@ define({
       display1: "1:1130 (default)",
       display2: "1:2258 (Far)",
       display3: "1:4415 (Farther)",
+      coverage: "Street Smart Coverage Layer",
 
 
       navigation: "Navigation",
@@ -39,7 +40,7 @@ define({
       zoomoutButton: 'Zoom-out Button',
 
       typeSrs: "Type or Select SRS",
-      version: "Street Smart Widget for Web AppBuilder @ version 23.1.2",
+      version: "Street Smart Widget for Web AppBuilder @ version 23.1.5",
   }),
   "de": true,
   "nl": true,

@@ -23,6 +23,7 @@
        display1: "1:1130 (standaard)",
        display2: "1:2258 (Ver)",
        display3: "1:4415 (Verder)",
+       coverage: "Street Smart Dekkingslaag",
 
        navigation: "Navigatie",
        navigationButtons: 'Navigatie Knoppen',
@@ -36,6 +37,6 @@
        zoomoutButton: 'Zoom-out Knop',
 
        typeSrs: "Typ of selecteer SRS",
-       version: "Street Smart Widget voor Web AppBuilder @ versie 23.1.2",
+       version: "Street Smart Widget voor Web AppBuilder @ versie 23.1.5",
    })
 );

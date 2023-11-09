@@ -120,6 +120,13 @@ define([
                     }
                 }
 
+                if(this.config.coverage){
+                    this.coverageEnabled.value = this.config.coverage;
+                    if(this.config.overlays === true){
+                        this.overlaysEnabled.checked = true;
+                    }
+                }
+
                 if(this.config.linkMapMove){
                     this.linkMapMove.value = this.config.linkMapMove;
                     if(this.config.linkMapMove === true){
@@ -189,6 +196,7 @@ define([
                 this.config.agreement = this.agreementCheck.checked;
                 this.config.saveMeasurements = this.saveMeasurementsEnabled.checked;
                 this.config.overlays = this.overlaysEnabled.checked;
+                this.config.coverage = this.coverageEnabled.checked;
                 this.config.linkMapMove = this.linkMapMove.checked;
                 this.config.allowEditing = this.allowEditing.checked;
                 this.config.srs = dijit.byId('srsComboBox') && dijit.byId('srsComboBox').value || document.getElementById('srsComboBox').value;

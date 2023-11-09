@@ -275,14 +275,14 @@ define([
         _createStrokeAndFill(symbol) {
             let stroke = '';
             let fill = '';
-            if (symbol.outline && symbol.outline.color) {
+            if (symbol.outline && symbol.outline.color && symbol.outline.color.toHex()) {
                 stroke = `<Stroke>
                     <SvgParameter name="stroke">${symbol.outline.color.toHex()}</SvgParameter>
                     <SvgParameter name="stroke-opacity">${symbol.outline.color.a}</SvgParameter>
                     <SvgParameter name="stroke-width">${symbol.outline.width}</SvgParameter>
                   </Stroke>`
             }
-            if(symbol.color) {
+            if(symbol.color && symbol.color.toHex()) {
                 //GC: added transparency to the overlays using the opacity property
                 symbol.color.a = this.mapLayer.opacity;
                 fill =  `<Fill>

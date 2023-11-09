@@ -62,6 +62,7 @@ define([
                 //GC: delays the add overlay function because it was adding the overlays before it can be deleted from the map
                 window.setTimeout(() => {this.widget._overlayManager.addOverlaysToViewer();}, 1000);
                 this.api.stopMeasurementMode();
+                this.widget._selectedFeatureID = null;
             });
 
             const saveButton = new Button({ label: this.nls.save, "class": "saveButton"},domConstruct.create("div"));
@@ -74,6 +75,7 @@ define([
                         this.widget._overlayManager.addOverlaysToViewer()
                 });
                 this.api.stopMeasurementMode();
+                //this.widget._measurementHandler.clear(this.selectedFeature._graphicsLayer);
             });
 
             this.inspector.on("attribute-change", (evt) => {
@@ -107,6 +109,8 @@ define([
             }
             this.map.infoWindow.resize(350, 240);
             this.map.infoWindow.show(new Point (centroid));
+            //stops the map from showing an empty attribute box
+            //this.map.infoWindow.show(feature);
             this.map.infoWindow.setTitle('');
             //GC: stop the map from centering on the clicked feature because it's disorienting
             //this.map.centerAt(centroid)
