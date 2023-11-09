@@ -405,3 +405,38 @@ th{
 .cmt-widget .show {
     opacity: 1;
 }
+
+/*change overlay box width and height*/
+#cmt .cmtViewerPanel,  #cmt .cmtViewerPanel .card{
+    width:100%;
+    max-width:325px;
+    max-height:250px;
+}
+#cmt .card{
+    display: block;
+}
+
+#cmt .cmtViewerPanel .card-body{
+    max-height:220px;
+}
+
+#cmt .viewer .cmtNavBarPanel .panel-overlays, #cmt .viewer .cmtNavBarPanel .card-body .card-body {
+    max-height: 175px;
+}
+
+/* fix side panel height */
+/*#cmt .fixed-panel .panel-body {*/
+/*    height: 83%;*/
+/*}*/
+
+/*!* fix side panel width *!*/
+/*#cmt .fixed-panel, #cmt .sidebar-width {*/
+/*    width: 300px !important;*/
+/*}*/
+
+/*.jimu-panel .jimu-on-screen-widget-panel .jimu-main-background {
+    width: 540px !important;
+}*/
+
+
+
