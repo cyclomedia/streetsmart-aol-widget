@@ -62,6 +62,21 @@ define([
                     }
                 });
 
+                const specialCasesLabel = renderer.infos.map((uniqueValue) => {
+                    if (uniqueValue.label) {
+                        const symbol = _.cloneDeep(uniqueValue.symbol);
+                        this.applyLayerAlpha(symbol, mapLayer);
+                        return {
+                            filter: {
+                                value: uniqueValue.label,
+                                attribute,
+                            },
+                            symbol,
+                            geometryType: mapLayer.geometryType,
+                        }
+                    }
+                });
+
                 // Add the "else" symbol (default case) to the list
                 if (renderer.defaultSymbol) {
                     this.containsDefaultCase = true;
@@ -77,7 +92,7 @@ define([
                     return [defaultCase, ...specialCases];
                 }
 
-                return specialCases;
+                return [...specialCases, ...specialCasesLabel];
             }
             if(renderer instanceof ClassBreaksRenderer){
                 const baseSymbol = _.cloneDeep(renderer.infos[0].symbol);
