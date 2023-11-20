@@ -409,7 +409,7 @@ th{
 /*change overlay box width and height*/
 #cmt .cmtViewerPanel,  #cmt .cmtViewerPanel .card{
     width:100%;
-    max-width:325px;
+    max-width:325px !important;
     max-height:250px;
 }
 #cmt .card{

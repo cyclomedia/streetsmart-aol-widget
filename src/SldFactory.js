@@ -54,7 +54,8 @@ define([
                     this.applyLayerAlpha(symbol, mapLayer);
                     return {
                         filter: {
-                            value: uniqueValue.value,
+                            //added an additional label to fix SRS issue not showing up correctly
+                            value: uniqueValue.label || uniqueValue.value,
                             attribute,
                         },
                         symbol,
@@ -77,7 +78,7 @@ define([
                     return [defaultCase, ...specialCases];
                 }
 
-                return specialCases;
+                return [...specialCases];
             }
             if(renderer instanceof ClassBreaksRenderer){
                 const baseSymbol = _.cloneDeep(renderer.infos[0].symbol);
