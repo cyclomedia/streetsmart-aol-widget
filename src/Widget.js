@@ -433,7 +433,10 @@ require(REQUIRE_CONFIG, [], function () {
                     this.map.removeLayer(this._layerManager.measureLayer);
                 }
                 //GC: Fix creating features bug when selecting another feature first
-                this._selectedFeatureID = null;
+                //should turn selected feature ID null when the measurement tool is closed so there no duplicate layers are being made
+                if(e.detail.panoramaViewer){
+                    this._selectedFeatureID = null;
+                }
             },
 
             /**

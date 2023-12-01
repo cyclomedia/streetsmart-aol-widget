@@ -38,9 +38,13 @@ define([
             }
             if (renderer instanceof UniqueValueRenderer) {
                 var attribute = '';
+                var codedValues = {}; //using coded values to display the styling correctly
                 //GC: use the alias instead of the name for the sld xml to show the correct symbology
                 for (let i = 0; i < mapLayer._fields.length; i++) {
                     if (mapLayer._fields[i].name === renderer.attributeField && mapLayer._fields[i].alias){
+                        if (mapLayer._fields[i].domain && mapLayer._fields[i].domain.codedValues) {
+                            mapLayer._fields[i].domain.codedValues.map((codedValue) => codedValues[codedValue.code] = codedValue.name);
+                        }
                         attribute = mapLayer._fields[i].alias;
                     }
                 }
@@ -52,10 +56,11 @@ define([
                 const specialCases = renderer.infos.map((uniqueValue) => {
                     const symbol = _.cloneDeep(uniqueValue.symbol);
                     this.applyLayerAlpha(symbol, mapLayer);
+                    var filterValue = codedValues.hasOwnProperty(uniqueValue.value) ? codedValues[uniqueValue.value] : uniqueValue.value;
                     return {
                         filter: {
-                            //added an additional label to fix SRS issue not showing up correctly
-                            value: uniqueValue.label || uniqueValue.value,
+                            //added a filter value to fix SRS issue not showing up correctly
+                            value: filterValue,
                             attribute,
                         },
                         symbol,

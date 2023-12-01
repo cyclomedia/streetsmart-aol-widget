@@ -43,7 +43,7 @@ We also make use of:
 Street Smart API:
 
 *	api.version: 23.12
-*	api.location: [Street Smart API](https://streetsmart.cyclomedia.com/api/v23.1/StreetSmartAPI.js)
+*	api.location: [Street Smart API](https://streetsmart.cyclomedia.com/api/v23.12/StreetSmartAPI.js)
 
 ## Authors
 
