@@ -109,6 +109,7 @@ define([
             }
             this.map.infoWindow.resize(350, 240);
             this.map.infoWindow.show(new Point (centroid));
+            //stops the map from showing an empty attribute box
             //this.map.infoWindow.show(feature);
             this.map.infoWindow.setTitle('');
             //GC: stop the map from centering on the clicked feature because it's disorienting

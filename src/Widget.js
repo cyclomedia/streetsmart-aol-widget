@@ -25,10 +25,10 @@ require(REQUIRE_CONFIG, [], function () {
         'esri/tasks/locator',
         "esri/tasks/query",
         "esri/geometry/webMercatorUtils",
-        //'https://labs.cyclomedia.com/streetsmart-api/branch/api_CSP_header_test/StreetSmartApi.js',
+        //'https://labs.cyclomedia.com/streetsmart-api/branch/develop/StreetSmartApi.js',
         //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-5342/StreetSmartApi.js',
-        //'https://streetsmart-staging.cyclomedia.com/api/v23.8/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v23.8/StreetSmartApi.js',
+        //'https://streetsmart-staging.cyclomedia.com/api/v23.13/StreetSmartApi.js',
+        'https://streetsmart.cyclomedia.com/api/v23.12/StreetSmartApi.js',
         'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
         './RecordingClient',
@@ -59,7 +59,7 @@ require(REQUIRE_CONFIG, [], function () {
         Query,
         webMercatorUtils,
         StreetSmartApi,
-        _,
+        lodash,
         utils,
         RecordingClient,
         LayerManager,
@@ -72,7 +72,7 @@ require(REQUIRE_CONFIG, [], function () {
         WebTiledLayer,
         requestModule,
         tokenUtils,
-        geoTransformClient
+        geoTransformClient,
     ) {
         //To create a widget, you need to derive from BaseWidget.
         return declare([BaseWidget], {
@@ -271,7 +271,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this._centerViewerToMap();
                     this.streetNameLayerID = this._overlayManager.addStreetNameLayer();
 
-                    const unitPrefs = _.get(StreetSmartApi, "Settings.UNIT_PREFERENCE");
+                    const unitPrefs = lodash.get(StreetSmartApi, "Settings.UNIT_PREFERENCE");
                     if(unitPrefs){
                         const units = this.config.units || unitPrefs.DEFAULT;
                         if(Object.values(unitPrefs).includes(units)){
@@ -319,9 +319,9 @@ require(REQUIRE_CONFIG, [], function () {
                     }
 
                     this.query(`${localPoint.x},${localPoint.y}`, coord, dateRange);
-                    return
+                    return;
                 }else if(!mapFeature) {
-                    return
+                    return;
                 }
 
                 const layer = mapFeature.getLayer();
@@ -433,7 +433,10 @@ require(REQUIRE_CONFIG, [], function () {
                     this.map.removeLayer(this._layerManager.measureLayer);
                 }
                 //GC: Fix creating features bug when selecting another feature first
-                this._selectedFeatureID = null;
+                //should turn selected feature ID null when the measurement tool is closed so there no duplicate layers are being made
+                if(e.detail.panoramaViewer){
+                    this._selectedFeatureID = null;
+                }
             },
 
             /**
@@ -584,8 +587,8 @@ require(REQUIRE_CONFIG, [], function () {
 
             _handleFeatureClick (event) {
                 const { detail } = event;
-                const mapLayers = _.values(this.map._layers);
-                const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
+                const mapLayers = lodash.values(this.map._layers);
+                const featureLayers = lodash.filter(mapLayers, l => l.type === 'Feature Layer');
                 const clickedLayer = featureLayers.find((l) => l.name === detail.layerName);
 
                 if (clickedLayer) {
@@ -610,11 +613,12 @@ require(REQUIRE_CONFIG, [], function () {
 
                 }
             },
+
             //GC: syncs overlay visibility change with layer list visibility
             _handleLayerVisibilityChange(info) {
                 const {layerId, visibility} = info.detail;
-                const mapLayers = _.values(this.map._layers);
-                const featureLayers = _.filter(mapLayers, l => l.type === 'Feature Layer');
+                const mapLayers = lodash.values(this.map._layers);
+                const featureLayers = lodash.filter(mapLayers, l => l.type === 'Feature Layer');
                 const overlayID = this._mapIdLayerId;
 
                 //since cyclorama recordings are not part of the feature layer list, it has to be checked here
@@ -901,7 +905,7 @@ require(REQUIRE_CONFIG, [], function () {
                 //let zoomThreshold = 1200;
                 //GC: creates default scale level if it hasn't been made yet
                 if(!this.config.scale){
-                    this.config.scale = 1130;
+                    this.config.scale = "1130";
                 }
                 let zoomThreshold = Number(this.config.scale);
 
@@ -1061,7 +1065,7 @@ require(REQUIRE_CONFIG, [], function () {
                     const editID = this._selectedFeatureID
                     this._featureLayerManager._saveMeasurementsToLayer(layer, this._measurementDetails, editID).then((r) => {
 
-                        const changes = _.get(r, 'addResults[0]') || _.get(r, 'updateResults[0]')
+                        const changes = lodash.get(r, 'addResults[0]') || lodash.get(r, 'updateResults[0]')
 
                         if(changes) {
                             const featureId = changes.objectId

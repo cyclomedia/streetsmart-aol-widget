@@ -38,9 +38,13 @@ define([
             }
             if (renderer instanceof UniqueValueRenderer) {
                 var attribute = '';
+                var codedValues = {}; //using coded values to display the styling correctly
                 //GC: use the alias instead of the name for the sld xml to show the correct symbology
                 for (let i = 0; i < mapLayer._fields.length; i++) {
                     if (mapLayer._fields[i].name === renderer.attributeField && mapLayer._fields[i].alias){
+                        if (mapLayer._fields[i].domain && mapLayer._fields[i].domain.codedValues) {
+                            mapLayer._fields[i].domain.codedValues.map((codedValue) => codedValues[codedValue.code] = codedValue.name);
+                        }
                         attribute = mapLayer._fields[i].alias;
                     }
                 }
@@ -52,9 +56,11 @@ define([
                 const specialCases = renderer.infos.map((uniqueValue) => {
                     const symbol = _.cloneDeep(uniqueValue.symbol);
                     this.applyLayerAlpha(symbol, mapLayer);
+                    var filterValue = codedValues.hasOwnProperty(uniqueValue.value) ? codedValues[uniqueValue.value] : uniqueValue.value;
                     return {
                         filter: {
-                            value: uniqueValue.value,
+                            //added a filter value to fix SRS issue not showing up correctly
+                            value: filterValue,
                             attribute,
                         },
                         symbol,
@@ -77,7 +83,7 @@ define([
                     return [defaultCase, ...specialCases];
                 }
 
-                return specialCases;
+                return [...specialCases];
             }
             if(renderer instanceof ClassBreaksRenderer){
                 const baseSymbol = _.cloneDeep(renderer.infos[0].symbol);
@@ -275,14 +281,14 @@ define([
         _createStrokeAndFill(symbol) {
             let stroke = '';
             let fill = '';
-            if (symbol.outline && symbol.outline.color) {
+            if (symbol.outline && symbol.outline.color && symbol.outline.color.toHex()) {
                 stroke = `<Stroke>
                     <SvgParameter name="stroke">${symbol.outline.color.toHex()}</SvgParameter>
                     <SvgParameter name="stroke-opacity">${symbol.outline.color.a}</SvgParameter>
                     <SvgParameter name="stroke-width">${symbol.outline.width}</SvgParameter>
                   </Stroke>`
             }
-            if(symbol.color) {
+            if(symbol.color && symbol.color.toHex()) {
                 //GC: added transparency to the overlays using the opacity property
                 symbol.color.a = this.mapLayer.opacity;
                 fill =  `<Fill>
