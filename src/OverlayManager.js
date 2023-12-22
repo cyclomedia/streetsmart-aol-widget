@@ -40,7 +40,7 @@ define([
     SLD,
 ) {
     return class LayerManager {
-        constructor({ map, wkid, config, StreetSmartApi, widget }) {
+        constructor({ map, wkid, config, StreetSmartApi, widget, nls }) {
             this.map = map;
             this.widget = widget;
             this.wkid = wkid;
@@ -67,6 +67,7 @@ define([
             this.isQueueLoading = false;
             this.reloadQueueOnFinish = false;
             this.graphicCount = false;
+            this.nls = nls;
             //  Can be used to listen to visibility changes in the layer list.
             //this._bindLayerChangeListeners();
         }
@@ -201,10 +202,18 @@ define([
                             knownFeatureIds.push(reqFeature.attributes[request.mapLayer.objectIdField]);
                         }
 
+//                        const min = new Point(this.map.extent.xmin,this.map.extent.ymin,this.map.spatialReference);
+//                        const max = new Point(this.map.extent.xmax,this.map.extent.ymax,this.map.spatialReference);
+//                        const newMin = utils.transformProj4js(this.nls, min, this.wkid, null);
+//                        const newMax = utils.transformProj4js(this.nls, max, this.wkid, null);
+//                        let mapExtent = newMax.x.toString()+","+newMax.y.toString()+","+newMin.x.toString()+","+newMin.y.toString();
                         const options = {
                             url: `${request.mapLayer.url}/query?`,
                             content: {
                                 f: 'json',
+//                                geometry: mapExtent,
+//                                inSR: this.wkid,
+//                                spatialRel:"esriSpatialRelIntersects",
                                 returnGeometry: true,
                                 returnZ: true,
                                 outFields: '*',

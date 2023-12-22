@@ -147,6 +147,7 @@ require(REQUIRE_CONFIG, [], function () {
                     map: this.map,
                     config: this.config,
                     StreetSmartApi: StreetSmartApi,
+                    nls: this.nls,
                 });
 
                 this._featureLayerManager = new FeatureLayerManager({
@@ -450,7 +451,7 @@ require(REQUIRE_CONFIG, [], function () {
                     this._layerManager.addLayers();
                     this._bindViewerDependantEventHandlers();
                     this._setButtonVisibilityInApi();
-                    this._handleImageChange();
+                    this._handleImageChange(true);
                     // this._drawDraggableMarker();
 
                     if(this.config.navigation === false){
@@ -662,7 +663,7 @@ require(REQUIRE_CONFIG, [], function () {
                 const viewerEvents = StreetSmartApi.Events.viewer;
                 this._timeTravelListener = this.addEventListener(this._panoramaViewer, panoramaEvents.TIME_TRAVEL_CHANGE, this._handleTimeChange.bind(this));
                 this._viewChangeListener = this.addEventListener(this._panoramaViewer, panoramaEvents.VIEW_CHANGE, this._handleConeChange.bind(this));
-                this._imageChangeListener = this.addEventListener(this._panoramaViewer, panoramaEvents.IMAGE_CHANGE, this._handleImageChange.bind(this));
+                this._imageChangeListener = this.addEventListener(this._panoramaViewer, panoramaEvents.IMAGE_CHANGE, this._handleImageFromImageChange.bind(this));
                 this._featureClickListener = this.addEventListener(this._panoramaViewer, panoramaEvents.FEATURE_CLICK, this._handleFeatureClick.bind(this));
                 this._overlayToggleListener = this.addEventListener(this._panoramaViewer, viewerEvents.LAYER_VISIBILITY_CHANGE, this._handleLayerVisibilityChange.bind(this));
                 this._panoramaViewer.showAttributePanelOnFeatureClick(false);
@@ -721,10 +722,16 @@ require(REQUIRE_CONFIG, [], function () {
 
             },
 
-            _handleImageChange() {
-                this._handleConeChange();
-                this._overlayManager.addOverlaysToViewer();
+            _handleImageFromImageChange() {
+                this._handleImageChange(false);
+            },
 
+            _handleImageChange(addOverlays) {
+                this._handleConeChange();
+
+                if (addOverlays === true) {
+                    this._overlayManager.addOverlaysToViewer();
+                }
 
                 if(!this._disableLinkToMap && this.config.linkMapMove === true && !this._panoramaViewer.props.activeMeasurement){
                     const recording = this._panoramaViewer.getRecording();
