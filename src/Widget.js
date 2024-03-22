@@ -28,7 +28,8 @@ require(REQUIRE_CONFIG, [], function () {
         //'https://labs.cyclomedia.com/streetsmart-api/branch/develop/StreetSmartApi.js',
         //'https://labs.cyclomedia.com/streetsmart-api/branch/STREET-5342/StreetSmartApi.js',
         //'https://streetsmart-staging.cyclomedia.com/api/v23.13/StreetSmartApi.js',
-        'https://streetsmart.cyclomedia.com/api/v23.12/StreetSmartApi.js',
+        //'https://streetsmart.cyclomedia.com/api/v23.12/StreetSmartApi.js',
+        'https://labs.cyclomedia.com/streetsmart-api/branch/API-TEST/StreetSmartApi.js',
         'https://sld.cyclomedia.com/react/lodash.min.js',
         './utils',
         './RecordingClient',
@@ -102,7 +103,7 @@ require(REQUIRE_CONFIG, [], function () {
                 this.streetIndicatorShouldBeVisible = true;
                 this._determineZoomThreshold();
 
-                utils.setProj4(CM.Proj4.getProj4());
+                utils.setProj4(StreetSmartApi.getProj4());
 
                 this._locator = new Locator("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer");
 
@@ -110,10 +111,30 @@ require(REQUIRE_CONFIG, [], function () {
                     this.streetIndicatorContainer.classList.add('hidden');
                 }
 
+                const { token, atlasHost } = this.config;
+
+                if (!atlasHost) {
+                    alert(`Street Smart: atlasHost not configured!`);
+                }
+
+                const authHeader = {
+                    Authorization: `Basic ${token}`
+                };
+
+                const wfsRecordingClient = StreetSmartApi.WfsRecordingClient();
+
                 this._recordingClient = new RecordingClient({
                     config: this.config,
                     apiKey: this._apiKey,
                     map: this.map,
+                    wfsClient: new wfsRecordingClient({
+                        uriManager: new StreetSmartApi.WfsRecordingUriManager({
+                            apiKey: this._apiKey,
+                            dataUri: atlasHost + '/recording/wfs',
+                            withCredentials: true
+                        }),
+                        authHeaders: authHeader
+                    }),
                 });
                 this._layerManager = new LayerManager({
                     wkid: this.wkid,
